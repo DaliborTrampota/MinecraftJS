@@ -1,0 +1,11 @@
+{
+    "solid": true,
+    "textures": {
+        "top": "grass_block_top",
+        "bottom": "dirt",
+        "right": "grass_block_side",
+        "left": "grass_block_side",
+        "front": "grass_block_side",
+        "back": "grass_block_side"
+    }
+}
