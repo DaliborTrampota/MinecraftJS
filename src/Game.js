@@ -50,6 +50,7 @@ export default class Game {
 
         this.world = new World(this, this.register, this.player);
         this.addUpdateSub(this.player)
+        this.addUpdateSub(this.world)
     }
 
     Update(){

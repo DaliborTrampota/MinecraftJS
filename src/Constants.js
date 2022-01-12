@@ -110,6 +110,13 @@ const sides = [
     { side: 'left',     dir: new Vector3(-1,  0,  0) },
 ]
 
+const CrossCheck = [ 
+    new Vector3(1, 0, 0),
+    new Vector3(0, 0, 1),
+    new Vector3(-1, 0, 0),
+    new Vector3(0, 0, -1)
+]
+
 export {
     sides,
     PI_2,
@@ -120,5 +127,6 @@ export {
     ChunkHeight,
     WorldSizeInChunks,
     HalfWorldSize,
-    WorldSize
+    WorldSize,
+    CrossCheck
 }

@@ -1,3 +1,5 @@
+
+
 function create3DArray(x, y, height){
     let arr = new Array(x)
     for(let i = 0; i < x; ++i){
@@ -35,12 +37,13 @@ class TwoWayMap extends Map{
     }
 
     get(query){
+        if(!isNaN(query)) query = Number(query)
         return this.has(query) ? super.get(query) : this.reversed.get(query)
     }
 
     add(name){
-        super.set(name, this.ID)
-        this.reversed.set(this.ID, name)
+        super.set(name, Number(this.ID))
+        this.reversed.set(Number(this.ID), name)
         ++this.ID
     }
 

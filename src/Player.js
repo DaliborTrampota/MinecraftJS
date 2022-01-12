@@ -97,8 +97,8 @@ export default class Player {
         if(collision.distance > 20) return console.log('Too long distance')
 
         let chunk = this.game.world.getChunkFromPos(collision.point)
-        chunk.removeVoxel(collision.point, collision.face.normal)
-        chunk.rebuild()
+        chunk.breakVoxel(collision.point, collision.face.normal)
+        //chunk.removeVoxel(collision.point, collision.face.normal)
     }
 
     place(e){
@@ -109,7 +109,6 @@ export default class Player {
 
         let chunk = this.game.world.getChunkFromPos(collision.point)
         chunk.addVoxel(collision.point, collision.face.normal, this.game.register.blockMap.get('end_stone'))
-        chunk.rebuild()
     }
 
     OnMouseClick(e){

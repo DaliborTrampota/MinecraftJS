@@ -16,22 +16,26 @@ export default class Register {
     }
 
     async Init(){
-        let promises = [
-            this.loadTextures(),
-            this.loadBlockData()
-        ]
-        return Promise.all(promises)
+        await this.loadBlockData()
+        await this.loadTextures()
+
+        return true
     }
 
     async loadTextures(){//TODO make async?
         console.log('Loading textures...')
 
-        let textures = await fetch('/textures').then(r => r.json())
+        let textures = []
+        textures.push(...await fetch('/textures').then(r => r.json()))
+        //textures.push(...await fetch('/textures/break').then(r => r.json()))
+
         for(let name of textures){
             let texture = this.loader.load(`resources/textures/blocks/${name}`)
             texture.magFilter = NearestFilter
-            this.textures.push(new MeshBasicMaterial({ map: texture }))
-            this.textureMap.add(name.split('.')[0])
+            
+            let blockName = name.split('.')[0] 
+            this.textures.push(new MeshBasicMaterial({ map: texture, transparent: this.blockData[blockName] ? !this.blockData[blockName]?.solid : true }))
+            this.textureMap.add(blockName)
         }
 
         console.log('Textures were loaded!')

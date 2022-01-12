@@ -9,7 +9,10 @@ document.getElementById('target').appendChild(renderer.domElement);
 
 const scene = new Scene();
 const clock = new Clock();
-const camera = new PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 500 );
+const camera = new PerspectiveCamera( 90, window.innerWidth / window.innerHeight, 1, 500 );
+
+camera.near = 0.01
+camera.updateProjectionMatrix()
 
 //const camPos = new Vector3(-20, 20, 20);
 //const camPos = new Vector3(-15, 5, 5);
