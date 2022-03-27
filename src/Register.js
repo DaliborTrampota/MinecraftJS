@@ -1,4 +1,5 @@
 import { TwoWayMap } from "./Utils.js";
+import Block from "./Block.js";
 import { TextureLoader, MeshBasicMaterial, NearestFilter   } from 'https://cdn.skypack.dev/three@0.129.0';
 
 export default class Register {
@@ -42,7 +43,7 @@ export default class Register {
     }
 
     async loadBlockData(){
-        this.blockData = await fetch('/blockData').then(r => r.json())
+        this.blockData = await fetch('/blockData').then(r => r.json())//.then(o => new Block())
     }
 
     block(name){ //make block builder

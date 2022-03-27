@@ -52,9 +52,16 @@ class TwoWayMap extends Map{
     }
 }
 
+const GAMEMODE = {
+    SURVIVAL: 0,
+    CREATIVE:  1
+}
+
+
 export {
     create3DArray,
     create2DArray,
     createEnum,
-    TwoWayMap
+    TwoWayMap,
+    GAMEMODE
 }

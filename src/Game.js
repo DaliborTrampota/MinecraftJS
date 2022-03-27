@@ -1,4 +1,4 @@
-import { Clock, DirectionalLight, DirectionalLightHelper, TextureLoader, MeshBasicMaterial, Mesh, PlaneGeometry, CubeTextureLoader } from 'https://cdn.skypack.dev/three@0.129.0';
+import { Clock, DirectionalLight, DirectionalLightHelper, TextureLoader, MeshBasicMaterial, Mesh, PlaneGeometry, CubeTextureLoader, BoxGeometry } from 'https://cdn.skypack.dev/three@0.129.0';
 import Stats from 'https://cdn.jsdelivr.net/npm/three@0.129.0/examples/jsm/libs/stats.module.js';
 import { PI_2 } from './Constants.js';
 import Register from './Register.js';
@@ -6,14 +6,17 @@ import Player from './Player.js';
 import World from './World.js';
 
 export default class Game {
+
     constructor(renderer, scene, clock, camera){
         this.renderer = renderer;
         this.scene = scene;
         this.clock = clock;
         this.camera = camera;
 
+        this.gravity = -9.81
+
         this.register = new Register();
-        this.player = new Player(this.camera, this);
+        this.player = new Player(this.createGameModel(), this.camera, this);
         this.world;
 
         this.stats = new Stats();
@@ -104,5 +107,13 @@ export default class Game {
             'resources/images/skybox/back.png',
         ]);
         this.scene.background = texture;
+    }
+
+    createGameModel(){
+        const geometry = new BoxGeometry( 1, 2, 1 );
+        const material = new MeshBasicMaterial( { color: 0x00ff00 } );
+        const model = new Mesh( geometry, material );
+        this.camera.parent = model
+        return model
     }
 }

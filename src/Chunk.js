@@ -128,19 +128,20 @@ export default class Chunk {
     }
 
     checkVoxel(pos, update){
+        //console.log(pos)
         if(pos.y < 0 || pos.y >= ChunkHeight) return true
-        let blockID;
+
+        let block;
         if(pos.x < 0 || pos.x >= ChunkSize || pos.z < 0 || pos.z >= ChunkSize) {
             pos.x += this.x * ChunkSize
             pos.z += this.y * ChunkSize
 
-            blockID = update ? this.world.getVoxelFromPos(pos) : this.world.getVoxel(pos)
+            block = update ? this.world.getVoxelFromPos(pos) : this.world.getVoxel(pos)
         }else {
-            blockID = this.data[pos.x][pos.y][pos.z]
+            block = this.getVoxel(pos)
         }
-        
-        if(blockID <= 0) return false
-        return this.register.getBlockData(blockID).solid
+
+        return block.solid
     }
 
     unload(){
@@ -164,6 +165,7 @@ export default class Chunk {
     }
 
     rebuildNeighbourChunks(pos, worldPos){
+        this.needsUpdate = true
         if(pos.x == 0 || pos.x == ChunkSize - 1 || pos.z == 0 || pos.z == ChunkSize - 1){
             for(let dir of CrossCheck){
                 let chunk = this.world.getChunkFromPos(worldPos.clone().add(dir))
@@ -211,7 +213,7 @@ export default class Chunk {
         pos.x -= this.mesh.position.x
         pos.z -= this.mesh.position.z
 
-        this.data[pos.x][pos.y][pos.z] = this.register.blockMap.get('air')
+        this.setVoxel(pos, this.register.blockMap.get('air'))
         
         this.rebuildNeighbourChunks(pos, worldPos)
     }
@@ -226,9 +228,20 @@ export default class Chunk {
         pos.x -= this.mesh.position.x
         pos.z -= this.mesh.position.z
 
-        this.data[pos.x][pos.y][pos.z] = blockID//possible out of bounds on borders
+        this.setVoxel(pos, blockID)//possible out of bounds on borders
         
         this.rebuildNeighbourChunks(pos, worldPos)
+    }
+
+    getVoxel(pos){
+        //console.log(pos, this.data)
+        let blockID = this.data[pos.x][pos.y][pos.z]
+        if(!blockID) return false
+        return this.register.getBlockData(blockID)
+    }
+
+    setVoxel(pos, blockID){
+        this.data[pos.x][pos.y][pos.z] = blockID
     }
 
     static compare(c1, c2){

@@ -124,7 +124,7 @@ export default class World {
         let y = ChunkHeight
         
         this.player.chunk
-        this.player.position = new Vector3(xz, y + 100, xz)
+        this.player.position = new Vector3(xz, y + 20, xz)
         this.player.camera.lookAt(xz, 0, xz)
     }
     
@@ -192,12 +192,25 @@ export default class World {
         let y = Math.floor(pos.y);
         let z = Math.floor(pos.z / ChunkSize);
 
-        let chunk = this.chunks[x][z]
+        try{
+            let chunk = this.chunks[x][z]
 
-        x = pos.x - (x * ChunkSize)
-        z = pos.z - (z * ChunkSize)
-        
-        return chunk.data[x][y][z]
+            x = Math.floor(pos.x - (x * ChunkSize))
+            z = Math.floor(pos.z - (z * ChunkSize))
+
+            return this.register.getBlockData(chunk.data[x][y][z])
+        } catch(err) {
+            //out of building area
+            return false
+        }
+    }
+
+    checkVoxel(x, y, z){
+        let pos = new Vector3(x, y, z)
+        let block = this.getVoxelFromPos(pos)
+        //console.log(pos, block ? block : false)
+        if(block) return block.solid
+        return false
     }
 
 }

@@ -14,9 +14,4 @@ const camera = new PerspectiveCamera( 90, window.innerWidth / window.innerHeight
 camera.near = 0.01
 camera.updateProjectionMatrix()
 
-//const camPos = new Vector3(-20, 20, 20);
-//const camPos = new Vector3(-15, 5, 5);
-//camera.position.copy(camPos);
-//camera.lookAt( 0, 0, 0 );
-
 const game = new Game(renderer, scene, clock, camera)
