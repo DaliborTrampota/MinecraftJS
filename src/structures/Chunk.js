@@ -87,18 +87,20 @@ export default class Chunk {
 
                         let textureIndex = blockData.textures.all ? this.register.textureMap.get(blockData.textures.all) : this.register.textureMap.get(blockData.textures[side])
                         
-                        if(textureGroups.hasOwnProperty(textureIndex)) textureGroups[textureIndex].push({ side, pos, breaking })
-                        else textureGroups[textureIndex] = [{ side, pos, breaking }]
+                        const key = `${textureIndex}_${blockID}`
+                        if(textureGroups.hasOwnProperty(`${textureIndex}_${blockID}`)) textureGroups[key].push({ side, pos, breaking })
+                        else textureGroups[key] = [{ side, pos, breaking }]
                     }
                 }
             }
         }
-        for(let textureIndex in textureGroups) this.buildTexture(textureIndex, textureGroups[textureIndex])
+        for(let key in textureGroups) this.buildTexture(...key.split('_'), textureGroups[key])
     }
 
-    buildTexture(textureIndex, data){
+    buildTexture(textureIndex, blockID, data){
         let groupCount = 0;
         let breakingGroups = []
+        let blockData = this.register.getBlockData(blockID)
 
         for(let o of data){
             for(let vert of triangles[o.side]){
@@ -106,7 +108,8 @@ export default class Chunk {
                 this.vertices.push(vertices[vert].y + o.pos.y)
                 this.vertices.push(vertices[vert].z + o.pos.z)
             }
-            this.UVs.push(...UVs[o.side])
+            if(blockData.animated) this.UVs.push(...UVs[o.side].map((u, i) => i % 2 ? u / blockData.animation.frames : u))
+            else this.UVs.push(...UVs[o.side])
 
             if(o.breaking) breakingGroups.push({ start: this.groupStart + groupCount, texture: o.breaking.textureIndex })
             groupCount += 6

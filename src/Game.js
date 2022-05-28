@@ -47,6 +47,7 @@ export default class Game {
             .block('sandstone')
             .block('end_stone')
             .block('furnace')
+            .block('water_still')
             .biome('forest', 0.5, 0.35, 0.5)
             .biome('desert', 0.9, 0.15, 0.3)
             .biome('hills', 0.2, 0.6, 0.9)

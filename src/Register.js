@@ -7,6 +7,7 @@ export default class Register {
         this.loader = new TextureLoader()
 
         this.textures = []
+        this.animatedTextures = {}
         this.textureMap = new TwoWayMap();
         this.blockMap = new TwoWayMap();
         this.blockData = {}
@@ -18,7 +19,7 @@ export default class Register {
     async Init(){
         await this.loadBlockData()
         await this.loadTextures()
-
+        this.animateTextures()
         return true
     }
 
@@ -34,8 +35,19 @@ export default class Register {
             texture.magFilter = NearestFilter
             
             let blockName = name.split('.')[0] 
-            this.textures.push(new MeshBasicMaterial({ map: texture, transparent: this.blockData[blockName] ? !this.blockData[blockName]?.solid : true }))
+            let blockData = this.blockData[blockName]
+
+            this.textures.push(new MeshBasicMaterial({ map: texture, transparent: !blockData?.solid || true }))
             this.textureMap.add(blockName)
+
+            if(blockData?.animated){
+                this.animatedTextures[this.textureMap.get(blockName)] = {
+                    frame: 0,
+                    end: blockData.animation.frames,
+                    interval: blockData.animation.interval,
+                    step: 1 / blockData.animation.frames
+                }
+            }
         }
 
         console.log('Textures were loaded!')
@@ -57,5 +69,19 @@ export default class Register {
 
     getBlockData(blockID){
         return this.blockData[this.blockMap.get(blockID)]
+    }
+
+    animateTextures(){
+        for(let idx in this.animatedTextures){
+            setInterval(() => {
+                let data = this.animatedTextures[idx]
+                this.textures[idx].map.offset.set(0, data.frame * data.step)
+
+                data.frame++
+                if(data.frame == data.end)
+                    data.frame = 0
+
+            }, this.animatedTextures[idx].interval)
+        }
     }
 }
