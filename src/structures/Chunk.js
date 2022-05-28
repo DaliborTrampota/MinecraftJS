@@ -122,7 +122,7 @@ export default class Chunk {
         this.geometry.setAttribute('position', new BufferAttribute(new Float32Array(this.vertices), 3))
         this.geometry.setAttribute('uv', new BufferAttribute(new Float32Array(this.UVs), 2))
 
-        if(update) return console.log(this.geometry)
+        if(update) return //console.log(this.geometry)
         
         this.mesh = new Mesh(this.geometry, this.register.textures)
     }
@@ -136,7 +136,7 @@ export default class Chunk {
             pos.x += this.x * ChunkSize
             pos.z += this.y * ChunkSize
 
-            block = update ? this.world.getVoxelFromPos(pos) : this.world.getVoxel(pos)
+            block = update ? this.world.getVoxelFromPos(pos) : this.register.getBlockData(this.world.getVoxel(pos))
         }else {
             block = this.getVoxel(pos)
         }
@@ -234,7 +234,6 @@ export default class Chunk {
     }
 
     getVoxel(pos){
-        //console.log(pos, this.data)
         let blockID = this.data[pos.x][pos.y][pos.z]
         if(!blockID) return false
         return this.register.getBlockData(blockID)
