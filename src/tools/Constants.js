@@ -117,6 +117,13 @@ const CrossCheck = [
     new Vector3(0, 0, -1)
 ]
 
+
+const GAMEMODE = {
+    SURVIVAL: 0,
+    CREATIVE:  1
+}
+
+
 export {
     sides,
     PI_2,
@@ -128,5 +135,7 @@ export {
     WorldSizeInChunks,
     HalfWorldSize,
     WorldSize,
-    CrossCheck
+    CrossCheck,
+
+    GAMEMODE
 }

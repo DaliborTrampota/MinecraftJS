@@ -1,6 +1,6 @@
-import { ChunkHeight, ChunkSize, sides, triangles, UVs, vertices, CrossCheck } from "./Constants.js"
-import { create3DArray } from "./Utils.js"
-import { Vector3, Vector2, BufferGeometry, BufferAttribute, Mesh } from 'https://cdn.skypack.dev/three@0.129.0';
+import { ChunkHeight, ChunkSize, sides, triangles, UVs, vertices, CrossCheck } from "../tools/Constants.js"
+import { create3DArray } from "../tools/Utils.js"
+import { Vector3, BufferGeometry, BufferAttribute, Mesh } from 'https://cdn.skypack.dev/three@0.129.0';
 
 //import { SceneUtils } from 'https://cdn.jsdelivr.net/npm/three@0.129.0/examples/jsm/utils/SceneUtils.js';
 

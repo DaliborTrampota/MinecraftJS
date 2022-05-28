@@ -1,10 +1,10 @@
-import { ChunkHeight, ChunkSize, HalfWorldSize, WorldSize, WorldSizeInChunks } from "./Constants.js";
-import { Vector3, Vector2, Scene } from 'https://cdn.skypack.dev/three@0.129.0';
-import { create2DArray } from "./Utils.js";
+import { ChunkHeight, ChunkSize, HalfWorldSize, WorldSize, WorldSizeInChunks } from "../tools/Constants.js";
+import { Vector3, Vector2 } from 'https://cdn.skypack.dev/three@0.129.0';
+import { create2DArray } from "../tools/Utils.js";
 import Chunk from "./Chunk.js"
 
-import NoiseGenerator from './Noise.js'
-import BiomeGenerator from "./BiomeGenerator.js";
+import NoiseGenerator from '../tools/Noise.js'
+import BiomeGenerator from "../tools/BiomeGenerator.js";
 
 
 export default class World {
@@ -170,7 +170,7 @@ export default class World {
                 case 'forest':
                     return this.register.blockMap.get('grass_block')
                 case 'hills':
-                    return this.register.blockMap.get('gravel')
+                    return this.register.blockMap.get('stone')
                 case 'desert':
                     return this.register.blockMap.get('sand')
             }
@@ -207,6 +207,13 @@ export default class World {
 
     checkVoxel(x, y, z){
         let pos = new Vector3(x, y, z)
+        let block = this.getVoxelFromPos(pos)
+        //console.log(pos, block ? block : false)
+        if(block) return block.solid
+        return false
+    }
+
+    checkVoxelVec(pos){
         let block = this.getVoxelFromPos(pos)
         //console.log(pos, block ? block : false)
         if(block) return block.solid

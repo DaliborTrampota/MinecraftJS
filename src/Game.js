@@ -1,9 +1,9 @@
 import { Clock, DirectionalLight, DirectionalLightHelper, TextureLoader, MeshBasicMaterial, Mesh, PlaneGeometry, CubeTextureLoader, BoxGeometry } from 'https://cdn.skypack.dev/three@0.129.0';
 import Stats from 'https://cdn.jsdelivr.net/npm/three@0.129.0/examples/jsm/libs/stats.module.js';
-import { PI_2 } from './Constants.js';
+import { PI_2 } from './tools/Constants.js';
 import Register from './Register.js';
 import Player from './Player.js';
-import World from './World.js';
+import World from './structures/World.js';
 
 export default class Game {
 
@@ -13,7 +13,7 @@ export default class Game {
         this.clock = clock;
         this.camera = camera;
 
-        this.gravity = -9.81
+        this.gravity = -9.81 * 2
 
         this.register = new Register();
         this.player = new Player(this.createGameModel(), this.camera, this);
@@ -47,9 +47,9 @@ export default class Game {
             .block('sandstone')
             .block('end_stone')
             .block('furnace')
-            .biome('forest', 0.9, 1.2, 1.2)
-            .biome('desert', 1.8, 0.2, 1)
-            .biome('hills', 0.2, 1.5, 1.8)
+            .biome('forest', 0.5, 0.35, 0.5)
+            .biome('desert', 0.9, 0.15, 0.3)
+            .biome('hills', 0.2, 0.6, 0.9)
 
         this.world = new World(this, this.register, this.player);
         this.addUpdateSub(this.player)
@@ -110,9 +110,12 @@ export default class Game {
     }
 
     createGameModel(){
-        const geometry = new BoxGeometry( 1, 2, 1 );
+        const geometry = new BoxGeometry( 0.8, 2, 0.5 );
         const material = new MeshBasicMaterial( { color: 0x00ff00 } );
         const model = new Mesh( geometry, material );
+        model.h = 2
+        model.w = 0.8
+        model.d = 0.5
         this.camera.parent = model
         return model
     }

@@ -1,6 +1,6 @@
 import { Vector3, Vector2, Euler, Raycaster } from 'https://cdn.skypack.dev/three@0.129.0';
-import { HalfWorldSize, PI_2 } from './Constants.js'
-import { GAMEMODE } from './Utils.js'
+import { HalfWorldSize, PI_2, GAMEMODE } from './tools/Constants.js'
+import { drawBlock, clamp, moveTowards } from './tools/Utils.js'
 
 const RIGHT = new Vector3(1, 0, 0)
 const UP = new Vector3(0, 1, 0)
@@ -13,23 +13,24 @@ export default class Player {
         this.camera = camera;
         this.game = game
         this.locked = false;
-        this.viewDistance = 10
+        this.viewDistance = 5
         
         this.health = 100;
         this.sensitivity = 1
         this.chunk = new Vector2(HalfWorldSize, HalfWorldSize)
 
+        this.acceleration = 60
         this.velocity = new Vector3(0, 0, 0);
         this.grounded = false
         this.vertVel = 0
 
-        this.gamemode = GAMEMODE.SURVIVAL
+        this.gamemode = GAMEMODE.CREATIVE
 
         this.playerWidth = 0.3
         this.movement = {
-            jump: 2,
-            speed: 25,
-            sprintMultiplier: 2,
+            jump: 10,
+            speed: 8,
+            sprintMultiplier: 1.8,
 
             front: false,
             back: false,
@@ -64,13 +65,19 @@ export default class Player {
         if(chunk) this.chunk = new Vector2(chunk.x, chunk.y)
     }
 
+    get blockPosition(){
+        let pos = new Vector3()
+        this.camera.getWorldPosition(pos).floor()
+        drawBlock(pos, this.game.scene)
+        return pos
+    }
+
     
 
     Update(delta){
         this.calculateVelocity(delta)
-        if(this.movement.jumpRequest) this.jump()
-        //console.log(this.velocity, this.movement.vertical, this.movement.horizontal, this.vertVel)
-        this.model.translateOnAxis(this.velocity, delta * this.movement.speed)
+        if(this.movement.jumpRequest) this.jump(delta)
+        this.model.translateOnAxis(this.velocity, delta)
         
         let curChunk = this.game.world.getChunkFromPos(this.position)
         if(!curChunk) return
@@ -107,28 +114,36 @@ export default class Player {
     calculateVelocity(delta){
         if(!this.movement.flying){
             if (this.vertVel > this.game.gravity) 
-                this.vertVel += delta * this.game.gravity
+                this.vertVel += delta * delta * this.game.gravity * 1.3
         }
 
-        let newVel = RIGHT.clone().multiplyScalar(this.movement.horizontal).add(FORWARD.clone().multiplyScalar(this.movement.vertical * (this.movement.sprint ? this.movement.sprintMultiplier : 1))).multiplyScalar(this.movement.speed).multiplyScalar(delta)
-        this.velocity.x = newVel.x
-        this.velocity.z = newVel.z
-        this.velocity.add(UP.clone().multiplyScalar(this.vertVel * delta))
+        const curSpeed = (this.movement.sprint ? this.movement.sprintMultiplier : 1) * this.movement.speed
+        let moveDir = new Vector3(this.movement.horizontal, 0, -this.movement.vertical).normalize().multiplyScalar(curSpeed)
+        const Y = this.velocity.y + this.vertVel
 
-        if(this.movement.vertical > 0 && this.front || this.movement.vertical < 0 && this.back)
+        this.velocity = moveTowards(this.velocity.clone(), moveDir.clone(), this.acceleration * delta)
+        this.velocity.y = (this.grounded ? 0 : clamp(Y, -80, 20))
+
+        let dir = this.model.getWorldDirection(new Vector3())
+        let rot = Math.atan2(dir.x, dir.z);
+        let worldDir = this.velocity.applyAxisAngle(UP, rot)
+
+        if(worldDir.z > 0 && this.back || worldDir.z < 0 && this.front)
             this.velocity.z = 0
 
-        if(this.movement.horizontal > 0 && this.right || this.movement.horizontal < 0 && this.left)
+        if(worldDir.x > 0 && this.right || worldDir.x < 0 && this.left)
             this.velocity.x = 0
-        
-        if(this.velocity.y < 0) this.velocity.y = this.checkDownSpeed(this.velocity.y)
+
+        if(this.velocity.y <= 0) this.velocity.y = this.checkDownSpeed(this.velocity.y)
         else if(this.velocity.y > 0) this.velocity.y = this.checkUpSpeed(this.velocity.y)
+
+        this.velocity.applyAxisAngle(UP, -rot)
     }
 
-    jump(){
+    jump(delta){
         this.movement.jumpRequest = false
         this.grounded = false
-        this.vertVel = this.movement.jump
+        this.vertVel = this.movement.jump * delta
         console.log('jump', this.vertVel)
     }
 
@@ -146,7 +161,6 @@ export default class Player {
 
 
         }else if(this.gamemode == GAMEMODE.CREATIVE){
-
             chunk.removeVoxel(collision.point, collision.face.normal)
         }
     }
@@ -204,8 +218,13 @@ export default class Player {
             case 'Space':
                 if(this.grounded) this.movement.jumpRequest = true
                 break
+
+            case 'KeyP':
+                this.debug = true
+                break
         }
-        //this.calculateVelocity();
+        this.movement.horizontal = clamp(this.movement.horizontal, -1, 1)
+        this.movement.vertical = clamp(this.movement.vertical, -1, 1)
     }
     
     KeyUp(e){
@@ -234,7 +253,14 @@ export default class Player {
                 this.movement.sprint = false;
                 break;
 
+            case 'KeyP':
+                this.debug = false
+                break
+
         }
+        
+        this.movement.horizontal = clamp(this.movement.horizontal, -1, 1)
+        this.movement.vertical = clamp(this.movement.vertical, -1, 1)
         //this.calculateVelocity();
     }
 
@@ -267,18 +293,24 @@ export default class Player {
     get left(){
         let pos = new Vector3()
         this.camera.getWorldPosition(pos)
+        pos.add(RIGHT.clone().multiplyScalar(-this.playerWidth))
+        
         if(
-            this.world.checkVoxel(pos.x - this.playerWidth, pos.y, pos.z) ||
-            this.world.checkVoxel(pos.x - this.playerWidth, pos.y - 1, pos.z)
+            this.world.checkVoxel(...pos.toArray()) ||
+            this.world.checkVoxel(...pos.add(UP.clone().negate()).toArray())
         ) return true
+
+        return false
     }
 
     get right(){
         let pos = new Vector3()
         this.camera.getWorldPosition(pos)
+        pos.add(RIGHT.clone().multiplyScalar(this.playerWidth))
+
         if(
-            this.world.checkVoxel(pos.x + this.playerWidth, pos.y, pos.z) ||
-            this.world.checkVoxel(pos.x + this.playerWidth, pos.y - 1, pos.z)
+            this.world.checkVoxel(...pos.toArray()) ||
+            this.world.checkVoxel(...pos.add(UP.clone().negate()).toArray())
         ) return true
 
         return false
@@ -287,10 +319,11 @@ export default class Player {
     get front(){
         let pos = new Vector3()
         this.camera.getWorldPosition(pos)
-        console.log(pos)
+        pos.add(FORWARD.clone().multiplyScalar(this.playerWidth))
+        
         if(
-            this.world.checkVoxel(pos.x, pos.y, pos.z - this.playerWidth) ||
-            this.world.checkVoxel(pos.x, pos.y - 1, pos.z - this.playerWidth)
+            this.world.checkVoxel(...pos.toArray()) ||
+            this.world.checkVoxel(...pos.add(UP.clone().negate()).toArray())
         ) return true
 
         return false
@@ -299,9 +332,11 @@ export default class Player {
     get back(){
         let pos = new Vector3()
         this.camera.getWorldPosition(pos)
+        pos.add(FORWARD.clone().multiplyScalar(-this.playerWidth))
+
         if(
-            this.world.checkVoxel(pos.x, pos.y, pos.z + this.playerWidth) ||
-            this.world.checkVoxel(pos.x, pos.y - 1, pos.z + this.playerWidth)
+            this.world.checkVoxel(...pos.toArray()) ||
+            this.world.checkVoxel(...pos.add(UP.clone().negate()).toArray())
         ) return true
         
         return false
@@ -311,20 +346,19 @@ export default class Player {
     checkDownSpeed(downSpeed) {
         let pos = new Vector3()
         this.camera.getWorldPosition(pos)
-        let temp = downSpeed
-        downSpeed *= 0.1
+        pos.add(new Vector3(0, -2, 0)).floor()
 
         if (
-           this.world.checkVoxel(pos.x - this.playerWidth, pos.y - 2 + downSpeed, pos.z - this.playerWidth) ||
-           this.world.checkVoxel(pos.x + this.playerWidth, pos.y - 2 + downSpeed, pos.z - this.playerWidth) ||
-           this.world.checkVoxel(pos.x + this.playerWidth, pos.y - 2 + downSpeed, pos.z + this.playerWidth) ||
-           this.world.checkVoxel(pos.x - this.playerWidth, pos.y - 2 + downSpeed, pos.z + this.playerWidth)
+            this.world.checkVoxel(pos.x - this.playerWidth, pos.y, pos.z - this.playerWidth) ||
+            this.world.checkVoxel(pos.x + this.playerWidth, pos.y, pos.z - this.playerWidth) ||
+            this.world.checkVoxel(pos.x + this.playerWidth, pos.y, pos.z + this.playerWidth) ||
+            this.world.checkVoxel(pos.x - this.playerWidth, pos.y, pos.z + this.playerWidth)
         ) {
-            this.grounded = true
-            return 0;
+             this.grounded = true
+             return 0;
         }
         this.grounded = false
-        return temp//downSpeed
+        return downSpeed
     }
 
     checkUpSpeed(upSpeed) {

@@ -1,5 +1,4 @@
-import { TwoWayMap } from "./Utils.js";
-import Block from "./Block.js";
+import { TwoWayMap } from "./tools/Utils.js";
 import { TextureLoader, MeshBasicMaterial, NearestFilter   } from 'https://cdn.skypack.dev/three@0.129.0';
 
 export default class Register {
