@@ -1,4 +1,4 @@
-import { ChunkHeight, ChunkSize, HalfWorldSize, WorldSize, WorldSizeInChunks } from "../tools/Constants.js";
+import { ChunkHeight, ChunkSize, HalfWorldSize, WorldSize, WorldSizeInChunks, WORLD_SETTINGS } from "../tools/Constants.js";
 import { Vector3, Vector2 } from 'https://cdn.skypack.dev/three@0.129.0';
 import { create2DArray } from "../tools/Utils.js";
 import Chunk from "./Chunk.js"
@@ -100,7 +100,7 @@ export default class World {
         for(let i = 0; i < WorldSizeInChunks; ++i){
             for(let j = 0; j < WorldSizeInChunks; ++j){
                 this.chunks[i][j].generate()
-                this.game.Scene.add(this.chunks[i][j].mesh)
+                this.game.scene.add(this.chunks[i][j].mesh)
             }
         }
     }
@@ -112,7 +112,7 @@ export default class World {
         for(let i = x.start; i < x.end; ++i){
             for(let j = y.start; j < y.end; ++j){
                 if(!this.chunks[i][j]) this.chunks[i][j] = new Chunk(i, j, this);
-                if(!this.chunks[i][j].mesh) this.game.Scene.add(this.chunks[i][j].generate())
+                if(!this.chunks[i][j].mesh) this.game.scene.add(this.chunks[i][j].generate())
                 this.chunks[i][j].load()
                 this.activeChunks.push(new Vector2(i, j))
             }
@@ -143,7 +143,7 @@ export default class World {
         for(let i = x.start; i < x.end; ++i){
             for(let j = y.start; j < y.end; ++j){
                 if(!this.chunks[i][j]) this.chunks[i][j] = new Chunk(i, j, this);
-                if(!this.chunks[i][j].mesh) this.game.Scene.add(this.chunks[i][j].generate())
+                if(!this.chunks[i][j].mesh) this.game.scene.add(this.chunks[i][j].generate())
                 this.chunks[i][j].load()
                 this.activeChunks.push(new Vector2(i, j))
             }
@@ -182,9 +182,9 @@ export default class World {
         else if(pos.y < height && pos.y > height - 3) return this.register.blockMap.get('dirt')
         else if(pos.y < height) return this.register.blockMap.get('stone')
         
-
-
+        else if(pos.y <= WORLD_SETTINGS.globalSeaLevel) return this.register.blockMap.get('water_still')
         else return this.register.blockMap.get('air')
+        
     }
 
     getVoxelFromPos(pos){

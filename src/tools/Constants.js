@@ -123,6 +123,9 @@ const GAMEMODE = {
     CREATIVE:  1
 }
 
+const WORLD_SETTINGS = {
+    globalSeaLevel: 12
+}
 
 export {
     sides,
@@ -137,5 +140,6 @@ export {
     WorldSize,
     CrossCheck,
 
-    GAMEMODE
+    GAMEMODE,
+    WORLD_SETTINGS
 }

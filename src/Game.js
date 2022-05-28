@@ -72,10 +72,6 @@ export default class Game {
         else console.error('No Update method!');
     }
 
-    get Scene() { 
-        return this.scene;
-    }
-
     createLight(){
         const light = new DirectionalLight( 0xFFFFFF );
         light.position.set(0, 10, 0)
