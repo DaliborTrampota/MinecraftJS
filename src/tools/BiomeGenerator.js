@@ -43,7 +43,7 @@ export default class BiomeGenerator {
             humidity: this.humidityNoise.Get(x, 0, y),
             altitude: this.altitudeNoise.Get(x, 0, y)
         }
-        console.log(curClimate)
+        //console.log(curClimate)
         let biomes = Array.from(this.register.biomes.entries())
         let biomesSorted = biomes.sort((a, b) => this.fitness(curClimate, a[1]) - this.fitness(curClimate, b[1]))
         //console.log(biomesSorted, biomesSorted.map(b => this.fitness(curClimate, b[1])))
@@ -51,9 +51,9 @@ export default class BiomeGenerator {
     }
 
     fitness(currentClimate, biomeClimate){
-        let temperature = Math.pow(biomeClimate.temperature - currentClimate.temperature, 2)
-        let humidity = Math.pow(biomeClimate.humidity - currentClimate.humidity, 2)
-        let altitude = Math.pow(biomeClimate.altitude - currentClimate.altitude, 2)
+        let temperature = Math.pow(biomeClimate.t - currentClimate.temperature, 2)
+        let humidity = Math.pow(biomeClimate.h - currentClimate.humidity, 2)
+        let altitude = Math.pow(biomeClimate.a - currentClimate.altitude, 2)
         //(this.weirdness - d.weirdness) * (this.weirdness - d.weirdness) + (this.offset - d.offset) * (this.offset - d.offset);
         return temperature + humidity + altitude;
     }

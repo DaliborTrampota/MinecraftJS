@@ -1,5 +1,5 @@
+import { Vector3, Vector2 } from 'https://cdn.skypack.dev/three@0.141.0';
 import { ChunkHeight, ChunkSize, HalfWorldSize, WorldSize, WorldSizeInChunks, WORLD_SETTINGS } from "../tools/Constants.js";
-import { Vector3, Vector2 } from 'https://cdn.skypack.dev/three@0.129.0';
 import { create2DArray } from "../tools/Utils.js";
 import Chunk from "./Chunk.js"
 
@@ -13,7 +13,8 @@ export default class World {
         this.register = register;
         this.player = player;
 
-        this.chunks = create2DArray(WorldSizeInChunks, WorldSizeInChunks); 
+        this.gravity = -9.81 * 2
+        this.chunks = create2DArray(WorldSizeInChunks, WorldSizeInChunks)
 
         this.biomeGenerator = new BiomeGenerator(game.register)
         this.noises = {
@@ -60,6 +61,10 @@ export default class World {
         this.Init()
     }
 
+    get scene() { 
+        return this.game.scene
+    }
+
     async Init(){
         console.time('Loading')
 
@@ -69,10 +74,10 @@ export default class World {
         //console.log('Drawing world...')
         //this.createChunkMeshes()
 
-        console.log('Loading chunks...')
+        console.info('Loading chunks...')
         await this.load()
         
-        console.log('Spawning player...')
+        console.info('Spawning player...')
         this.spawnPlayer()
 
         console.timeEnd('Loading')
@@ -100,7 +105,7 @@ export default class World {
         for(let i = 0; i < WorldSizeInChunks; ++i){
             for(let j = 0; j < WorldSizeInChunks; ++j){
                 this.chunks[i][j].generate()
-                this.game.scene.add(this.chunks[i][j].mesh)
+                this.scene.add(this.chunks[i][j].mesh)
             }
         }
     }
@@ -112,7 +117,7 @@ export default class World {
         for(let i = x.start; i < x.end; ++i){
             for(let j = y.start; j < y.end; ++j){
                 if(!this.chunks[i][j]) this.chunks[i][j] = new Chunk(i, j, this);
-                if(!this.chunks[i][j].mesh) this.game.scene.add(this.chunks[i][j].generate())
+                if(!this.chunks[i][j].mesh) this.scene.add(this.chunks[i][j].generate())
                 this.chunks[i][j].load()
                 this.activeChunks.push(new Vector2(i, j))
             }
@@ -138,12 +143,14 @@ export default class World {
             this.chunks[ch.x][ch.y].unload()
         }
         this.activeChunks = []
+
         const x = { start:  Math.max(this.player.chunk.x - this.player.viewDistance + 1, 0), end: Math.min(this.player.chunk.x + this.player.viewDistance, WorldSizeInChunks) }
         const y = { start:  Math.max(this.player.chunk.y - this.player.viewDistance + 1, 0), end: Math.min(this.player.chunk.y + this.player.viewDistance, WorldSizeInChunks) }
+
         for(let i = x.start; i < x.end; ++i){
             for(let j = y.start; j < y.end; ++j){
                 if(!this.chunks[i][j]) this.chunks[i][j] = new Chunk(i, j, this);
-                if(!this.chunks[i][j].mesh) this.game.scene.add(this.chunks[i][j].generate())
+                if(!this.chunks[i][j].mesh) this.scene.add(this.chunks[i][j].generate())
                 this.chunks[i][j].load()
                 this.activeChunks.push(new Vector2(i, j))
             }
@@ -168,22 +175,22 @@ export default class World {
             let biome = this.biomeGenerator.getBiome(pos.x, pos.z) //this.noise.Get(pos.z, 0.0, pos.x)
             switch(biome){
                 case 'forest':
-                    return this.register.blockMap.get('grass_block')
+                    return this.register.blocks.getID('grass_block')
                 case 'hills':
-                    return this.register.blockMap.get('stone')
+                    return this.register.blocks.getID('stone')
                 case 'desert':
-                    return this.register.blockMap.get('sand')
+                    return this.register.blocks.getID('sand')
             }
             //console.log(biome)
-            if(biome > 5) return this.register.blockMap.get('sand')
-            if(biome > 2) return this.register.blockMap.get('gravel')
-            return this.register.blockMap.get('grass_block')
+            if(biome > 5) return this.register.blocks.getID('sand')
+            if(biome > 2) return this.register.blocks.getID('gravel')
+            return this.register.blocks.getID('grass_block')
         }
-        else if(pos.y < height && pos.y > height - 3) return this.register.blockMap.get('dirt')
-        else if(pos.y < height) return this.register.blockMap.get('stone')
+        else if(pos.y < height && pos.y > height - 3) return this.register.blocks.getID('dirt')
+        else if(pos.y < height) return this.register.blocks.getID('stone')
         
-        else if(pos.y <= WORLD_SETTINGS.globalSeaLevel) return this.register.blockMap.get('water_still')
-        else return this.register.blockMap.get('air')
+        else if(pos.y <= WORLD_SETTINGS.globalSeaLevel) return this.register.blocks.getID('water_still')
+        else return this.register.blocks.getID('air')
         
     }
 
@@ -198,10 +205,11 @@ export default class World {
             x = Math.floor(pos.x - (x * ChunkSize))
             z = Math.floor(pos.z - (z * ChunkSize))
 
-            return this.register.getBlockData(chunk.data[x][y][z])
+            return this.register.getBlock(chunk.data[x][y][z])
         } catch(err) {
             //out of building area
-            return false
+            //console.log(err, this.register.getBlock(0))
+            return this.register.getBlock(0)
         }
     }
 

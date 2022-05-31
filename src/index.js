@@ -1,4 +1,4 @@
-import { Scene, Clock, PerspectiveCamera, WebGLRenderer } from 'https://cdn.skypack.dev/three@0.129.0';
+import { Scene, Clock, PerspectiveCamera, WebGLRenderer } from 'https://cdn.skypack.dev/three@0.141.0';
 import Game from './Game.js'
 
 const renderer = new WebGLRenderer();
@@ -14,4 +14,13 @@ const camera = new PerspectiveCamera( 90, window.innerWidth / window.innerHeight
 camera.near = 0.01
 camera.updateProjectionMatrix()
 
-const game = new Game(renderer, scene, clock, camera)
+window.game = new Game(renderer, scene, clock, camera)
+
+function onWindowResize() {
+    camera.aspect = container.clientWidth / container.clientHeight;
+    camera.updateProjectionMatrix();
+  
+    renderer.setSize( container.clientWidth, container.clientHeight );
+}
+
+document.onresize = onWindowResize

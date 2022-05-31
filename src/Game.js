@@ -1,9 +1,13 @@
-import { Clock, DirectionalLight, DirectionalLightHelper, TextureLoader, MeshBasicMaterial, Mesh, PlaneGeometry, CubeTextureLoader, BoxGeometry } from 'https://cdn.skypack.dev/three@0.129.0';
-import Stats from 'https://cdn.jsdelivr.net/npm/three@0.129.0/examples/jsm/libs/stats.module.js';
-import { PI_2 } from './tools/Constants.js';
+import { Clock, DirectionalLight, DirectionalLightHelper, TextureLoader, MeshBasicMaterial, Mesh, PlaneGeometry, CubeTextureLoader, BoxGeometry, Box3 } from 'https://cdn.skypack.dev/three@0.141.0';
+import Stats from 'https://cdn.jsdelivr.net/npm/three@0.141.0/examples/jsm/libs/stats.module.js';
+import { MATERIAL, PI_2, PLAYER_DIMENSIONS } from './tools/Constants.js';
 import Register from './Register.js';
-import Player from './Player.js';
+import Player from './structures/Player/Player.js';
 import World from './structures/World.js';
+import TextureManager from './tools/TextureManager.js';
+import Block from './registers/Block.js';
+import Biome from './registers/Biome.js';
+import BlockItem from './registers/BlockItem.js';
 
 export default class Game {
 
@@ -13,9 +17,10 @@ export default class Game {
         this.clock = clock;
         this.camera = camera;
 
-        this.gravity = -9.81 * 2
+        this.textureManager = new TextureManager()
+        this.register = new Register()
 
-        this.register = new Register();
+
         this.player = new Player(this.createGameModel(), this.camera, this);
         this.world;
 
@@ -29,30 +34,40 @@ export default class Game {
     }
 
     async Init(){
-        let textureLoad = this.register.Init()
-
         this.createSkybox()
         this.scene.add(this.createLight())
 
-        await textureLoad
+        await this.register.load()
+        await this.textureManager.load()
+
+        const getBlock = (name) => {
+            return this.register.blocks.get(name)
+        }
 
         this.register
-            .block('dirt')
-            .block('grass_block')
-            .block('stone')
-            .block('cobblestone')
-            .block('mossy_cobblestone')
-            .block('sand')
-            .block('gravel')
-            .block('sandstone')
-            .block('end_stone')
-            .block('furnace')
-            .block('water_still')
-            .biome('forest', 0.5, 0.35, 0.5)
-            .biome('desert', 0.9, 0.15, 0.3)
-            .biome('hills', 0.2, 0.6, 0.9)
+            .block(new Block('air', MATERIAL.AIR))
+            .block(new Block('dirt', MATERIAL.SOLID))
+            .block(new Block('grass_block', MATERIAL.SOLID))
+            .block(new Block('stone', MATERIAL.SOLID))
+            .block(new Block('cobblestone', MATERIAL.SOLID))
+            .block(new Block('mossy_cobblestone', MATERIAL.SOLID))
+            .block(new Block('gravel', MATERIAL.SOLID))
+            .block(new Block('sand', MATERIAL.SOLID))
+            .block(new Block('sandstone', MATERIAL.SOLID))
+            .block(new Block('end_stone', MATERIAL.SOLID))
+            .block(new Block('furnace', MATERIAL.SOLID))
+            .block(new Block('glass', MATERIAL.SOLID))
+            .block(new Block('water_still', MATERIAL.LIQUID))
 
+            .biome(new Biome('forest').setTemperature(0.5).setHumidity(0.35).setAltitude(0.5))
+            .biome(new Biome('desert').setTemperature(0.9).setHumidity(0.15).setAltitude(0.3))
+            .biome(new Biome('hills').setTemperature(0.2).setHumidity(0.6).setAltitude(0.9))
+
+            .item(new BlockItem(getBlock('grass_block'), 'grass_block'))
+            .item(new BlockItem(getBlock('stone'), 'stone'))
+            
         this.world = new World(this, this.register, this.player);
+
         this.addUpdateSub(this.player)
         this.addUpdateSub(this.world)
     }
@@ -69,7 +84,16 @@ export default class Game {
 
     addUpdateSub(obj){
         if('Update' in obj) this.updateSubs.push({ obj, clock: new Clock()})
-        else console.error('No Update method!');
+        else console.warn('No Update method!');
+    }
+
+    removeUpdateSub(obj){
+        if('Update' in obj) {
+            let idx = this.updateSubs.findIndex(o => o.obj.id == obj.id)
+            if(idx !== -1) this.updateSubs.splice(idx, 1)
+            console.warn('Not subscribed to Update!')
+        }
+        else console.warn('No Update method!');
     }
 
     createLight(){
@@ -77,20 +101,6 @@ export default class Game {
         light.position.set(0, 10, 0)
         const helper = new DirectionalLightHelper( light, 5 );
         return helper;
-    }
-    
-    testFloor(){
-        const geometry = new PlaneGeometry( 30, 30 );
-    
-        const loader = new TextureLoader()
-        const texture = loader.load('resources/textures/blocks/dirt.png')
-    
-        const material = new MeshBasicMaterial( {map: texture } );
-        const plane = new Mesh( geometry, material );
-        plane.rotateX(-PI_2)
-        plane.position.set(0, -10, 0)
-        
-        return plane
     }
 
     createSkybox(){
@@ -107,13 +117,18 @@ export default class Game {
     }
 
     createGameModel(){
-        const geometry = new BoxGeometry( 0.8, 2, 0.5 );
+        const geometry = new BoxGeometry(PLAYER_DIMENSIONS.width * 2, PLAYER_DIMENSIONS.height, PLAYER_DIMENSIONS.depth * 2);
         const material = new MeshBasicMaterial( { color: 0x00ff00 } );
         const model = new Mesh( geometry, material );
-        model.h = 2
-        model.w = 0.8
-        model.d = 0.5
+
+        model.bb = new Box3().setFromObject(model)
+
+        model.h = geometry.parameters.height
+        model.w = geometry.parameters.width
+        model.d = geometry.parameters.depth
+        
         this.camera.parent = model
+        this.camera.position.set(0, -PLAYER_DIMENSIONS.cameraOffset, 0)
         return model
     }
 }

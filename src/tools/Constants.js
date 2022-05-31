@@ -1,4 +1,4 @@
-import { Vector3 } from 'https://cdn.skypack.dev/three@0.129.0';
+import { Vector3 } from 'https://cdn.skypack.dev/three@0.141.0';
 
 const PI_2 = Math.PI / 2;
 const vertices = [
@@ -117,14 +117,52 @@ const CrossCheck = [
     new Vector3(0, 0, -1)
 ]
 
+const CornerCheck = [ 
+    new Vector3(1, 0, 1),
+    new Vector3(1, 0, -1),
+    new Vector3(-1, 0, -1),
+    new Vector3(-1, 0, 1),
+]
 
 const GAMEMODE = {
     SURVIVAL: 0,
     CREATIVE:  1
 }
 
+const BASE_PLAYER_SETTINGS = {
+    viewDistance: 5,
+    health: 100,
+    acceleration: 60,
+    jump: 1,
+    speed: 5,
+    sprintMultiplier: 1.5,
+    throwSpeed: 6
+}
+
+const PLAYER_DIMENSIONS = {
+    height: 2,
+    width: 0.4,
+    depth: 0.2,
+    cameraOffset: 0.25
+}
+
 const WORLD_SETTINGS = {
     globalSeaLevel: 12
+}
+
+const GAME_SETTINGS = {
+    maxItems: 64
+}
+
+const RIGHT = new Vector3(1, 0, 0)
+const UP = new Vector3(0, 1, 0)
+const FORWARD = new Vector3(0, 0, -1)
+const ZERO = new Vector3(0, 0, 0)
+
+const MATERIAL = {
+    AIR: 0,
+    SOLID: 1,
+    LIQUID: 2
 }
 
 export {
@@ -133,13 +171,26 @@ export {
     vertices, 
     triangles,
     UVs,
+
     ChunkSize,
     ChunkHeight,
     WorldSizeInChunks,
     HalfWorldSize,
     WorldSize,
+
     CrossCheck,
+    CornerCheck,
 
     GAMEMODE,
-    WORLD_SETTINGS
+    BASE_PLAYER_SETTINGS,
+    PLAYER_DIMENSIONS,
+    WORLD_SETTINGS,
+    GAME_SETTINGS,
+
+    RIGHT,
+    UP,
+    FORWARD,
+    ZERO,
+
+    MATERIAL
 }

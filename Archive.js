@@ -1,8 +1,8 @@
 import { Vector3, Mesh, InstancedMesh, Scene, Clock, PerspectiveCamera,
     TextureLoader, WebGLRenderer, BufferAttribute, BufferGeometry, MeshBasicMaterial
-} from 'https://cdn.skypack.dev/three@0.129.0';
+} from 'https://cdn.skypack.dev/three@0.141.0';
 
-import * as Three from 'https://cdn.skypack.dev/three@0.129.0'
+import * as Three from 'https://cdn.skypack.dev/three@0.141.0'
 import { vertices, triangles, UVs } from './Constants.js';
 
 //NOTE water render DoubleSide
@@ -87,6 +87,22 @@ function buildCube(){
     return geometry
 }
 
+//in game.js
+function testFloor(){
+    const geometry = new PlaneGeometry( 30, 30 );
+
+    const loader = new TextureLoader()
+    const texture = loader.load('resources/textures/blocks/dirt.png')
+
+    const material = new MeshBasicMaterial( {map: texture } );
+    const plane = new Mesh( geometry, material );
+    plane.rotateX(-PI_2)
+    plane.position.set(0, -10, 0)
+    
+    return plane
+}
+
+
 function buildFaceInstance(triangles, UVs, texture){
     const geometry = new BufferGeometry()
 
@@ -113,7 +129,7 @@ function buildFaceInstance(triangles, UVs, texture){
 function addVoxel(pos){
     let blockID = this.data[pos.x][pos.y][pos.z]
     if(!blockID) return 
-    let blockData = this.register.getBlockData(blockID)
+    let blockData = this.register.getBlock(blockID)
     
     for(let i = 0; i < 6; ++i){
         if(this.checkVoxel(new Vector3(pos.x, pos.y, pos.z).add(sides[i].dir))) continue;
@@ -133,3 +149,40 @@ function addVoxel(pos){
         this.groupStart += groupCount;
     }
 }
+
+
+
+
+
+import { Vector3, Vector2, BufferGeometry, BufferAttribute, Mesh } from 'https://cdn.skypack.dev/three@0.141.0';
+
+export default class Block {
+
+    constructor(blockID, chunk, pos){
+        this.id = blockID
+        this.chunk = chunk
+        this.pos = pos
+
+        this.metadata = {}
+    }
+
+    get worldPos(){
+        return new Vector3(this.chunk.x + this.pos.x, this.pos.y, this.chunk.y + this.pos.z)
+    }
+
+    get isSolid(){
+        return this.chunk.register.getBlock(this.id).solid
+    }
+
+    setData(key, value){
+        this.metadata[key] = value
+    }
+
+    getData(key){
+        return this.metadata[key.toString()]
+    }
+
+    
+
+
+} 

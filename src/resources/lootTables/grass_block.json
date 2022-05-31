@@ -1,0 +1,14 @@
+{
+    "type": "block",
+    "pools": [
+        {
+            "items": 1,
+            "drops": [
+                {
+                    "type": "item",
+                    "name": "grass_block"
+                }
+            ]
+        }
+    ]
+}

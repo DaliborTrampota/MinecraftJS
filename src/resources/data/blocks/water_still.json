@@ -1,7 +1,9 @@
 {
     "solid": false,
+    "renderSides": false,
     "animated": true,
-    
+    "liquid": true,
+
     "animation": {
         "frames": 32,
         "interval": 100

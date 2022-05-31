@@ -1,87 +1,50 @@
-import { TwoWayMap } from "./tools/Utils.js";
-import { TextureLoader, MeshBasicMaterial, NearestFilter   } from 'https://cdn.skypack.dev/three@0.129.0';
+import { IDMap } from "./tools/Utils.js";
 
 export default class Register {
 
+    static blockData = false
+    static itemData = false
+    static lootTables = false
+
     constructor(){
-        this.loader = new TextureLoader()
+        this.blocks = new IDMap()
+        this.items = new IDMap()
+        this.biomes = new Map()
 
-        this.textures = []
-        this.animatedTextures = {}
-        this.textureMap = new TwoWayMap();
-        this.blockMap = new TwoWayMap();
         this.blockData = {}
-        this.biomes = new Map();
-
-        this.blockMap.add('air')
     }
 
-    async Init(){
-        await this.loadBlockData()
-        await this.loadTextures()
-        this.animateTextures()
+    async load(){
+        if(!Register.blockData) Register.blockData = await fetch('/blockData').then(r => r.json())
+        if(!Register.itemData) Register.itemData = await fetch('/itemData').then(r => r.json())
+        if(!Register.lootTables) Register.lootTables = await fetch('/lootTables').then(r => r.json())
         return true
     }
 
-    async loadTextures(){//TODO make async?
-        console.log('Loading textures...')
-
-        let textures = []
-        textures.push(...await fetch('/textures').then(r => r.json()))
-        //textures.push(...await fetch('/textures/break').then(r => r.json()))
-
-        for(let name of textures){
-            let texture = this.loader.load(`resources/textures/blocks/${name}`)
-            texture.magFilter = NearestFilter
-            
-            let blockName = name.split('.')[0] 
-            let blockData = this.blockData[blockName]
-
-            this.textures.push(new MeshBasicMaterial({ map: texture, transparent: !blockData?.solid || true }))
-            this.textureMap.add(blockName)
-
-            if(blockData?.animated){
-                this.animatedTextures[this.textureMap.get(blockName)] = {
-                    frame: 0,
-                    end: blockData.animation.frames,
-                    interval: blockData.animation.interval,
-                    step: 1 / blockData.animation.frames
-                }
-            }
-        }
-
-        console.log('Textures were loaded!')
-    }
-
-    async loadBlockData(){
-        this.blockData = await fetch('/blockData').then(r => r.json())//.then(o => new Block())
-    }
-
-    block(name){ //make block builder
-        this.blockMap.add(name);
+    block(block){ //make block builder
+        this.blocks.set(block.name, block);
         return this;
     }
 
-    biome(name, temperature, humidity, altitude){//make biome builder
-        this.biomes.set(name, { temperature, humidity, altitude })
+    item(item){
+        this.items.set(item.name, item)
         return this
-    }    
-
-    getBlockData(blockID){
-        return this.blockData[this.blockMap.get(blockID)]
     }
 
-    animateTextures(){
-        for(let idx in this.animatedTextures){
-            setInterval(() => {
-                let data = this.animatedTextures[idx]
-                this.textures[idx].map.offset.set(0, data.frame * data.step)
+    biome(biome){//make biome builder
+        this.biomes.set(biome.name, biome)
+        return this
+    }
 
-                data.frame++
-                if(data.frame == data.end)
-                    data.frame = 0
 
-            }, this.animatedTextures[idx].interval)
-        }
+    getBlock(blockIdOrName){
+        return this.blocks.get(blockIdOrName)
+        let data = Register.blockData[this.blocks.get(blockID)]
+        data.id = blockID
+        return data
+    }
+
+    getItem(itemIdOrName){
+        return this.items.get(itemIdOrName)
     }
 }

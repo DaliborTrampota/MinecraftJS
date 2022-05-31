@@ -1,8 +1,12 @@
-import { ChunkHeight, ChunkSize, sides, triangles, UVs, vertices, CrossCheck } from "../tools/Constants.js"
-import { create3DArray } from "../tools/Utils.js"
-import { Vector3, BufferGeometry, BufferAttribute, Mesh } from 'https://cdn.skypack.dev/three@0.129.0';
+import { ChunkHeight, ChunkSize, sides, triangles, UVs, vertices, CrossCheck, MATERIAL, UP } from "../tools/Constants.js"
+import { create3DArray, drawBlock } from "../tools/Utils.js"
+import { Vector3, BufferGeometry, BufferAttribute, Mesh } from 'https://cdn.skypack.dev/three@0.141.0';
+import ItemEntity from "./Entities/ItemEntity.js";
+import TextureManager from "../tools/TextureManager.js";
+import LootTable from "./LootTable.js";
+import Register from "../Register.js";
 
-//import { SceneUtils } from 'https://cdn.jsdelivr.net/npm/three@0.129.0/examples/jsm/utils/SceneUtils.js';
+//import { SceneUtils } from 'https://cdn.jsdelivr.net/npm/three@0.141.0/examples/jsm/utils/SceneUtils.js';
 
 export default class Chunk {
     constructor(x, y, world){
@@ -17,6 +21,7 @@ export default class Chunk {
         this.mesh;
 
         this.data = []
+        this.entities = {}
         
         this.groupStart = 0
         this.enabled = false
@@ -71,21 +76,21 @@ export default class Chunk {
                 for(let k = 0; k < ChunkSize; ++k){
 
                     let blockID = this.data[i][j][k]
-                    if(blockID <= 0) continue next;
+                    if(!blockID) continue next;
 
-                    let blockData = this.register.getBlockData(blockID)
-
+                    let blockData = this.register.getBlock(blockID)
+                    if(!blockData) console.log('createMesh no blockData', blockID, i, j, k)
                     let pos = new Vector3(i, j, k)
                     let breaking = this.breaking.find(o => o.pos.equals(pos))
                     if(breaking){
                         breaking.textureIndex = this.register.textureMap.get(`break_${breaking.progress}`)
                     }
-
+                    
                     sides:
                     for(let { side, dir } of sides){
-                        if(this.checkVoxel(pos.clone().add(dir), update)) continue sides;
+                        if(this.checkVoxel(pos.clone().add(dir), blockData, update)) continue sides;
 
-                        let textureIndex = blockData.textures.all ? this.register.textureMap.get(blockData.textures.all) : this.register.textureMap.get(blockData.textures[side])
+                        let textureIndex = 'all' in blockData.textures ? blockData.textures.all : blockData.textures[side]
                         
                         const key = `${textureIndex}_${blockID}`
                         if(textureGroups.hasOwnProperty(`${textureIndex}_${blockID}`)) textureGroups[key].push({ side, pos, breaking })
@@ -94,21 +99,21 @@ export default class Chunk {
                 }
             }
         }
-        for(let key in textureGroups) this.buildTexture(...key.split('_'), textureGroups[key])
+        for(let key in textureGroups) this.buildTexture(...key.split('_').map(Number), textureGroups[key])
     }
 
     buildTexture(textureIndex, blockID, data){
         let groupCount = 0;
         let breakingGroups = []
-        let blockData = this.register.getBlockData(blockID)
-
+        let blockData = this.register.getBlock(blockID)
+        
         for(let o of data){
             for(let vert of triangles[o.side]){
                 this.vertices.push(vertices[vert].x + o.pos.x)
                 this.vertices.push(vertices[vert].y + o.pos.y)
                 this.vertices.push(vertices[vert].z + o.pos.z)
             }
-            if(blockData.animated) this.UVs.push(...UVs[o.side].map((u, i) => i % 2 ? u / blockData.animation.frames : u))
+            if(blockData.animation) this.UVs.push(...UVs[o.side].map((u, i) => i % 2 ? u / blockData.animation.frames : u))
             else this.UVs.push(...UVs[o.side])
 
             if(o.breaking) breakingGroups.push({ start: this.groupStart + groupCount, texture: o.breaking.textureIndex })
@@ -127,24 +132,26 @@ export default class Chunk {
 
         if(update) return //console.log(this.geometry)
         
-        this.mesh = new Mesh(this.geometry, this.register.textures)
+        this.mesh = new Mesh(this.geometry, TextureManager.textures)
     }
 
-    checkVoxel(pos, update){
-        //console.log(pos)
+    //return true to not render side
+    checkVoxel(pos, curBlock, update){
         if(pos.y < 0 || pos.y >= ChunkHeight) return true
 
         let block;
-        if(pos.x < 0 || pos.x >= ChunkSize || pos.z < 0 || pos.z >= ChunkSize) {
+        if(pos.x < 0 || pos.x >= ChunkSize || pos.z < 0 || pos.z >= ChunkSize) {//outside chunk
             pos.x += this.x * ChunkSize
             pos.z += this.y * ChunkSize
 
-            block = update ? this.world.getVoxelFromPos(pos) : this.register.getBlockData(this.world.getVoxel(pos))
+            block = update ? this.world.getVoxelFromPos(pos) : this.register.getBlock(this.world.getVoxel(pos))
         }else {
             block = this.getVoxel(pos)
         }
 
-        return block.solid
+        if(block.material == MATERIAL.AIR) return false
+        if(!block.transparent && block.solid || block.renderSides) return true
+        return !block.renderSides && curBlock.id === block.id
     }
 
     unload(){
@@ -172,59 +179,62 @@ export default class Chunk {
         if(pos.x == 0 || pos.x == ChunkSize - 1 || pos.z == 0 || pos.z == ChunkSize - 1){
             for(let dir of CrossCheck){
                 let chunk = this.world.getChunkFromPos(worldPos.clone().add(dir))
-                if(Chunk.compare(chunk, this)) continue
+                if(Chunk.equals(chunk, this)) continue
                 chunk.needsUpdate = true
             }
         }
     }
 
-    breakVoxel(pos, dir){
-        pos.x = Math.floor(pos.x) - Math.max(dir.x, 0)
-        pos.y = Math.floor(pos.y) - Math.max(dir.y, 0)
-        pos.z = Math.floor(pos.z) - Math.max(dir.z, 0)
+    breakVoxel(pos){
+        pos.floor()
 
         let worldPos = pos.clone()
 
         pos.x -= this.mesh.position.x
         pos.z -= this.mesh.position.z
 
-        this.breaking.push({ pos, progress: 4 })
+        let idx = this.breaking.findIndex(o => o.pos.equals(pos))
+        if(idx != -1) {
+            this.breaking[idx].progress++
+            if(this.breaking[idx].progress === 9){
+                this.breaking.splice(idx, 1)
+                return this.removeVoxel(worldPos, true)
+            }
+        }
+        else this.breaking.push({ pos, progress: 0 })
         this.needsUpdate = true
         this.rebuildNeighbourChunks(pos, worldPos)
-        //let blockID = this.data[pos.x][pos.y][pos.z] 
-        //his.data[pos.x][pos.y][pos.z] = -blockID//this.register.blockMap.get('air')
-
-        //let overlayData = this.register.blockData['break_4']
-        /*let blockMesh = this.spawnBlock(blockID, overlayData)
-        worldPos.z--
-        worldPos.x--
-        blockMesh.position.copy(worldPos)
-        this.scene.add(blockMesh)
-
-        console.log(blockMesh)
-        this.rebuild()*/
-
     }
 
-    removeVoxel(pos, dir){
-        pos.x = Math.floor(pos.x) - Math.max(dir.x, 0)
-        pos.y = Math.floor(pos.y) - Math.max(dir.y, 0)
-        pos.z = Math.floor(pos.z) - Math.max(dir.z, 0)
+    removeVoxel(pos, drop){
+        pos.floor()
 
         let worldPos = pos.clone()
 
         pos.x -= this.mesh.position.x
         pos.z -= this.mesh.position.z
-
-        this.setVoxel(pos, this.register.blockMap.get('air'))
         
+        let curBlock = this.getVoxel(pos)
+        if(curBlock.material == MATERIAL.AIR) return false
+
+        if(drop){
+            //todo get drop from loot table, returns itemStack[]
+            const table = new LootTable(curBlock.name, this.world.game.register)
+            let drops = table.roll()
+            //console.log(table, drops)
+            for(let stack of drops){//Todo sound particles
+                let entity = new ItemEntity(this.world, stack.item.getModel(worldPos.add(new Vector3(0.5, 0.5, 0.5))), stack, UP.clone().multiplyScalar(2))
+                this.world.game.addUpdateSub(entity)
+            }
+        }
+        
+        this.setVoxel(pos, this.register.blocks.getID('air'))
         this.rebuildNeighbourChunks(pos, worldPos)
+        return true
     }
 
-    addVoxel(pos, dir, blockID){
-        pos.x = Math.floor(pos.x) + Math.min(dir.x, 0)
-        pos.y = Math.floor(pos.y) + Math.min(dir.y, 0)
-        pos.z = Math.floor(pos.z) + Math.min(dir.z, 0)
+    addVoxel(pos, blockID){
+        pos.floor()
 
         let worldPos = pos.clone()
         
@@ -232,29 +242,28 @@ export default class Chunk {
         pos.z -= this.mesh.position.z
 
         this.setVoxel(pos, blockID)//possible out of bounds on borders
-        
         this.rebuildNeighbourChunks(pos, worldPos)
+        return true
     }
 
     getVoxel(pos){
         let blockID = this.data[pos.x][pos.y][pos.z]
-        if(!blockID) return false
-        return this.register.getBlockData(blockID)
+        if(!blockID && blockID != 0) {
+            console.log(blockID, pos)
+            return false
+        }
+        return this.register.getBlock(blockID)
     }
 
     setVoxel(pos, blockID){
         this.data[pos.x][pos.y][pos.z] = blockID
     }
 
-    static compare(c1, c2){
-        return c1.x == c2.x && c1.y == c2.y
-    }
-
     spawnBlock(blockID){
         if(blockID <= 0) return false //update to next stage?
         const geometry = new BufferGeometry()
     
-        let blockData = this.register.getBlockData(blockID)
+        let blockData = this.register.getBlock(blockID)
         let groupStart = 0
     
         let verts = [], uvs = []
@@ -283,5 +292,21 @@ export default class Chunk {
         geometry.setAttribute('uv', new BufferAttribute(new Float32Array(uvs), 2))
         
         return new Mesh(geometry, this.register.textures)
+    }
+
+    
+    static equals(c1, c2){
+        return c1.x == c2.x && c1.y == c2.y
+    }
+
+    toChunkPosition(position){
+        position.x -= this.mesh.position.x
+        position.z -= this.mesh.position.z
+        
+        return position
+    }
+
+    toString(){
+        return `X: ${this.x} Y: ${this.y}`
     }
 }
