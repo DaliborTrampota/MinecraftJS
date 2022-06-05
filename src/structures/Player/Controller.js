@@ -22,7 +22,7 @@ export default class Controller {
         this.flying = false
 
         this.debug = {
-            properties: Object.entries(this.player.game.renderer.info).map(([key, o]) => Object.keys(o).map(prop => `${key}.${prop}`)).flat(),
+            properties: Object.entries(window.game.renderer.info).map(([key, o]) => Object.keys(o).map(prop => `${key}.${prop}`)).flat(),
             active: false
         }
         
@@ -157,7 +157,7 @@ export default class Controller {
     }
 
     updateDebugPanel(debug){
-        let renderer = this.player.game.renderer
+        let renderer = window.game.renderer
 
         for(let propPath of this.debug.properties){
             let { prop, value } = this.getProp(renderer.info, propPath)

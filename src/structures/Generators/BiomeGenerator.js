@@ -1,5 +1,6 @@
 
-import NoiseGenerator from './Noise.js'
+import { ChunkHeight } from '../../tools/Constants.js';
+import NoiseGenerator from '../../tools/Noise.js'
 
 export default class BiomeGenerator {
     
@@ -33,11 +34,25 @@ export default class BiomeGenerator {
             exponentiation: 4,
             height: 2,
         })
+
+        this.heightNoise = new NoiseGenerator({
+            seed: 6,
+            octaves: 3,
+            scale: 64,
+            persistence: 0.5,
+            lacunarity: 2.0,
+            exponentiation: 4,
+            height: ChunkHeight / 4,
+        })
+    }
+
+    getHeight(x, y){
+        //let height = Math.floor(this.noises.elevation.Get(pos.x, 0, pos.z) + (this.noises.roughness.Get(pos.x + 500, 0, pos.z + 500) * this.noises.detail.Get(pos.x - 500, 0, pos.z - 500)) * 64 + 64)
+        return this.heightNoise.Get(x, 0, y) + 10
     }
 
 
     getBiome(x, y){
-
         let curClimate = {
             temperature: this.temperatureNoise.Get(x, 0, y),
             humidity: this.humidityNoise.Get(x, 0, y),
@@ -61,3 +76,34 @@ export default class BiomeGenerator {
 
 
 }
+
+/*
+this.noises = {
+            elevation: new NoiseGenerator({
+                seed: 6,
+                octaves: 1,
+                scale: 64,
+                persistence: 1,
+                lacunarity: 2.0,
+                exponentiation: 4,
+                height: 1,
+            }),
+            roughness: new NoiseGenerator({
+                seed: 6,
+                octaves: 1,
+                scale: 64,
+                persistence: 1,
+                lacunarity: 2.0,
+                exponentiation: 4,
+                height: 1,
+            }),
+            detail: new NoiseGenerator({
+                seed: 6,
+                octaves: 1,
+                scale: 64,
+                persistence: 1,
+                lacunarity: 2.0,
+                exponentiation: 4,
+                height: 1,
+            })   
+        }*/

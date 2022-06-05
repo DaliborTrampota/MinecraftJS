@@ -8,18 +8,18 @@ import TextureManager from './tools/TextureManager.js';
 import Block from './registers/Block.js';
 import Biome from './registers/Biome.js';
 import BlockItem from './registers/BlockItem.js';
+import BiomeGenerator from './structures/Generators/BiomeGenerator.js';
 
 export default class Game {
 
-    constructor(renderer, scene, clock, camera){
+    constructor(renderer, camera){
+        window.game = this
+
         this.renderer = renderer;
-        this.scene = scene;
-        this.clock = clock;
         this.camera = camera;
 
         this.textureManager = new TextureManager()
         this.register = new Register()
-
 
         this.player = new Player(this.createGameModel(), this.camera, this);
         this.world;
@@ -35,7 +35,7 @@ export default class Game {
 
     async Init(){
         this.createSkybox()
-        this.scene.add(this.createLight())
+        window.scene.add(this.createLight())
 
         await this.register.load()
         await this.textureManager.load()
@@ -63,11 +63,14 @@ export default class Game {
             .biome(new Biome('desert').setTemperature(0.9).setHumidity(0.15).setAltitude(0.3))
             .biome(new Biome('hills').setTemperature(0.2).setHumidity(0.6).setAltitude(0.9))
 
-            .item(new BlockItem(getBlock('grass_block'), 'grass_block'))
-            .item(new BlockItem(getBlock('stone'), 'stone'))
+            .item(new BlockItem(getBlock('grass_block')))
+            .item(new BlockItem(getBlock('dirt')))
+            .item(new BlockItem(getBlock('stone')))
+            .item(new BlockItem(getBlock('sand')))
             
-        this.world = new World(this, this.register, this.player);
+        this.world = new World(new BiomeGenerator(this.register), this.register, this.player);
 
+        window.clock.start()
         this.addUpdateSub(this.player)
         this.addUpdateSub(this.world)
     }
@@ -78,22 +81,22 @@ export default class Game {
             const delta = o.clock.getDelta();
             o.obj.Update(delta)
         }
-        this.renderer.render(this.scene, this.camera);
+        this.renderer.render(window.scene, this.camera);
         //console.log(this.renderer.info.render.calls)
     }
 
     addUpdateSub(obj){
         if('Update' in obj) this.updateSubs.push({ obj, clock: new Clock()})
-        else console.warn('No Update method!');
+        else console.warn('No Update method!', obj);
     }
 
     removeUpdateSub(obj){
         if('Update' in obj) {
             let idx = this.updateSubs.findIndex(o => o.obj.id == obj.id)
-            if(idx !== -1) this.updateSubs.splice(idx, 1)
-            console.warn('Not subscribed to Update!')
+            if(idx === -1) return console.warn('Not subscribed to Update!')
+            this.updateSubs.splice(idx, 1)
         }
-        else console.warn('No Update method!');
+        else console.warn('No Update method!', obj);
     }
 
     createLight(){
@@ -113,7 +116,7 @@ export default class Game {
             'resources/images/skybox/front.png',
             'resources/images/skybox/back.png',
         ]);
-        this.scene.background = texture;
+        window.scene.background = texture;
     }
 
     createGameModel(){

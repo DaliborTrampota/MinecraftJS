@@ -1,5 +1,5 @@
 import { ChunkHeight, ChunkSize, sides, triangles, UVs, vertices, CrossCheck, MATERIAL, UP } from "../tools/Constants.js"
-import { create3DArray, drawBlock } from "../tools/Utils.js"
+import { create3DArray, drawBlock, map } from "../tools/Utils.js"
 import { Vector3, BufferGeometry, BufferAttribute, Mesh } from 'https://cdn.skypack.dev/three@0.141.0';
 import ItemEntity from "./Entities/ItemEntity.js";
 import TextureManager from "../tools/TextureManager.js";
@@ -34,10 +34,6 @@ export default class Chunk {
 
     get register(){
         return this.world.register;
-    }
-
-    get scene(){
-        return this.world.game.scene;
     }
 
     Init(){
@@ -83,7 +79,7 @@ export default class Chunk {
                     let pos = new Vector3(i, j, k)
                     let breaking = this.breaking.find(o => o.pos.equals(pos))
                     if(breaking){
-                        breaking.textureIndex = this.register.textureMap.get(`break_${breaking.progress}`)
+                        breaking.textureIndex = TextureManager.textureMap.get(`break_${breaking.progress}`)
                     }
                     
                     sides:
@@ -185,7 +181,7 @@ export default class Chunk {
         }
     }
 
-    breakVoxel(pos){
+    breakVoxel(pos, damage){
         pos.floor()
 
         let worldPos = pos.clone()
@@ -195,13 +191,16 @@ export default class Chunk {
 
         let idx = this.breaking.findIndex(o => o.pos.equals(pos))
         if(idx != -1) {
-            this.breaking[idx].progress++
-            if(this.breaking[idx].progress === 9){
+            this.breaking[idx].hitpoints -= damage
+            this.breaking[idx].progress = Math.floor(map(this.breaking[idx].hitpoints, 0, 1000, 9, 0))
+            
+            if(this.breaking[idx].progress === 10){
                 this.breaking.splice(idx, 1)
                 return this.removeVoxel(worldPos, true)
             }
         }
-        else this.breaking.push({ pos, progress: 0 })
+        else this.breaking.push({ pos, progress: 0, hitpoints: 1000 - damage })
+        console.log(this.breaking)
         this.needsUpdate = true
         this.rebuildNeighbourChunks(pos, worldPos)
     }
@@ -219,12 +218,12 @@ export default class Chunk {
 
         if(drop){
             //todo get drop from loot table, returns itemStack[]
-            const table = new LootTable(curBlock.name, this.world.game.register)
+            const table = new LootTable(curBlock.name, { register: window.game.register })
             let drops = table.roll()
             //console.log(table, drops)
             for(let stack of drops){//Todo sound particles
                 let entity = new ItemEntity(this.world, stack.item.getModel(worldPos.add(new Vector3(0.5, 0.5, 0.5))), stack, UP.clone().multiplyScalar(2))
-                this.world.game.addUpdateSub(entity)
+                window.game.addUpdateSub(entity)
             }
         }
         

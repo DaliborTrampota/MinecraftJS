@@ -8,6 +8,10 @@ export default class Stack {
         this.amount = amount
     }
 
+    get full(){
+        return this.amount >= this.item.stack
+    }
+
     //todo merge 
     merge(stack){
         if(this.item.id != stack.item.id) return false
@@ -18,6 +22,7 @@ export default class Stack {
             return stack
         }else{
             this.amount += stack.amount
+            stack.amount = 0
             return true
         }
     }

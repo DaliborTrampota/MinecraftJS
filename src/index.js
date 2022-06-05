@@ -7,14 +7,14 @@ renderer.setSize( window.innerWidth, window.innerHeight );
 //document.body.appendChild( renderer.domElement );
 document.getElementById('target').appendChild(renderer.domElement);
 
-const scene = new Scene();
-const clock = new Clock();
+window.scene = new Scene();
+window.clock = new Clock();
 const camera = new PerspectiveCamera( 90, window.innerWidth / window.innerHeight, 1, 500 );
 
 camera.near = 0.01
 camera.updateProjectionMatrix()
 
-window.game = new Game(renderer, scene, clock, camera)
+new Game(renderer, camera)
 
 function onWindowResize() {
     camera.aspect = container.clientWidth / container.clientHeight;

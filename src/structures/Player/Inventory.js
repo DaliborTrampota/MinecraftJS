@@ -31,30 +31,78 @@ export default class Inventory extends StorageInterface {
         this.selectedSlot = index
     }
 
-    setItem(item, index = -1){
-        //if(index == -1) //find next free slot
-        if(this.hotbar[index]) return false
+    hotbarSlotFor(stack){
+        let emptySlot = -1
+        for(let i = 0; i < this.hotbar.length; ++i){
+            if(emptySlot == -1 && !this.hotbar[i]) emptySlot = i
+            else if(this.hotbar[i]) {
+                if(this.hotbar[i].item.id == stack.item.id && !this.hotbar[i].full){
+                    return i
+                }
+            }
+        }
+        return emptySlot
+    }
 
-        this.hotbar[index] = item
+    drop(amount = 1){
+        if(!this.slot) return false
+        
+        let toDrop
+        if(amount >= this.slot.amount){
+            toDrop = this.slot
+            this.hotbar[this.selectedSlot] = undefined
+        }else{
+            toDrop = this.slot.split(amount)
+        }
+        
+        this.updateHotbarSlot()
+        return toDrop
+    }
+
+    addStack(stack){
+        let set = false
+        while(stack.amount && !set){
+            let index = this.hotbarSlotFor(stack)
+            if(index == -1) {//add to inv
+                index = this.slotFor(stack)
+                if(index == -1) return false
+
+                this.slots[index] = stack
+            }else{//add to hotbar
+                if(!this.hotbar[index]) {
+                    this.hotbar[index] = stack
+                    set = true
+                } else {
+                    this.hotbar[index].merge(stack)
+                }
+
+                this.updateHotbarSlot(index)
+            }
+        }
     }
 
     setStack(stack, index = -1){
-        //if(index == -1) //find next same item slot or free slot
+        if(index == -1) index = this.selectedSlot
+
         let curStack = this.hotbar[index]
-        if(curStack)
+
+        if(curStack) 
             return curStack.merge(stack)
         
-        return false
+        this.updateHotbarSlot(index)
+        
+        return output
     }
 
-    updateSlot(index){
+    updateHotbarSlot(index = this.selectedSlot){
         const stack = this.hotbar[index]
-        if(stack){
-            this.htmlSlots[index].image = this.hotbar[index].item.image
-            this.htmlSlots[index].count = this.hotbar[index].amount
+        if(stack && stack.amount){
+            this.htmlSlots[index].image.src = this.hotbar[index].item.image
+            this.htmlSlots[index].count.innerHTML = this.hotbar[index].amount
         }else{
-            this.htmlSlots[index].image = Inventory.empty
-            this.htmlSlots[index].count = ''
+            this.htmlSlots[index].image.src = Inventory.empty
+            this.htmlSlots[index].count.innerHTML = ''
+            this.hotbar[index] = undefined
         }
     }
 
@@ -65,7 +113,7 @@ export default class Inventory extends StorageInterface {
                 `<div class="slot" id=${i == 0 ? `selected` : ''}>
                     <span>${i + 1}</span>
                     <img src="${Inventory.empty}" alt="item"/>
-                    <span>64</span>
+                    <span></span>
                 </div>`
             )
         }

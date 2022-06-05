@@ -4,10 +4,10 @@ import Stack from "./Interfaces/Stack.js"
 
 export default class LootTable {
 
-    constructor(name, register){
+    constructor(name, context){
         this.data = Register.lootTables[name]
-        this.register = register
         this.name = name
+        this.context = context
     }
 
     roll(){
@@ -19,7 +19,8 @@ export default class LootTable {
 
         for(let pool of this.data.pools){
             for(let i = 0; i < pool.items; ++i){
-                result.push(this.getRandom(pool.drops))
+                let drop = this.getRandom(pool.drops)
+                if(drop) result.push(drop)
             }
         }
 
@@ -28,17 +29,31 @@ export default class LootTable {
 
     dropToStack(drop){
         //console.log(drop)
-        if(drop.type == 'item') return new Stack(this.register.getItem(drop.name), drop.amount ?? 1)
+        if(drop.type == 'item') return new Stack(this.context.register.getItem(drop.name), drop.amount ?? 1)
 
     }
 
     getRandom(drops){
-        let validDrops = drops.filter(d => this.validate(d))
+        let validDrops = drops.filter(d => d.conditions ? this.validate(d) : true)
         if(validDrops.length == 1) return validDrops[0]
         return validDrops.at(Math.random() * validDrops.length)
     }
 
     validate(drop){
-        return true
+        let valid = true
+        let idx = 0
+        while(valid){
+            valid = this.validateCondition(drop.conditions[idx])
+            idx++
+        }
+        return valid
+    }
+
+    validateCondition({condition}){
+        switch(condition){
+            case 'match_tool':
+                return false //this.context.slotItem =  
+        }
+        return false
     }
 }

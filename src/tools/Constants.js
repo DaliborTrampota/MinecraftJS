@@ -129,6 +129,12 @@ const GAMEMODE = {
     CREATIVE:  1
 }
 
+const MOUSE_BUTTON = {
+    LMB: 1,
+    WHEEL: 2,
+    RMB: 3
+}
+
 const BASE_PLAYER_SETTINGS = {
     viewDistance: 5,
     health: 100,
@@ -136,7 +142,13 @@ const BASE_PLAYER_SETTINGS = {
     jump: 1,
     speed: 5,
     sprintMultiplier: 1.5,
-    throwSpeed: 6
+    throwSpeed: 6,
+    
+    magnetSpeed: 10,
+    magnetRadius: 1,
+    magnetError: 0.15,
+    pickupDelay: 1000,
+    placeDelay: 175
 }
 
 const PLAYER_DIMENSIONS = {
@@ -182,6 +194,7 @@ export {
     CornerCheck,
 
     GAMEMODE,
+    MOUSE_BUTTON,
     BASE_PLAYER_SETTINGS,
     PLAYER_DIMENSIONS,
     WORLD_SETTINGS,

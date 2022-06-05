@@ -3,66 +3,18 @@ import { ChunkHeight, ChunkSize, HalfWorldSize, WorldSize, WorldSizeInChunks, WO
 import { create2DArray } from "../tools/Utils.js";
 import Chunk from "./Chunk.js"
 
-import NoiseGenerator from '../tools/Noise.js'
-import BiomeGenerator from "../tools/BiomeGenerator.js";
-
-
 export default class World {
-    constructor(game, register, player){
-        this.game = game
+    constructor(generator, register, player){
+        this.generator = generator
         this.register = register;
         this.player = player;
 
         this.gravity = -9.81 * 2
         this.chunks = create2DArray(WorldSizeInChunks, WorldSizeInChunks)
 
-        this.biomeGenerator = new BiomeGenerator(game.register)
-        this.noises = {
-            elevation: new NoiseGenerator({
-                seed: 6,
-                octaves: 1,
-                scale: 64,
-                persistence: 1,
-                lacunarity: 2.0,
-                exponentiation: 4,
-                height: 1,
-            }),
-            roughness: new NoiseGenerator({
-                seed: 6,
-                octaves: 1,
-                scale: 64,
-                persistence: 1,
-                lacunarity: 2.0,
-                exponentiation: 4,
-                height: 1,
-            }),
-            detail: new NoiseGenerator({
-                seed: 6,
-                octaves: 1,
-                scale: 64,
-                persistence: 1,
-                lacunarity: 2.0,
-                exponentiation: 4,
-                height: 1,
-            })   
-        }
-        this.noise = new NoiseGenerator({
-            seed: 6,
-            octaves: 3,
-            scale: 64,
-            persistence: 0.5,
-            lacunarity: 2.0,
-            exponentiation: 4,
-            height: ChunkHeight / 4,
-        })
-
         this.activeChunks = []
 
         this.Init()
-    }
-
-    get scene() { 
-        return this.game.scene
     }
 
     async Init(){
@@ -105,19 +57,19 @@ export default class World {
         for(let i = 0; i < WorldSizeInChunks; ++i){
             for(let j = 0; j < WorldSizeInChunks; ++j){
                 this.chunks[i][j].generate()
-                this.scene.add(this.chunks[i][j].mesh)
+                window.scene.add(this.chunks[i][j].mesh)
             }
         }
     }
 
     async load(){
-        const x = { start:  Math.max(this.player.chunk.x - this.player.viewDistance + 1, 0), end: Math.min(this.player.chunk.x + this.player.viewDistance, WorldSizeInChunks) }
-        const y = { start:  Math.max(this.player.chunk.y - this.player.viewDistance + 1, 0), end: Math.min(this.player.chunk.y + this.player.viewDistance, WorldSizeInChunks) }
+        const x = { start:  Math.max(this.player.chunkCoords.x - this.player.viewDistance + 1, 0), end: Math.min(this.player.chunkCoords.x + this.player.viewDistance, WorldSizeInChunks) }
+        const y = { start:  Math.max(this.player.chunkCoords.y - this.player.viewDistance + 1, 0), end: Math.min(this.player.chunkCoords.y + this.player.viewDistance, WorldSizeInChunks) }
 
         for(let i = x.start; i < x.end; ++i){
             for(let j = y.start; j < y.end; ++j){
                 if(!this.chunks[i][j]) this.chunks[i][j] = new Chunk(i, j, this);
-                if(!this.chunks[i][j].mesh) this.scene.add(this.chunks[i][j].generate())
+                if(!this.chunks[i][j].mesh) window.scene.add(this.chunks[i][j].generate())
                 this.chunks[i][j].load()
                 this.activeChunks.push(new Vector2(i, j))
             }
@@ -128,7 +80,7 @@ export default class World {
         let xz = HalfWorldSize * ChunkSize + (ChunkSize / 2);
         let y = ChunkHeight
         
-        this.player.chunk
+        //this.player.chunk
         this.player.position = new Vector3(xz, y + 20, xz)
         this.player.camera.lookAt(xz, 0, xz)
     }
@@ -144,13 +96,13 @@ export default class World {
         }
         this.activeChunks = []
 
-        const x = { start:  Math.max(this.player.chunk.x - this.player.viewDistance + 1, 0), end: Math.min(this.player.chunk.x + this.player.viewDistance, WorldSizeInChunks) }
-        const y = { start:  Math.max(this.player.chunk.y - this.player.viewDistance + 1, 0), end: Math.min(this.player.chunk.y + this.player.viewDistance, WorldSizeInChunks) }
+        const x = { start:  Math.max(this.player.chunkCoords.x - this.player.viewDistance + 1, 0), end: Math.min(this.player.chunkCoords.x + this.player.viewDistance, WorldSizeInChunks) }
+        const y = { start:  Math.max(this.player.chunkCoords.y - this.player.viewDistance + 1, 0), end: Math.min(this.player.chunkCoords.y + this.player.viewDistance, WorldSizeInChunks) }
 
         for(let i = x.start; i < x.end; ++i){
             for(let j = y.start; j < y.end; ++j){
                 if(!this.chunks[i][j]) this.chunks[i][j] = new Chunk(i, j, this);
-                if(!this.chunks[i][j].mesh) this.scene.add(this.chunks[i][j].generate())
+                if(!this.chunks[i][j].mesh) window.scene.add(this.chunks[i][j].generate())
                 this.chunks[i][j].load()
                 this.activeChunks.push(new Vector2(i, j))
             }
@@ -168,11 +120,10 @@ export default class World {
 
     getVoxel(pos){ //Terain Generation here
         if(pos.x < 0 || pos.x >= WorldSize || pos.z < 0 || pos.z >= WorldSize) return 0
-        let height = Math.floor(this.noise.Get(pos.x, 0.0, pos.z)) + 10
-        //let height = Math.floor(this.noises.elevation.Get(pos.x, 0, pos.z) + (this.noises.roughness.Get(pos.x + 500, 0, pos.z + 500) * this.noises.detail.Get(pos.x - 500, 0, pos.z - 500)) * 64 + 64)
-        //console.log(height)
+        let height = Math.floor(this.generator.getHeight(pos.x, pos.z))
+        
         if(pos.y == height) {
-            let biome = this.biomeGenerator.getBiome(pos.x, pos.z) //this.noise.Get(pos.z, 0.0, pos.x)
+            let biome = this.generator.getBiome(pos.x, pos.z)
             switch(biome){
                 case 'forest':
                     return this.register.blocks.getID('grass_block')

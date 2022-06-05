@@ -1,9 +1,12 @@
-import { Vector3, Vector2, Euler, Raycaster, BoxGeometry, Mesh, MeshBasicMaterial } from 'https://cdn.skypack.dev/three@0.141.0';
+import { Vector3, Vector2, Euler, Raycaster } from 'https://cdn.skypack.dev/three@0.141.0';
 import Controller from './Controller.js';
 import ItemEntity from '../Entities/ItemEntity.js';
-import { HalfWorldSize, PI_2, GAMEMODE, BASE_PLAYER_SETTINGS, PLAYER_DIMENSIONS, RIGHT, UP, FORWARD, MATERIAL } from '../../tools/Constants.js'
-import { drawBlock, clamp, moveTowards, drawPoint } from '../../tools/Utils.js'
+import { HalfWorldSize, PI_2, GAMEMODE, BASE_PLAYER_SETTINGS, PLAYER_DIMENSIONS, RIGHT, UP, FORWARD, MATERIAL, CrossCheck, CornerCheck, MOUSE_BUTTON } from '../../tools/Constants.js'
+import { clamp, moveTowards } from '../../tools/Utils.js'
+
 import Inventory from './Inventory.js';
+import Chunk from '../Chunk.js';
+import BlockPlaceContext from '../Contexts/BlockPlaceContext.js';
 import BlockItem from '../../registers/BlockItem.js';
 
 const WIDTH = PLAYER_DIMENSIONS.width
@@ -12,65 +15,100 @@ const Y_WIDTH = WIDTH * 0.75
 
 export default class Player {
 
-    constructor(model, camera, game){
+    constructor(model, camera){
         this.model = model
         this.camera = camera;
-        this.game = game
 
         this.locked = false;
         this.viewDistance = BASE_PLAYER_SETTINGS.viewDistance
         this.sensitivity = 1
         
         this.health = BASE_PLAYER_SETTINGS.health;
-        this.gamemode = GAMEMODE.CREATIVE
+        this.gamemode = GAMEMODE.SURVIVAL
         this.inventory = new Inventory()
 
         this.velocity = new Vector3(0, 0, 0);
         this.vertVel = 0
-        this.chunk = new Vector2(HalfWorldSize, HalfWorldSize)
+        this.chunkCoords = new Vector2(HalfWorldSize, HalfWorldSize)
 
+        this.placeDelay = 0
 
         this.grounded = false
         this.controller = new Controller(this)
+        this.holding = {
+            clickStack: [],
+            RMB: false,
+            LMB: false
+        }
         document.addEventListener('mousemove', this.onMouseMove.bind(this));
         document.addEventListener('mousedown', this.onMouseClick.bind(this));
+        document.addEventListener('mouseup', this.onMouseRelease.bind(this));
     }
 
     get world() {
-        return this.game.world
+        return window.game.world
     }
 
-    get chunkObj() {
-        return this.game.world.chunks[this.chunk.x][this.chunk.y]
+    get chunk() {
+        return window.game.world.chunks[this.chunkCoords.x][this.chunkCoords.y]
     } 
 
     get position() {
-        return this.model.position;
+        return this.model.position
     }
 
     set position(vector){
         this.model.position.copy(vector)
-        let chunk = this.game.world.getChunkFromPos(vector)
-        if(chunk) this.chunk = new Vector2(chunk.x, chunk.y)
+        let chunk = window.game.world.getChunkFromPos(vector)
+        if(chunk) this.chunkCoords = new Vector2(chunk.x, chunk.y)
     }
 
     get eyePos(){
         return this.camera.getWorldPosition(new Vector3())
     }
     
+    get feetPos(){
+        return this.position.clone().sub(new Vector3(0, 2, 0))
+    }
+
+    get range(){
+        return this.inCreative ? 10 : 5 //todo take in account gamemode, item in hand, etc
+    }
+
+    get inCreative(){
+        return this.gamemode == GAMEMODE.CREATIVE
+    }
+
+    get inSurvival(){
+        return this.gamemode == GAMEMODE.SURVIVAL
+    }
+
+    setPlaceDelay(){
+        this.placeDelay = BASE_PLAYER_SETTINGS.placeDelay
+    }
 
     Update(delta){
+        this.delta = delta
         this.calculateVelocity(delta)
         if(this.controller.jumpRequest && this.grounded) this.jump()
         this.model.translateOnAxis(this.velocity, delta)
+
+        this.pickupEntities()
         
-        let curChunk = this.game.world.getChunkFromPos(this.position)
+        let curChunk = window.game.world.getChunkFromPos(this.position)
         if(!curChunk) return
         let curChunkPos = new Vector2(curChunk.x, curChunk.y)
 
-        if(this.chunk.x != curChunkPos.x || this.chunk.y != curChunkPos.y){
-            this.chunk = curChunkPos;
-            //this.game.world.updateViewDistance()
+        if(this.chunkCoords.x != curChunkPos.x || this.chunkCoords.y != curChunkPos.y){
+            this.chunkCoords = curChunkPos;
+            //window.game.world.updateViewDistance()
+        }
+
+        if(this.holding.LMB || this.holding.clickStack[0] == MOUSE_BUTTON.LMB){
+            this.interact(MOUSE_BUTTON.LMB)
+        }else if(this.holding.RMB || this.holding.clickStack[0] == MOUSE_BUTTON.RMB){
+            this.placeDelay -= delta * 1000
+            this.interact(MOUSE_BUTTON.RMB)
         }
     }
 
@@ -115,51 +153,73 @@ export default class Player {
         this.velocity.y += BASE_PLAYER_SETTINGS.jump * 8
     }
 
-    destroy(range){
-        const { block, position, normal, found } = this.getAimedBlock(range)
+    interact(button){
+        this.holding.clickStack = []
+        
+        if(button == MOUSE_BUTTON.WHEEL){
+            if(this.inCreative)
+                this.pick()
+            return
+        }
+
+        if(button == MOUSE_BUTTON.RMB){
+            let stack = this.inventory.slot
+            if(!stack) return false
+            if(this.placeDelay > 0) return
+
+            if(stack.item instanceof BlockItem){
+                let blockPlaceContext = new BlockPlaceContext(this, stack)
+                return stack.item.use(blockPlaceContext)
+            }else{
+                console.warn('action not implemented for item', stack.item)
+            }
+        }
+
+
+        if(button == MOUSE_BUTTON.LMB){
+            let stack = this.inventory.slot
+            if(!stack) this.attack()
+
+            if(this.inCreative){
+                this.holding.LMB = false
+                return this.destroy()
+            }else{
+                return this.destroy()
+            }
+        }
+    }
+
+    attack(){
+        //console.warn('Attack not implemented')
+    }
+
+
+    //TODO move to use context?
+    destroy(){
+        const { block, position, normal, found } = this.getAimedBlock(this.range)
         if(!found) return false
 
-        let chunk = this.game.world.getChunkFromPos(position)
+        let chunk = window.game.world.getChunkFromPos(position)
         let outcome = false
-        if(this.gamemode == GAMEMODE.SURVIVAL){
+        if(this.inSurvival){
             //TODO check if can break
-            outcome = chunk.breakVoxel(position)
+            outcome = chunk.breakVoxel(position, 500 * this.delta)
 
 
-        }else if(this.gamemode == GAMEMODE.CREATIVE){
-            outcome = chunk.removeVoxel(position, true)
+        }else if(this.inCreative){
+            outcome = chunk.removeVoxel(position)
         }
+        
         return outcome
     }
 
-    place(range){
-        const { block, position, normal, found } = this.getAimedBlock(range)
-        if(!found) return false
-
-        position.sub(normal).floor()
-        let playerBlockPos = this.eyePos.floor()
-        
-        if(playerBlockPos.equals(position) || playerBlockPos.sub(UP).equals(position))
-            return false//console.log('cant place')
-        
-
-        let chunk = this.world.getChunkFromPos(position)
-        return chunk.addVoxel(position, this.game.register.blocks.getID('glass'))
-    }
-
     drop(amount = 1){
-        let stack = this.inventory.slot
+        let stack = this.inventory.drop(amount)
         if(!stack) return false
-
+        
         let model = stack.item.getModel(this.eyePos.add(new Vector3(0, -0.20, 0)))
-        let stackToDrop = stack.split(amount)
-
-        /*const blockItem = new BlockItem(this.game.register.getBlock('grass_block'), 'grass_block')
-        const model = blockItem.getModel()
-        model.position.copy(this.eyePos.add(new Vector3(0, -0.20, 0)))
-        */
-        let droppedItem = new ItemEntity(this.world, model, stackToDrop, this.camera.getWorldDirection(new Vector3()).multiplyScalar(BASE_PLAYER_SETTINGS.throwSpeed))
-        this.game.addUpdateSub(droppedItem)
+        let droppedItem = new ItemEntity(this.world, model, stack, this.camera.getWorldDirection(new Vector3()).multiplyScalar(BASE_PLAYER_SETTINGS.throwSpeed))
+        window.game.addUpdateSub(droppedItem)
     }
 
     raycastFromCamera(){
@@ -174,7 +234,7 @@ export default class Player {
         for(let v of this.world.activeChunks){
             objectsToIntersect.push(this.world.chunks[v.x][v.y].mesh)
         }
-        let intersects = raycaster.intersectObjects(objectsToIntersect)//this.game.scene.children
+        let intersects = raycaster.intersectObjects(objectsToIntersect)//window.scene.children
 
         if(intersects.length) return intersects[0]
         return false
@@ -208,10 +268,29 @@ export default class Player {
         return { block, position, normal: position.clone().floor().sub(prevPos.floor()), found: true }
     }
 
+    pickupEntities(){
+        let entities = Object.values(this.chunk.entities)
+        for(let dir of [...CrossCheck, ...CornerCheck]){
+            let chunk = this.world.getChunkFromPos(this.position.clone().add(dir.clone().setLength(BASE_PLAYER_SETTINGS.magnetRadius)))
+            if(Chunk.equals(chunk, this.chunk)) continue
+            entities.push(...Object.values(chunk.entities))
+        }
+
+        for(let e of entities){
+            if(!e || e.accelerate || e.createdAt + BASE_PLAYER_SETTINGS.pickupDelay > Date.now()) continue
+
+            let position = this.position.clone()
+            position.y = Math.floor(position.y - 1)
+            if(Math.floor(e.position.y) != position.y) continue
+            if(e.position.clone().sub(position).lengthSq() <= (BASE_PLAYER_SETTINGS.magnetRadius * BASE_PLAYER_SETTINGS.magnetRadius)){
+                e.accelerateTowards(this.position, 'PICK', { player: this })
+            }
+        }
+    }
+
     get left(){
-        let pos = new Vector3()
-        this.camera.getWorldPosition(pos)
-        pos.add(RIGHT.clone().multiplyScalar(-WIDTH))
+        let pos = this.camera.getWorldPosition(new Vector3())
+        pos.addScaledVector(RIGHT, -WIDTH)
         
         if(
             this.world.checkVoxel(...pos.toArray()) ||
@@ -222,9 +301,8 @@ export default class Player {
     }
 
     get right(){
-        let pos = new Vector3()
-        this.camera.getWorldPosition(pos)
-        pos.add(RIGHT.clone().multiplyScalar(WIDTH))
+        let pos = this.camera.getWorldPosition(new Vector3())
+        pos.addScaledVector(RIGHT, WIDTH)
 
         if(
             this.world.checkVoxel(...pos.toArray()) ||
@@ -235,9 +313,8 @@ export default class Player {
     }
 
     get front(){
-        let pos = new Vector3()
-        this.camera.getWorldPosition(pos)
-        pos.add(FORWARD.clone().multiplyScalar(WIDTH))
+        let pos = this.camera.getWorldPosition(new Vector3())
+        pos.addScaledVector(FORWARD, WIDTH)
         
         if(
             this.world.checkVoxel(...pos.toArray()) ||
@@ -248,9 +325,8 @@ export default class Player {
     }
 
     get back(){
-        let pos = new Vector3()
-        this.camera.getWorldPosition(pos)
-        pos.add(FORWARD.clone().multiplyScalar(-WIDTH))
+        let pos = this.camera.getWorldPosition(new Vector3())
+        pos.addScaledVector(FORWARD, -WIDTH)
 
         if(
             this.world.checkVoxel(...pos.toArray()) ||
@@ -262,9 +338,8 @@ export default class Player {
 
     
     checkDownSpeed(downSpeed) {
-        let pos = new Vector3()
-        this.camera.getWorldPosition(pos)
-        pos.sub(UP.clone().multiplyScalar(PLAYER_DIMENSIONS.height - PLAYER_DIMENSIONS.cameraOffset))
+        let pos = this.camera.getWorldPosition(new Vector3())
+        pos.addScaledVector(UP, -(PLAYER_DIMENSIONS.height - PLAYER_DIMENSIONS.cameraOffset))
 
         
         if (
@@ -281,9 +356,8 @@ export default class Player {
     }
 
     checkUpSpeed(upSpeed) {
-        let pos = new Vector3()
-        this.camera.getWorldPosition(pos)
-        pos.add(UP.clone().multiplyScalar(PLAYER_DIMENSIONS.cameraOffset))
+        let pos = this.camera.getWorldPosition(new Vector3())
+        pos.addScaledVector(UP, PLAYER_DIMENSIONS.cameraOffset)
         
         if (
             this.world.checkVoxel(pos.x - Y_WIDTH, pos.y, pos.z - Y_WIDTH) ||
@@ -299,16 +373,27 @@ export default class Player {
     
     onMouseClick(e){
         switch(e.which){
-            case 1: // LMB
-                this.destroy()
+            case MOUSE_BUTTON.LMB: 
+                this.holding.clickStack.push(MOUSE_BUTTON.LMB)
+                this.holding.LMB = true
                 break
 
-            case 2: // Wheel click
-                if(this.gamemode == GAMEMODE.CREATIVE) this.pick()
+            case MOUSE_BUTTON.RMB:
+                this.holding.clickStack.push(MOUSE_BUTTON.RMB)
+                this.holding.RMB = true
+                break
+        }
+    }
+
+    onMouseRelease(e){
+        switch(e.which){
+            case MOUSE_BUTTON.LMB:
+                this.holding.LMB = false
                 break
 
-            case 3: // RMB
-                this.place()
+            case MOUSE_BUTTON.RMB:
+                this.holding.RMB = false
+                this.placeDelay = 0
                 break
         }
     }

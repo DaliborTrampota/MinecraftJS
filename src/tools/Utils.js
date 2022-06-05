@@ -86,21 +86,21 @@ class IDMap extends Map {
 }
 
 
-function drawBlock(pos, scene, col = 0xffff00){
+function drawBlock(pos, col = 0xffff00){
     const geometry = new BoxGeometry( 1, 1, 1 );
     geometry.translate( 0.5, 0.5, 0.5 );
     const cube = new Mesh( geometry, new MeshBasicMaterial( 0xff0000 ) );
     cube.position.copy(pos.floor())
     const box = new BoxHelper( cube, col );
-    scene.add( box );
+    window.scene.add( box );
 }
 
-function drawPoint(pos, scene, col = 0xffff00){
+function drawPoint(pos, col = 0xffff00){
     const geometry = new BoxGeometry( 0.1, 0.1, 0.1 );
     geometry.translate( 0.05, 0.05, 0.05 );
     const point = new Mesh( geometry, new MeshBasicMaterial( col ) );
     point.position.copy(pos)
-    scene.add( point );
+    window.scene.add( point );
 }
 
 
@@ -145,7 +145,7 @@ const MAP_NAMES = [
     'normalMap',
     'roughnessMap',
     'specularMap',
-  ];
+];
 
 function dispose(object, disposeTextures = false){
     object.removeFromParent()
@@ -175,7 +175,11 @@ function disposeTextures(object) {
             })
         })
     });
-  }
+}
+
+function map(value, x1, y1, x2, y2){
+    return (value - x1) * (y2 - x2) / (y1 - x1) + x2;
+}
 
 export {
     create3DArray,
@@ -190,6 +194,7 @@ export {
     clamp,
     moveTowards,
     deltaAngle,
+    map,
     
     TwoWayMap,
     IDMap
