@@ -15,12 +15,14 @@ export default class BlockPlaceContext extends Context {
     }
 
     get canPlace(){
+        if(!this.hitResult.found) return false
+
         this.hitResult.position.sub(this.hitResult.normal).floor()
         let playerBlockPos = this.player.eyePos.floor()
         
-        if(this.hitResult.found && (playerBlockPos.equals(this.hitResult.position) || playerBlockPos.sub(UP).equals(this.hitResult.position)))
+        if(playerBlockPos.equals(this.hitResult.position) || playerBlockPos.sub(UP).equals(this.hitResult.position))
             return false//console.log('cant place')
-        return this.hitResult.found
+        return true
     }
 
     place(){

@@ -6,6 +6,7 @@ export default class Item {
         this.name = name
 
         this.image = `/src/resources/textures/blocks/${name}.png`//"https://raw.githubusercontent.com/ZtechNetwork/MCBVanillaResourcePack/master/textures/items/wheat.png"
+        this.pixelated = true
         this.stack = 64
         this.tab = "DEFAULT"
         this.damage = 0

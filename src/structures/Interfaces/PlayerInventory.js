@@ -1,4 +1,4 @@
-import StorageInterface from "../Interfaces/StorageInterface.js";
+import StorageInterface from "./StorageInterface.js";
 
 
 export default class Inventory extends StorageInterface {
@@ -9,6 +9,8 @@ export default class Inventory extends StorageInterface {
         this.htmlSlots = []
         this.hotbar = new Array(hotbarSize)
         this.selectedSlot = 0
+
+        this.background = '/src/resources/images/gui/inventory.png'
 
         Inventory.makeHotbar(hotbarSize)
         Inventory.formatSlots(this)
@@ -97,8 +99,13 @@ export default class Inventory extends StorageInterface {
     updateHotbarSlot(index = this.selectedSlot){
         const stack = this.hotbar[index]
         if(stack && stack.amount){
-            this.htmlSlots[index].image.src = this.hotbar[index].item.image
-            this.htmlSlots[index].count.innerHTML = this.hotbar[index].amount
+            this.htmlSlots[index].count.innerHTML = stack.amount
+            this.htmlSlots[index].image.src = stack.item.image
+            if(stack.item.pixelated){
+                this.htmlSlots[index].image.classList.add('pixelated')
+            }else{
+                this.htmlSlots[index].image.classList.remove('pixelated')
+            }
         }else{
             this.htmlSlots[index].image.src = Inventory.empty
             this.htmlSlots[index].count.innerHTML = ''

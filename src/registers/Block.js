@@ -1,5 +1,7 @@
+import { Mesh } from 'https://cdn.skypack.dev/three@0.141.0';
 import Register from "../Register.js"
 import TextureManager from "../tools/TextureManager.js"
+import VoxelBuilder from "../tools/VoxelBuilder.js"
 
 export default class Block {
 
@@ -12,12 +14,14 @@ export default class Block {
         this.textures = {}
         this.#setTextures()
 
-        
+        this.voxel = false
         this.solid = true
         this.transparent = false
         this.renderSides = true
         this.animation = false
         this.#setProperties()
+
+        this.#generateModel()
 
 
         delete Register.blockData[this.name]
@@ -28,12 +32,12 @@ export default class Block {
         if(this.textures.all) textures = this.textures.all
         else {
             textures = [
-                this.textures.right,    //right
-                this.textures.left,     //left
-                this.textures.top,      //top
-                this.textures.bottom,   //bottom
-                this.textures.front,
-                this.textures.back
+                this.textures.east,    //right
+                this.textures.west,     //left
+                this.textures.up,      //top
+                this.textures.down,   //bottom
+                this.textures.north,
+                this.textures.south
             ]
         }
         return Array.isArray(textures) ? textures.map(idx => TextureManager.textures[idx]): TextureManager.textures[textures]
@@ -67,5 +71,19 @@ export default class Block {
 
         if(data?.animation) 
             this.animation = data.animation 
+    }
+
+    #generateModel(){
+        let data = Register.blockData[this.name]
+        
+        if(data?.elements){
+            const { geometry, vertData, uvData } = VoxelBuilder.build(data.elements)
+
+            this.geometry = geometry
+            this.vertices = vertData
+            this.UVs = uvData
+
+            this.voxel = true
+        }
     }
 }

@@ -81,7 +81,7 @@ export default class World {
         let y = ChunkHeight
         
         //this.player.chunk
-        this.player.position = new Vector3(xz, y + 20, xz)
+        this.player.position = new Vector3(xz, y - 80, xz)
         this.player.camera.lookAt(xz, 0, xz)
     }
     

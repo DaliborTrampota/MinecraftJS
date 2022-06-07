@@ -33,6 +33,7 @@ export default class Context {
         }
 
         if(block.material == MATERIAL.AIR && !options.placeOnAir) return { found: false }
+        if(block.material == MATERIAL.LIQUID && options.ignoreLiquids) return { found: false }
 
         return { block, position, normal: position.clone().floor().sub(prevPos.floor()), found: true }
     }

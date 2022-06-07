@@ -198,9 +198,10 @@ export default class Chunk {
                 this.breaking.splice(idx, 1)
                 return this.removeVoxel(worldPos, true)
             }
+        } else {
+            this.breaking.push({ pos, progress: 0, hitpoints: 1000 - damage })
         }
-        else this.breaking.push({ pos, progress: 0, hitpoints: 1000 - damage })
-        console.log(this.breaking)
+        
         this.needsUpdate = true
         this.rebuildNeighbourChunks(pos, worldPos)
     }

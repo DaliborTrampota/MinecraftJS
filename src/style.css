@@ -39,6 +39,10 @@ body {
     display: block;
 }
 
+.pixelated {
+    image-rendering: pixelated;
+}
+
 #debug {
     background-color: rgba(20, 20, 20, 0.5);
     font-size: large;
@@ -86,9 +90,8 @@ body {
 
 .slot img {
     z-index: 50;
-    image-rendering: pixelated;
-    width: 32px;
-    height: 32px;
+    width: 48px;
+    height: 48px;
     margin: auto;
 }
 
@@ -108,4 +111,65 @@ body {
 
 #selected {
     background-color: lightcoral;
+}
+
+#image-gen > canvas{
+    margin: 0 auto;
+}
+
+#gui {
+    z-index: 100;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: none;
+}
+
+#gui > img {
+    width: 512px;
+    image-rendering: pixelated;
+}
+
+.gui-slot {
+    position: absolute;
+    width: 47px;
+    height: 47px;
+    top: 23px;
+    left: 23px;
+}
+
+.gui-slot-data span {
+    position: absolute;
+    right: 2px;
+    bottom: 2px;
+    font-weight: 400;
+    color: white
+}
+
+.gui-slot-data img {
+    margin: auto auto;
+    width: 32px;
+}
+
+.gui-slot-data {
+    display: flex;
+    width: 100%;
+    height: 100%;
+}
+
+.gui-slot-data > * {
+    pointer-events: none;
+}
+
+[draggable="true"] {
+    z-index: 1;
+}
+
+#slot-2 {
+    top: calc(50px + 23px);
+}
+
+#slot-3 {
+    top: calc(100px + 23px);
 }

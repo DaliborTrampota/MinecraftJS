@@ -4,10 +4,11 @@ import ItemEntity from '../Entities/ItemEntity.js';
 import { HalfWorldSize, PI_2, GAMEMODE, BASE_PLAYER_SETTINGS, PLAYER_DIMENSIONS, RIGHT, UP, FORWARD, MATERIAL, CrossCheck, CornerCheck, MOUSE_BUTTON } from '../../tools/Constants.js'
 import { clamp, moveTowards } from '../../tools/Utils.js'
 
-import Inventory from './Inventory.js';
+import Inventory from '../Interfaces/PlayerInventory.js';
 import Chunk from '../Chunk.js';
 import BlockPlaceContext from '../Contexts/BlockPlaceContext.js';
 import BlockItem from '../../registers/BlockItem.js';
+import Stack from '../Interfaces/Stack.js';
 
 const WIDTH = PLAYER_DIMENSIONS.width
 const Y_WIDTH = WIDTH * 0.75
@@ -24,7 +25,7 @@ export default class Player {
         this.sensitivity = 1
         
         this.health = BASE_PLAYER_SETTINGS.health;
-        this.gamemode = GAMEMODE.SURVIVAL
+        this.gamemode = GAMEMODE.CREATIVE
         this.inventory = new Inventory()
 
         this.velocity = new Vector3(0, 0, 0);
@@ -214,7 +215,7 @@ export default class Player {
     }
 
     drop(amount = 1){
-        let stack = this.inventory.drop(amount)
+        let stack = this.inventory.drop(amount) || new Stack(this.world.register.getItem('vertical_slab'), 5)
         if(!stack) return false
         
         let model = stack.item.getModel(this.eyePos.add(new Vector3(0, -0.20, 0)))
@@ -372,6 +373,7 @@ export default class Player {
 
     
     onMouseClick(e){
+        if(this.controller.inGUI) return
         switch(e.which){
             case MOUSE_BUTTON.LMB: 
                 this.holding.clickStack.push(MOUSE_BUTTON.LMB)

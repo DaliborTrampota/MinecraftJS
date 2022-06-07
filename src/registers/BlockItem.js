@@ -1,5 +1,5 @@
-import Item from "./Item.js"
 import { BoxGeometry, Mesh, Group } from 'https://cdn.skypack.dev/three@0.141.0';
+import Item from "./Item.js"
 
 
 export default class BlockItem extends Item {
@@ -9,6 +9,8 @@ export default class BlockItem extends Item {
     constructor(block, name){
         super(name ?? block.name)
         this.block = block        
+        this.image = window.getBlockImage(this)
+        this.pixelated = false
     }
 
     getModel(position){

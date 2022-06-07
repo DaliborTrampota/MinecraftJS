@@ -1,5 +1,6 @@
 import { Scene, Clock, PerspectiveCamera, WebGLRenderer } from 'https://cdn.skypack.dev/three@0.141.0';
 import Game from './Game.js'
+import PhotoBooth from './tools/PhotoBooth.js';
 
 const renderer = new WebGLRenderer();
 renderer.setPixelRatio(1)
@@ -7,6 +8,7 @@ renderer.setSize( window.innerWidth, window.innerHeight );
 //document.body.appendChild( renderer.domElement );
 document.getElementById('target').appendChild(renderer.domElement);
 
+window.getBlockImage = PhotoBooth
 window.scene = new Scene();
 window.clock = new Clock();
 const camera = new PerspectiveCamera( 90, window.innerWidth / window.innerHeight, 1, 500 );
@@ -14,7 +16,6 @@ const camera = new PerspectiveCamera( 90, window.innerWidth / window.innerHeight
 camera.near = 0.01
 camera.updateProjectionMatrix()
 
-new Game(renderer, camera)
 
 function onWindowResize() {
     camera.aspect = container.clientWidth / container.clientHeight;
@@ -24,3 +25,4 @@ function onWindowResize() {
 }
 
 document.onresize = onWindowResize
+new Game(renderer, camera)

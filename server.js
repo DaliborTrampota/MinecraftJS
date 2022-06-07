@@ -36,3 +36,5 @@ function getJsonFiles(path){
     }
     return data
 }
+
+//TODO generate block item icons

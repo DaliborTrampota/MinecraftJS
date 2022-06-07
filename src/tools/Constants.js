@@ -12,34 +12,34 @@ const vertices = [
     new Vector3(0, 0, 1)
 ]
 const triangles = {
-    front: [
+    north: [
         5, 4, 7,
         5, 7, 6
     ],
-    back: [
+    south: [
         0, 2, 1,
         0, 3, 2
     ],
-    top: [
+    up: [
         2, 3, 4,
         2, 4, 5
     ],
-    bottom: [
+    down: [
         0, 6, 7,
         0, 1, 6
     ],
-    right: [
+    east: [
         1, 2, 5,
         1, 5, 6
     ],
-    left: [
+    west: [
         0, 7, 4,
         0, 4, 3
     ]
 }
 
 const UVs = {
-    front: [
+    north: [
         1, 1,
         0, 1,
         0, 0,
@@ -48,7 +48,7 @@ const UVs = {
         0, 0,
         1, 0
     ],
-    back: [
+    south: [
         1, 0,
         0, 1, 
         0, 0,
@@ -57,7 +57,7 @@ const UVs = {
         1, 1, 
         0, 1
     ],
-    top: [
+    up: [
         1, 1,
         0, 1,
         0, 0,
@@ -66,7 +66,7 @@ const UVs = {
         0, 0,
         1, 0
     ],
-    bottom: [
+    down: [
         1, 1,
         0, 0,
         1, 0,
@@ -75,7 +75,7 @@ const UVs = {
         0, 1,
         0, 0
     ],
-    right: [
+    east: [
         1, 0,
         1, 1,
         0, 1,
@@ -84,7 +84,7 @@ const UVs = {
         0, 1,
         0, 0
     ],
-    left: [
+    west: [
         0, 0,
         1, 0,
         1, 1,
@@ -102,12 +102,12 @@ const WorldSize = ChunkSize * WorldSizeInChunks;
 const HalfWorldSize = Math.floor(WorldSizeInChunks / 2);
 
 const sides = [
-    { side: 'front',    dir: new Vector3( 0,  0,  1) },
-    { side: 'back',     dir: new Vector3( 0,  0, -1) },
-    { side: 'top',      dir: new Vector3( 0,  1,  0) },
-    { side: 'bottom',   dir: new Vector3( 0, -1,  0) },
-    { side: 'right',    dir: new Vector3( 1,  0,  0) },
-    { side: 'left',     dir: new Vector3(-1,  0,  0) },
+    { side: 'north',    dir: new Vector3( 0,  0,  1) },
+    { side: 'south',     dir: new Vector3( 0,  0, -1) },
+    { side: 'up',      dir: new Vector3( 0,  1,  0) },
+    { side: 'down',   dir: new Vector3( 0, -1,  0) },
+    { side: 'east',    dir: new Vector3( 1,  0,  0) },
+    { side: 'west',     dir: new Vector3(-1,  0,  0) },
 ]
 
 const CrossCheck = [ 
