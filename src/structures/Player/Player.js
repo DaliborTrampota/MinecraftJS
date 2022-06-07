@@ -1,7 +1,7 @@
 import { Vector3, Vector2, Euler, Raycaster } from 'https://cdn.skypack.dev/three@0.141.0';
 import Controller from './Controller.js';
 import ItemEntity from '../Entities/ItemEntity.js';
-import { HalfWorldSize, PI_2, GAMEMODE, BASE_PLAYER_SETTINGS, PLAYER_DIMENSIONS, RIGHT, UP, FORWARD, MATERIAL, CrossCheck, CornerCheck, MOUSE_BUTTON } from '../../tools/Constants.js'
+import { PI_2, GAMEMODE, BASE_PLAYER_SETTINGS, PLAYER_DIMENSIONS, RIGHT, UP, FORWARD, MATERIAL, CrossCheck, CornerCheck, MOUSE_BUTTON } from '../../tools/Constants.js'
 import { clamp, moveTowards } from '../../tools/Utils.js'
 
 import Inventory from '../Interfaces/PlayerInventory.js';
@@ -30,7 +30,7 @@ export default class Player {
 
         this.velocity = new Vector3(0, 0, 0);
         this.vertVel = 0
-        this.chunkCoords = new Vector2(HalfWorldSize, HalfWorldSize)
+        this.chunkCoords = new Vector2(0, 0)
 
         this.placeDelay = 0
 
@@ -51,7 +51,7 @@ export default class Player {
     }
 
     get chunk() {
-        return window.game.world.chunks[this.chunkCoords.x][this.chunkCoords.y]
+        return window.game.world.chunks[Chunk.id(this.chunkCoords.x, this.chunkCoords.y)]
     } 
 
     get position() {
@@ -233,7 +233,7 @@ export default class Player {
 
         let objectsToIntersect = []
         for(let v of this.world.activeChunks){
-            objectsToIntersect.push(this.world.chunks[v.x][v.y].mesh)
+            objectsToIntersect.push(this.world.chunks[Chunk.id(v.x, v.y)].mesh)
         }
         let intersects = raycaster.intersectObjects(objectsToIntersect)//window.scene.children
 

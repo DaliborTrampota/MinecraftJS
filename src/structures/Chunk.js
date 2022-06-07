@@ -9,10 +9,12 @@ import Register from "../Register.js";
 //import { SceneUtils } from 'https://cdn.jsdelivr.net/npm/three@0.141.0/examples/jsm/utils/SceneUtils.js';
 
 export default class Chunk {
+
     constructor(x, y, world){
         this.x = x
         this.y = y
-
+        this.id = Chunk.id(x, y)
+        
         this.world = world;
 
         this.vertices = []
@@ -309,4 +311,9 @@ export default class Chunk {
     toString(){
         return `X: ${this.x} Y: ${this.y}`
     }
+
+    static id(x, y){
+        return `${x}_${y}`
+    }
+
 }

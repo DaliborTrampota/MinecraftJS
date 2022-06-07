@@ -1,6 +1,5 @@
-import { Vector3, Vector2 } from 'https://cdn.skypack.dev/three@0.141.0';
-import { ChunkHeight, ChunkSize, HalfWorldSize, WorldSize, WorldSizeInChunks, WORLD_SETTINGS } from "../tools/Constants.js";
-import { create2DArray } from "../tools/Utils.js";
+import { Vector3 } from 'https://cdn.skypack.dev/three@0.141.0';
+import { ChunkHeight, ChunkSize, WORLD_SETTINGS } from "../tools/Constants.js";
 import Chunk from "./Chunk.js"
 
 export default class World {
@@ -10,7 +9,7 @@ export default class World {
         this.player = player;
 
         this.gravity = -9.81 * 2
-        this.chunks = create2DArray(WorldSizeInChunks, WorldSizeInChunks)
+        this.chunks = {}
 
         this.activeChunks = []
 
@@ -19,25 +18,17 @@ export default class World {
 
     async Init(){
         console.time('Loading')
-
-        //console.log('Generating world...')
-        //this.generateWorld()
-
-        //console.log('Drawing world...')
-        //this.createChunkMeshes()
-
         console.info('Loading chunks...')
         await this.load()
         
         console.info('Spawning player...')
         this.spawnPlayer()
-
         console.timeEnd('Loading')
     }
 
     Update(delta){
-        for(let chPos of this.activeChunks){
-            let ch = this.chunks[chPos.x][chPos.y]
+        for(let chID of this.activeChunks){
+            let ch = this.chunks[chID]
             if(ch.needsUpdate) {
                 ch.rebuild()
                 ch.needsUpdate = false
@@ -45,66 +36,53 @@ export default class World {
         }
     }
 
-    generateWorld(){
-        for(let i = 0; i < WorldSizeInChunks; ++i){
-            for(let j = 0; j < WorldSizeInChunks; ++j){
-                this.chunks[i][j] = new Chunk(i, j, this)
-            }
-        }
-    }
-
-    createChunkMeshes(){
-        for(let i = 0; i < WorldSizeInChunks; ++i){
-            for(let j = 0; j < WorldSizeInChunks; ++j){
-                this.chunks[i][j].generate()
-                window.scene.add(this.chunks[i][j].mesh)
-            }
-        }
-    }
-
     async load(){
-        const x = { start:  Math.max(this.player.chunkCoords.x - this.player.viewDistance + 1, 0), end: Math.min(this.player.chunkCoords.x + this.player.viewDistance, WorldSizeInChunks) }
-        const y = { start:  Math.max(this.player.chunkCoords.y - this.player.viewDistance + 1, 0), end: Math.min(this.player.chunkCoords.y + this.player.viewDistance, WorldSizeInChunks) }
+        const start = -this.player.viewDistance
+        const end = this.player.viewDistance
 
-        for(let i = x.start; i < x.end; ++i){
-            for(let j = y.start; j < y.end; ++j){
-                if(!this.chunks[i][j]) this.chunks[i][j] = new Chunk(i, j, this);
-                if(!this.chunks[i][j].mesh) window.scene.add(this.chunks[i][j].generate())
-                this.chunks[i][j].load()
-                this.activeChunks.push(new Vector2(i, j))
+        console.log(start, end)
+
+        for(let i = start; i < end; ++i){
+            for(let j = start; j < end; ++j){
+                console.log(i, j)
+                let chunk = new Chunk(i, j, this)
+                window.scene.add(chunk.generate())
+                chunk.load()
+
+                this.chunks[chunk.id] = chunk
+                this.activeChunks.push(chunk.id)
             }
         }
     }
 
     spawnPlayer(){
-        let xz = HalfWorldSize * ChunkSize + (ChunkSize / 2);
-        let y = ChunkHeight
-        
-        //this.player.chunk
-        this.player.position = new Vector3(xz, y - 80, xz)
-        this.player.camera.lookAt(xz, 0, xz)
+        this.player.position.set(ChunkSize / 2, ChunkHeight - 80, ChunkSize / 2)
+        this.player.camera.lookAt(ChunkSize / 2, 0, ChunkSize / 2)
     }
     
     getChunk(x, y){
-        if(x < 0 || y < 0 || x >= WorldSizeInChunks || y >= WorldSizeInChunks) return false;
-        return this.chunks[x][y]
+        return this.chunks[Chunk.id(x, y)]
     }
 
     updateViewDistance(){
-        for(let ch of this.activeChunks){
-            this.chunks[ch.x][ch.y].unload()
+        console.log('updating view distance')
+        for(let chID of this.activeChunks){//todo unload only necessarry chunks
+            this.chunks[chID].unload()
         }
         this.activeChunks = []
 
-        const x = { start:  Math.max(this.player.chunkCoords.x - this.player.viewDistance + 1, 0), end: Math.min(this.player.chunkCoords.x + this.player.viewDistance, WorldSizeInChunks) }
-        const y = { start:  Math.max(this.player.chunkCoords.y - this.player.viewDistance + 1, 0), end: Math.min(this.player.chunkCoords.y + this.player.viewDistance, WorldSizeInChunks) }
+        const start = this.player.chunkCoords.x - this.player.viewDistance
+        const end = this.player.chunkCoords.y + this.player.viewDistance + 1
 
-        for(let i = x.start; i < x.end; ++i){
-            for(let j = y.start; j < y.end; ++j){
-                if(!this.chunks[i][j]) this.chunks[i][j] = new Chunk(i, j, this);
-                if(!this.chunks[i][j].mesh) window.scene.add(this.chunks[i][j].generate())
-                this.chunks[i][j].load()
-                this.activeChunks.push(new Vector2(i, j))
+        for(let i = start; i < end; ++i){
+            for(let j = start; j < end; ++j){
+                const ID = Chunk.id(i, j)
+
+                if(!this.chunks[ID]) this.chunks[ID] = new Chunk(i, j, this);
+                if(!this.chunks[ID].mesh) window.scene.add(this.chunks[ID].generate())
+
+                this.chunks[ID].load()
+                this.activeChunks.push(ID)
             }
         }
     }
@@ -112,14 +90,11 @@ export default class World {
     getChunkFromPos(pos){
         let x = Math.floor(pos.x / ChunkSize);
         let y = Math.floor(pos.z / ChunkSize);
-        
-        if(x >= WorldSizeInChunks || y >= WorldSizeInChunks || x < 0 || y < 0) return false;
 
-        return this.chunks[x][y]
+        return this.chunks[Chunk.id(x, y)]
     }
 
     getVoxel(pos){ //Terain Generation here
-        if(pos.x < 0 || pos.x >= WorldSize || pos.z < 0 || pos.z >= WorldSize) return 0
         let height = Math.floor(this.generator.getHeight(pos.x, pos.z))
         
         if(pos.y == height) {
@@ -151,7 +126,7 @@ export default class World {
         let z = Math.floor(pos.z / ChunkSize);
 
         try{
-            let chunk = this.chunks[x][z]
+            let chunk = this.chunks[Chunk.id(x, z)]
 
             x = Math.floor(pos.x - (x * ChunkSize))
             z = Math.floor(pos.z - (z * ChunkSize))
@@ -178,5 +153,4 @@ export default class World {
         if(block) return block.solid
         return false
     }
-
 }

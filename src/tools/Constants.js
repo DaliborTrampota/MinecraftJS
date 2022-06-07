@@ -97,9 +97,6 @@ const UVs = {
 
 const ChunkSize = 16
 const ChunkHeight = 128
-const WorldSizeInChunks = 1000;
-const WorldSize = ChunkSize * WorldSizeInChunks;
-const HalfWorldSize = Math.floor(WorldSizeInChunks / 2);
 
 const sides = [
     { side: 'north',    dir: new Vector3( 0,  0,  1) },
@@ -186,9 +183,6 @@ export {
 
     ChunkSize,
     ChunkHeight,
-    WorldSizeInChunks,
-    HalfWorldSize,
-    WorldSize,
 
     CrossCheck,
     CornerCheck,
