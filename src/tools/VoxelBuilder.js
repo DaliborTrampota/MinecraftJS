@@ -9,7 +9,7 @@ export default class VoxelBuilder {
         let verts = []
         let uvs = []
 
-        let unculledVertData = {
+        const vertData = {
             up: [],
             down: [],
             north: [],
@@ -17,25 +17,11 @@ export default class VoxelBuilder {
             east: [],
             west: []
         }
-        let unculledUvData = {
-            up: [],
-            down: [],
-            north: [],
-            south: [],
-            east: [],
-            west: []
-        }
-
-        let culledVertData = {
-            up: [],
-            down: [],
-            north: [],
-            south: [],
-            east: [],
-            west: []
-        }
-
-        let culledUvData = {
+        /*const vertData = {
+                unculled: [],
+                culled: [],
+            }*/
+        const uvData = {
             up: [],
             down: [],
             north: [],
@@ -74,11 +60,21 @@ export default class VoxelBuilder {
                 }
 
                 if(face.cullface){
-                    culledVertData[face.cullface].push(...tempVerts)
-                    culledUvData[face.cullface].push(...sideUVs)
+                    if(vertData[side].at(-1)?.type == 'culled') vertData[side].at(-1).data.push(...tempVerts)
+                    else vertData[side].push({ type: 'culled', data: tempVerts })
+
+                    if(uvData[side].at(-1)?.type == 'culled') uvData[side].at(-1).data.push(...sideUVs)
+                    else uvData[side].push({ type: 'culled', data: sideUVs })
+                    // vertData[face.cullface].culled.push(...tempVerts)
+                    // uvData[face.cullface].culled.push(...sideUVs)
                 }else{
-                    unculledVertData[side].push(...tempVerts)
-                    unculledUvData[side].push(...sideUVs)
+                    if(vertData[side].at(-1)?.type == 'unculled') vertData[side].at(-1).data.push(...tempVerts)
+                    else vertData[side].push({ type: 'unculled', data: tempVerts})
+
+                    if(uvData[side].at(-1)?.type == 'unculled') uvData[side].at(-1).data.push(...sideUVs)
+                    else uvData[side].push({ type: 'unculled', data: sideUVs})
+                    // vertData[side].unculled.push(...tempVerts)
+                    // uvData[side].unculled.push(...sideUVs)
                 }
 
                 verts.push(...tempVerts)
@@ -89,10 +85,7 @@ export default class VoxelBuilder {
         geometry.setAttribute('position', new BufferAttribute(new Float32Array(verts), 3))
         geometry.setAttribute('uv', new BufferAttribute(new Float32Array(uvs), 2))
 
-        return { geometry, vertices: unculledVertData, UVs: unculledUvData, culling: {
-            vertices: culledVertData,
-            UVs: culledUvData
-        } }
+        return { geometry, vertices: vertData, UVs: uvData }
     }
 
     static rotateUVs(uvs){

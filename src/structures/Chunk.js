@@ -86,6 +86,7 @@ export default class Chunk {
                     
                     sides:
                     for(let { side, dir } of sides){
+                        if(blockData.voxel) console.log(side, dir, this.checkVoxel(pos.clone().add(dir), blockData, side, update))
                         if(this.checkVoxel(pos.clone().add(dir), blockData, side, update)) continue sides;
 
                         let textureIndex = 'all' in blockData.textures ? blockData.textures.all : blockData.textures[side]
@@ -107,15 +108,17 @@ export default class Chunk {
         
         for(let o of data){
             if(blockData.voxel){
-                let vertices = [...blockData.vertices[o.side], ...blockData.culling.vertices[o.side]]
-                console.log(vertices)
+                //let b = this.world.getVoxelFromPos(o.pos.clone().add(sides.find(s => s.side == o.side).dir))
+                //console.log(o, b)
+                const { vertices, uvs } = blockData.side(o.side, true)
+                
                 for(let i = 0; i < vertices.length; i += 3){
                     this.vertices.push(vertices[i] + o.pos.x)
                     this.vertices.push(vertices[i + 1] + o.pos.y)
                     this.vertices.push(vertices[i + 2] + o.pos.z)
                     groupCount++
                 }
-                this.UVs.push(...blockData.UVs[o.side], ...blockData.culling.UVs[o.side])
+                this.UVs.push(...uvs)
             }else{
                 for(let vert of triangles[o.side]){
                     this.vertices.push(vertices[vert].x + o.pos.x)

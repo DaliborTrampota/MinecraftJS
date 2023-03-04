@@ -24,7 +24,6 @@ export default class Block {
         this.#generateModel()
         this.elements = false
 
-
         delete Register.blockData[this.name]
     }
 
@@ -42,6 +41,15 @@ export default class Block {
             ]
         }
         return Array.isArray(textures) ? textures.map(idx => TextureManager.textures[idx]): TextureManager.textures[textures]
+    }
+
+    side(side, culled) {
+        const data = {
+            vertices: this.vertices[side].filter(o => !culled ? o.type == 'unculled' : true).map(o => o.data).flat(),
+            uvs: this.UVs[side].filter(o => !culled ? o.type == 'unculled' : true).map(o => o.data).flat(),
+        }
+        console.log(this, data)
+        return data
     }
 
     setHardness(h){
@@ -78,12 +86,11 @@ export default class Block {
         let data = Register.blockData[this.name]
         
         if(data?.elements){
-            const { geometry, vertices, UVs, culling } = VoxelBuilder.build(data.elements)
+            const { geometry, vertices, UVs } = VoxelBuilder.build(data.elements)
 
             this.geometry = geometry
             this.vertices = vertices
             this.UVs = UVs
-            this.culling = culling
             this.elements = data.elements
 
             this.voxel = true
