@@ -1,5 +1,5 @@
 import { ChunkHeight, ChunkSize, sides, triangles, UVs, vertices, CrossCheck, MATERIAL, UP } from "../tools/Constants.js"
-import { create3DArray, drawBlock, map } from "../tools/Utils.js"
+import { create3DArray, map } from "../tools/Utils.js"
 import { Vector3, BufferGeometry, BufferAttribute, Mesh } from 'https://cdn.skypack.dev/three@0.141.0';
 import ItemEntity from "./Entities/ItemEntity.js";
 import TextureManager from "../tools/TextureManager.js";
@@ -86,7 +86,7 @@ export default class Chunk {
                     
                     sides:
                     for(let { side, dir } of sides){
-                        if(this.checkVoxel(pos.clone().add(dir), blockData, update)) continue sides;
+                        if(this.checkVoxel(pos.clone().add(dir), blockData, side, update)) continue sides;
 
                         let textureIndex = 'all' in blockData.textures ? blockData.textures.all : blockData.textures[side]
                         
@@ -106,16 +106,29 @@ export default class Chunk {
         let blockData = this.register.getBlock(blockID)
         
         for(let o of data){
-            for(let vert of triangles[o.side]){
-                this.vertices.push(vertices[vert].x + o.pos.x)
-                this.vertices.push(vertices[vert].y + o.pos.y)
-                this.vertices.push(vertices[vert].z + o.pos.z)
+            if(blockData.voxel){
+                let vertices = [...blockData.vertices[o.side], ...blockData.culling.vertices[o.side]]
+                console.log(vertices)
+                for(let i = 0; i < vertices.length; i += 3){
+                    this.vertices.push(vertices[i] + o.pos.x)
+                    this.vertices.push(vertices[i + 1] + o.pos.y)
+                    this.vertices.push(vertices[i + 2] + o.pos.z)
+                    groupCount++
+                }
+                this.UVs.push(...blockData.UVs[o.side], ...blockData.culling.UVs[o.side])
+            }else{
+                for(let vert of triangles[o.side]){
+                    this.vertices.push(vertices[vert].x + o.pos.x)
+                    this.vertices.push(vertices[vert].y + o.pos.y)
+                    this.vertices.push(vertices[vert].z + o.pos.z)
+                }
+                if(blockData.animation) this.UVs.push(...UVs[o.side].map((u, i) => i % 2 ? u / blockData.animation.frames : u))
+                else this.UVs.push(...UVs[o.side])
+                groupCount += 6
             }
-            if(blockData.animation) this.UVs.push(...UVs[o.side].map((u, i) => i % 2 ? u / blockData.animation.frames : u))
-            else this.UVs.push(...UVs[o.side])
-
+        
             if(o.breaking) breakingGroups.push({ start: this.groupStart + groupCount, texture: o.breaking.textureIndex })
-            groupCount += 6
+            
         }
         
         this.geometry.addGroup(this.groupStart, groupCount, Number(textureIndex))
@@ -133,8 +146,10 @@ export default class Chunk {
         this.mesh = new Mesh(this.geometry, TextureManager.textures)
     }
 
-    //return true to not render side
-    checkVoxel(pos, curBlock, update){
+    /**
+    * returns true if a block is on the position and should render the face
+    */
+    checkVoxel(pos, blockData, side, update){
         if(pos.y < 0 || pos.y >= ChunkHeight) return true
 
         let block;
@@ -147,9 +162,15 @@ export default class Chunk {
             block = this.getVoxel(pos)
         }
 
+        /*if(blockData.voxel && !blockData.culling[side]){
+            return false
+        }
+        if(block.voxel && !block.culling[side])
+            return false*/
+        if(block.voxel) return false
         if(block.material == MATERIAL.AIR) return false
         if(!block.transparent && block.solid || block.renderSides) return true
-        return !block.renderSides && curBlock.id === block.id
+        return !block.renderSides && blockData.id === block.id
     }
 
     unload(){

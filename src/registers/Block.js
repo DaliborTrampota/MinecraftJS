@@ -22,6 +22,7 @@ export default class Block {
         this.#setProperties()
 
         this.#generateModel()
+        this.elements = false
 
 
         delete Register.blockData[this.name]
@@ -77,11 +78,13 @@ export default class Block {
         let data = Register.blockData[this.name]
         
         if(data?.elements){
-            const { geometry, vertData, uvData } = VoxelBuilder.build(data.elements)
+            const { geometry, vertices, UVs, culling } = VoxelBuilder.build(data.elements)
 
             this.geometry = geometry
-            this.vertices = vertData
-            this.UVs = uvData
+            this.vertices = vertices
+            this.UVs = UVs
+            this.culling = culling
+            this.elements = data.elements
 
             this.voxel = true
         }

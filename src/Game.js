@@ -58,6 +58,9 @@ export default class Game {
             .block(new Block('furnace', MATERIAL.SOLID))
             .block(new Block('glass', MATERIAL.SOLID))
             .block(new Block('water_still', MATERIAL.LIQUID))
+            .block(new Block('stairs', MATERIAL.SOLID))
+            .block(new Block('slab', MATERIAL.SOLID))
+            .block(new Block('vertical_slab', MATERIAL.SOLID))
 
             .biome(new Biome('forest').setTemperature(0.5).setHumidity(0.35).setAltitude(0.5))
             .biome(new Biome('desert').setTemperature(0.9).setHumidity(0.15).setAltitude(0.3))
@@ -67,6 +70,10 @@ export default class Game {
             .item(new BlockItem(getBlock('dirt')))
             .item(new BlockItem(getBlock('stone')))
             .item(new BlockItem(getBlock('sand')))
+            .item(new BlockItem(getBlock('glass')))
+            .item(new BlockItem(getBlock('stairs')))
+            .item(new BlockItem(getBlock('slab')))
+            .item(new BlockItem(getBlock('vertical_slab')))
             
         this.world = new World(new BiomeGenerator(this.register), this.register, this.player);
 
