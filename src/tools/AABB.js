@@ -25,7 +25,7 @@ export default class AABB {
 
     static fromBlock(block, pos) {
         if(block.voxel) return AABB.createVoxelAABBs(block, pos)
-        return new AABB(0, 0, 0, 1, 1, 1).move(pos)
+        return [new AABB(0, 0, 0, 1, 1, 1).move(pos)]
     }
 
     static fromVectors(min, max) {

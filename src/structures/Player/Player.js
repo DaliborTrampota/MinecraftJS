@@ -72,7 +72,7 @@ export default class Player {
     }
     
     get feetPos(){
-        return this.position.clone().sub(new Vector3(0, 2, 0))
+        return this.position.clone().sub(new Vector3(0, 1.925, 0))
     }
 
     get range(){
@@ -127,29 +127,39 @@ export default class Player {
      */
     collide(target) {
         const AABBs = []
-        const groundAABBs = []
+        const topAABBs = []
+        const bottomAABBs = []
 
-        let cameraPos = this.eyePos.floor()
-        for(let x = cameraPos.x - 1; x <= cameraPos.x + 1; x++) {
-            for(let z = cameraPos.z - 1; z <= cameraPos.z + 1; z++) {
-                for(let y = cameraPos.y + 1; y >= cameraPos.y - 2; y--) {
+        let feetPos = this.feetPos.floor()
+        const playerBB = this.getAABB()
+        console.log(playerBB.yMin)
+        this.eyePos
+        for(let x = feetPos.x - 1; x <= feetPos.x + 1; x++) {
+            for(let z = feetPos.z - 1; z <= feetPos.z + 1; z++) {
+                for(let y = feetPos.y + 2; y >= feetPos.y - 2; y--) {
                     let pos = new Vector3(x, y, z)
                     if(!this.world.checkVoxelVec(pos)) continue
-                    const bb = AABB.fromBlock(this.world.getVoxelFromPos(pos), pos)
+                    const bbs = AABB.fromBlock(this.world.getVoxelFromPos(pos), pos)
 
-                    if(y == cameraPos.y - 2) groundAABBs.push(bb)
-                    else AABBs.push(bb)
+                    //if(bb.yMax < feetPos.y) bottomAABBs.push(bb)
+                    //else if(y == feetPos.y + 2) topAABBs.push(bb)
+                    for(let bb of bbs) {
+                        if(bb.yMax <= playerBB.yMin + 0.1) bottomAABBs.push(bb)
+                        else if(bb.yMin >= playerBB.yMax - 0.1) topAABBs.push(bb)
+                        else AABBs.push(bb)
+                    }
                 }
             }
         }
-        const playerBB = this.getAABB()
-        for(let bb of AABBs.flat()) {
+        //console.log(feetPos.y, bottomAABBs)
+        let upStep = 0
+        for(let bb of AABBs) {
             if(playerBB.intersects(bb)) {
                 const dir = playerBB.direction(bb)
                 const yDiff = bb.yMax - this.feetPos.y
                 if(this.grounded && yDiff > 5e-2 && yDiff <= this.maxUpStep) {
                     //target.y = dir.y *100 + 0.1
-                    this.vertTarget = yDiff
+                    upStep = yDiff
                 }
 
                 if(target.x > 0 && dir.x == -1 || target.x < 0 && dir.x == 1)
@@ -159,15 +169,27 @@ export default class Player {
                     target.z = 0
             }
         }
-
         
-        this.grounded = false
-        for(let bb of groundAABBs.flat()) {
-            if(playerBB.intersects(bb)){
-                this.grounded = true
-                console.log(target.y)
-                target.y = Math.max(target.y, 0)
+
+        if(target.y > 0) {
+            for(let bb of topAABBs) {
+                if(playerBB.intersects(bb)){
+                    target.y = Math.min(target.y, 0)
+                }
             }
+        } else {
+            this.grounded = false
+            for(let bb of bottomAABBs) {
+                if(playerBB.intersects(bb)){
+                    this.grounded = true
+                    target.y = Math.max(target.y, 0)
+                }
+            }
+        }
+        
+        
+        if(upStep) {
+            this.jump(upStep * 1.5)
         }
 
         return target
@@ -208,10 +230,10 @@ export default class Player {
         }
     }
 
-    jump(){
+    jump(height){
         this.controller.jumpRequest = false
         this.grounded = false
-        this.velocity.y += BASE_PLAYER_SETTINGS.jump * 8
+        this.velocity.y += (height ?? BASE_PLAYER_SETTINGS.jump) * 8
     }
 
     interact(button){
