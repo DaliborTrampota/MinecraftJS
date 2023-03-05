@@ -135,8 +135,8 @@ body {
     position: absolute;
     width: 47px;
     height: 47px;
-    top: 23px;
-    left: 23px;
+    /*top: 23px;
+    left: 23px;*/
 }
 
 .gui-slot-data span {
@@ -164,12 +164,4 @@ body {
 
 [draggable="true"] {
     z-index: 1;
-}
-
-#slot-2 {
-    top: calc(50px + 23px);
-}
-
-#slot-3 {
-    top: calc(100px + 23px);
 }

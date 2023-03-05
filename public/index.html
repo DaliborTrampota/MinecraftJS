@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <link rel="stylesheet" type="text/css" href="/src/style.css">
+    <link rel="stylesheet" type="text/css" href="public/style.css">
     <title>Minecraft JS</title>
   </head>
   <body>
@@ -9,35 +9,37 @@
       <div id="debug"></div>
 
       <div id="gui" draggable="false">
-        <div class="slots">
+        <div id="slots">
           <div class="gui-slot" id="slot-1" draggable="true">
             <div class="gui-slot-data">
-              <img src="/src/resources/textures/blocks/cobblestone.png" alt="item"/>
+              <img src="src/resources/textures/blocks/cobblestone.png" alt="item"/>
               <span>10</span>
             </div>
           </div>
           <div class="gui-slot" id="slot-2" draggable="true">
             <div class="gui-slot-data">
-              <img src="/src/resources/textures/blocks/sand.png" alt="item"/>
+              <img src="src/resources/textures/blocks/sand.png" alt="item"/>
               <span>10</span>
             </div>
           </div>
           <div class="gui-slot" id="slot-3" draggable="true">
             <div class="gui-slot-data">
-              <img src="/src/resources/images/empty.png" alt="item"/>
+              <img src="src/resources/images/empty.png" alt="item"/>
               <span>10</span>
             </div>
           </div>
         </div>
       
-        <img src="/src/resources/images/gui/inventory.png" id="gui-bg" draggable="false">
+        <img src="src/resources/images/gui/inventory.png" id="gui-bg" draggable="false">
       </div>
 
       <div id="crosshair">
-        <img src="/src/resources/images/crosshair.png">
+        <img src="src/resources/images/crosshair.png">
       </div>
       <div id="hotbar"></div>
       <div id="image-gen"></div>
-      <script src="/src/index.js" type="module"></script>
+
+      <script src="src/index.js" type="module"></script>
+      
   </body>
 </html>
