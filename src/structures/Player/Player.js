@@ -1,7 +1,7 @@
 import { Vector3, Vector2, Euler, Raycaster } from 'https://cdn.skypack.dev/three@0.141.0';
 import Controller from './Controller.js';
 import ItemEntity from '../Entities/ItemEntity.js';
-import { PI_2, GAMEMODE, BASE_PLAYER_SETTINGS, PLAYER_DIMENSIONS, RIGHT, UP, FORWARD, MATERIAL, CrossCheck, CornerCheck, MOUSE_BUTTON } from '../../tools/Constants.js'
+import { PI_2, GAMEMODE, BASE_PLAYER_SETTINGS, PLAYER_DIMENSIONS, RIGHT, UP, FORWARD, MATERIAL, CrossCheck, CornerCheck, MOUSE_BUTTON, sides } from '../../tools/Constants.js'
 import { clamp, moveTowards } from '../../tools/Utils.js'
 
 import Inventory from '../Interfaces/PlayerInventory.js';
@@ -9,6 +9,7 @@ import Chunk from '../Chunk.js';
 import BlockPlaceContext from '../Contexts/BlockPlaceContext.js';
 import BlockItem from '../../registers/BlockItem.js';
 import Stack from '../Interfaces/Stack.js';
+import AABB from '../../tools/AABB.js';
 
 const WIDTH = PLAYER_DIMENSIONS.width
 const Y_WIDTH = WIDTH * 0.75
@@ -18,9 +19,9 @@ export default class Player {
 
     constructor(model, camera){
         this.model = model
-        this.camera = camera;
+        this.camera = camera
 
-        this.locked = false;
+        this.locked = false
         this.viewDistance = BASE_PLAYER_SETTINGS.viewDistance
         this.sensitivity = 1
         
@@ -28,9 +29,9 @@ export default class Player {
         this.gamemode = GAMEMODE.CREATIVE
         this.inventory = new Inventory()
 
-        this.velocity = new Vector3(0, 0, 0);
-        this.vertVel = 0
+        this.velocity = new Vector3(0, 0, 0)
         this.chunkCoords = new Vector2(0, 0)
+        this.vertTarget = 0
 
         this.placeDelay = 0
 
@@ -44,6 +45,8 @@ export default class Player {
         document.addEventListener('mousemove', this.onMouseMove.bind(this));
         document.addEventListener('mousedown', this.onMouseClick.bind(this));
         document.addEventListener('mouseup', this.onMouseRelease.bind(this));
+
+        this.maxUpStep = 0.6
     }
 
     get world() {
@@ -113,6 +116,63 @@ export default class Player {
         }
     }
 
+    /**
+     * 1. get all blocks around the player done
+     * 2. generate aabbs  done
+     * 3. check collisions with player's aabb done
+     * 4. block velocity 
+     * 5. handle steps
+     * 6. push when partially inside a block
+     * 
+     */
+    collide(target) {
+        const AABBs = []
+        const groundAABBs = []
+
+        let cameraPos = this.eyePos.floor()
+        for(let x = cameraPos.x - 1; x <= cameraPos.x + 1; x++) {
+            for(let z = cameraPos.z - 1; z <= cameraPos.z + 1; z++) {
+                for(let y = cameraPos.y + 1; y >= cameraPos.y - 2; y--) {
+                    let pos = new Vector3(x, y, z)
+                    if(!this.world.checkVoxelVec(pos)) continue
+                    const bb = AABB.fromBlock(this.world.getVoxelFromPos(pos), pos)
+
+                    if(y == cameraPos.y - 2) groundAABBs.push(bb)
+                    else AABBs.push(bb)
+                }
+            }
+        }
+        const playerBB = this.getAABB()
+        for(let bb of AABBs.flat()) {
+            if(playerBB.intersects(bb)) {
+                const dir = playerBB.direction(bb)
+                const yDiff = bb.yMax - this.feetPos.y
+                if(this.grounded && yDiff > 5e-2 && yDiff <= this.maxUpStep) {
+                    //target.y = dir.y *100 + 0.1
+                    this.vertTarget = yDiff
+                }
+
+                if(target.x > 0 && dir.x == -1 || target.x < 0 && dir.x == 1)
+                    target.x = 0
+                    
+                if(target.z > 0 && dir.z == -1 || target.z < 0 && dir.z == 1)
+                    target.z = 0
+            }
+        }
+
+        
+        this.grounded = false
+        for(let bb of groundAABBs.flat()) {
+            if(playerBB.intersects(bb)){
+                this.grounded = true
+                console.log(target.y)
+                target.y = Math.max(target.y, 0)
+            }
+        }
+
+        return target
+    }
+
     calculateVelocity(delta){
         if(!this.controller.flying){
             this.velocity.y += delta * this.world.gravity * 1.5
@@ -132,20 +192,20 @@ export default class Player {
             let rot = Math.atan2(dir.x, dir.z);
             let worldDir = this.velocity.applyAxisAngle(UP, rot)
 
-        
-            if(worldDir.z > 0 && this.back || worldDir.z < 0 && this.front)
-                this.velocity.z = 0
+            worldDir = this.collide(worldDir)
+            // if(worldDir.z > 0 && this.back || worldDir.z < 0 && this.front)
+            //     this.velocity.z = 0
 
-            if(worldDir.x > 0 && this.right || worldDir.x < 0 && this.left)
-                this.velocity.x = 0
+            // if(worldDir.x > 0 && this.right || worldDir.x < 0 && this.left)
+            //     this.velocity.x = 0
 
-            if(this.velocity.y <= 0) this.velocity.y = this.checkDownSpeed(this.velocity.y)
-            else if(this.velocity.y > 0) this.velocity.y = this.checkUpSpeed(this.velocity.y)
-
+            // if(this.velocity.y <= 0) this.velocity.y = this.checkDownSpeed(this.velocity.y)
+            // else if(this.velocity.y > 0) this.velocity.y = this.checkUpSpeed(this.velocity.y)
+            
             this.velocity.applyAxisAngle(UP, -rot)
+        }else {
+            this.camera.getWorldPosition(new Vector3()) //has to be called otherwise the game freezes? figure out why TODO
         }
-        
-
     }
 
     jump(){
@@ -341,7 +401,6 @@ export default class Player {
     checkDownSpeed(downSpeed) {
         let pos = this.camera.getWorldPosition(new Vector3())
         pos.addScaledVector(UP, -(PLAYER_DIMENSIONS.height - PLAYER_DIMENSIONS.cameraOffset))
-
         
         if (
             this.world.checkVoxel(pos.x - Y_WIDTH, pos.y, pos.z - Y_WIDTH) ||
@@ -349,8 +408,8 @@ export default class Player {
             this.world.checkVoxel(pos.x + Y_WIDTH, pos.y, pos.z + Y_WIDTH) ||
             this.world.checkVoxel(pos.x - Y_WIDTH, pos.y, pos.z + Y_WIDTH)
         ) {
-             this.grounded = true
-             return 0;
+            this.grounded = true
+            return 0
         }
         this.grounded = false
         return downSpeed
@@ -368,6 +427,13 @@ export default class Player {
         ) return 0
     
         return upSpeed;
+    }
+
+    getAABB() {
+        this.model.geometry.computeBoundingBox()
+        const bb = this.model.geometry.boundingBox
+        const moved = bb.clone().applyMatrix4(this.model.matrixWorld)
+        return AABB.fromVectors(moved.min, moved.max)//.move(this.model.getWorldPosition(new Vector3()))
     }
 
 

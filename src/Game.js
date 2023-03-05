@@ -1,4 +1,4 @@
-import { Clock, DirectionalLight, DirectionalLightHelper, TextureLoader, MeshBasicMaterial, Mesh, PlaneGeometry, CubeTextureLoader, BoxGeometry, Box3 } from 'https://cdn.skypack.dev/three@0.141.0';
+import { Clock, DirectionalLight, DirectionalLightHelper, TextureLoader, MeshBasicMaterial, Mesh, PlaneGeometry, CubeTextureLoader, BoxGeometry, Box3, Vector3 } from 'https://cdn.skypack.dev/three@0.141.0';
 import Stats from 'https://cdn.jsdelivr.net/npm/three@0.141.0/examples/jsm/libs/stats.module.js';
 import { MATERIAL, PI_2, PLAYER_DIMENSIONS } from './tools/Constants.js';
 import Register from './Register.js';
@@ -9,6 +9,7 @@ import Block from './registers/Block.js';
 import Biome from './registers/Biome.js';
 import BlockItem from './registers/BlockItem.js';
 import BiomeGenerator from './structures/Generators/BiomeGenerator.js';
+import Stack from './structures/Interfaces/Stack.js';
 
 export default class Game {
 
@@ -80,6 +81,11 @@ export default class Game {
         window.clock.start()
         this.addUpdateSub(this.player)
         this.addUpdateSub(this.world)
+
+        this.player.inventory.addStack(new Stack(this.register.getItem('stairs'), 64))
+        this.player.inventory.addStack(new Stack(this.register.getItem('stone'), 64))
+        this.player.inventory.addStack(new Stack(this.register.getItem('slab'), 64))
+        this.player.inventory.addStack(new Stack(this.register.getItem('vertical_slab'), 64))
     }
 
     Update(){
@@ -127,9 +133,11 @@ export default class Game {
     }
 
     createGameModel(){
-        const geometry = new BoxGeometry(PLAYER_DIMENSIONS.width * 2, PLAYER_DIMENSIONS.height, PLAYER_DIMENSIONS.depth * 2);
-        const material = new MeshBasicMaterial( { color: 0x00ff00 } );
-        const model = new Mesh( geometry, material );
+        const geometry = new BoxGeometry(PLAYER_DIMENSIONS.width * 2, PLAYER_DIMENSIONS.height, PLAYER_DIMENSIONS.depth * 2)
+        const material = new MeshBasicMaterial( { color: 0x00ff00, opacity: 0.3, transparent: true } );
+        const model = new Mesh( geometry, material )
+        model.geometry.translate(0, -1, 0)
+        //window.scene.add(model)
 
         model.bb = new Box3().setFromObject(model)
 

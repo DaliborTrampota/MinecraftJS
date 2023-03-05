@@ -21,8 +21,8 @@ export default class Block {
         this.animation = false
         this.#setProperties()
 
-        this.#generateModel()
         this.elements = false
+        this.#generateModel()
 
         delete Register.blockData[this.name]
     }
@@ -48,7 +48,6 @@ export default class Block {
             vertices: this.vertices[side].filter(o => !culled ? o.type == 'unculled' : true).map(o => o.data).flat(),
             uvs: this.UVs[side].filter(o => !culled ? o.type == 'unculled' : true).map(o => o.data).flat(),
         }
-        console.log(this, data)
         return data
     }
 
