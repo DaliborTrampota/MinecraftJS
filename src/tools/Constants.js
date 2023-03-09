@@ -99,12 +99,12 @@ const ChunkSize = 16
 const ChunkHeight = 128
 
 const sides = [
-    { side: 'north',    dir: new Vector3( 0,  0,  1) },
-    { side: 'south',     dir: new Vector3( 0,  0, -1) },
-    { side: 'up',      dir: new Vector3( 0,  1,  0) },
-    { side: 'down',   dir: new Vector3( 0, -1,  0) },
-    { side: 'east',    dir: new Vector3( 1,  0,  0) },
-    { side: 'west',     dir: new Vector3(-1,  0,  0) },
+    { side: 'north',dir: new Vector3( 0,  0,  1) },
+    { side: 'south',dir: new Vector3( 0,  0, -1) },
+    { side: 'up',   dir: new Vector3( 0,  1,  0) },
+    { side: 'down', dir: new Vector3( 0, -1,  0) },
+    { side: 'east', dir: new Vector3( 1,  0,  0) },
+    { side: 'west', dir: new Vector3(-1,  0,  0) },
 ]
 
 const CrossCheck = [ 
@@ -151,7 +151,7 @@ const BASE_PLAYER_SETTINGS = {
 
 const PLAYER_DIMENSIONS = {
     height: 2,
-    width: 0.4,
+    width: 0.35,
     depth: 0.2,
     cameraOffset: 0.25
 }
