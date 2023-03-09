@@ -11,18 +11,18 @@ document.getElementById('target').appendChild(renderer.domElement);
 window.getBlockImage = PhotoBooth
 window.scene = new Scene();
 window.clock = new Clock();
-const camera = new PerspectiveCamera( 90, window.innerWidth / window.innerHeight, 1, 500 );
+window.pintar = new PintarJS()
+const camera = new PerspectiveCamera(90, window.innerWidth / window.innerHeight, 1, 500 );
 
 camera.near = 0.01
 camera.updateProjectionMatrix()
 
 
 function onWindowResize() {
-    camera.aspect = container.clientWidth / container.clientHeight;
+    camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
-  
-    renderer.setSize( container.clientWidth, container.clientHeight );
+    renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-document.onresize = onWindowResize
+window.onresize = onWindowResize
 new Game(renderer, camera)
