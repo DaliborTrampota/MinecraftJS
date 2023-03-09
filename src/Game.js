@@ -86,6 +86,7 @@ export default class Game {
         this.player.inventory.addStack(new Stack(this.register.getItem('stone'), 64))
         this.player.inventory.addStack(new Stack(this.register.getItem('slab'), 64))
         this.player.inventory.addStack(new Stack(this.register.getItem('vertical_slab'), 64))
+        this.player.inventory.addStack(new Stack(this.register.getItem('glass'), 64))
     }
 
     Update(){

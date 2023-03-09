@@ -24,5 +24,14 @@ function onWindowResize() {
     renderer.setSize( container.clientWidth, container.clientHeight );
 }
 
+function preventClose(e) {
+    if(window.game.player.controller.locked) {
+        e.preventDefault()
+        return e.returnValue = 'Are you sure you want to leave?'
+    }
+}
+
 document.onresize = onWindowResize
+window.onbeforeunload = preventClose
+
 new Game(renderer, camera)

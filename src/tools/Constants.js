@@ -123,7 +123,8 @@ const CornerCheck = [
 
 const GAMEMODE = {
     SURVIVAL: 0,
-    CREATIVE:  1
+    CREATIVE:  1,
+    SPECTATOR: 2,
 }
 
 const MOUSE_BUTTON = {
