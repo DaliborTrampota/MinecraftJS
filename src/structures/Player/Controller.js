@@ -1,4 +1,5 @@
 import { clamp } from "../../tools/Utils.js"
+import { BoxHelper } from 'https://cdn.skypack.dev/three@0.141.0';
 
 
 export default class Controller {
@@ -24,7 +25,8 @@ export default class Controller {
 
         this.debug = {
             properties: Object.entries(window.game.renderer.info).map(([key, o]) => Object.keys(o).map(prop => `${key}.${prop}`)).flat(),
-            active: false
+            active: false,
+            helpers: {}
         }
         
         this.connect()
@@ -144,6 +146,8 @@ export default class Controller {
         for(let prop of this.debug.properties){
             debug.insertAdjacentHTML('beforeend', `<div id=info-${prop}></div>`)
         }
+        this.debug.helpers.player = new BoxHelper(this.player.model, 0xffff00)
+        window.scene.add(this.debug.helpers.player)
     }
 
     toggleDebugPanel(){
@@ -168,6 +172,9 @@ export default class Controller {
             let { prop, value } = this.getProp(renderer.info, propPath)
             document.getElementById(`info-${propPath}`).innerHTML = `${prop}: ${typeof value == 'number' ? value.toLocaleString() : value}`
         }
+        for(let helper in this.debug.helpers) {
+            this.debug.helpers[helper].update()
+        } 
     }
 
     getProp(object, path){
