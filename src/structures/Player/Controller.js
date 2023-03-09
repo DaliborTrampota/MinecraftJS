@@ -1,3 +1,4 @@
+import { GAMEMODE } from "../../tools/Constants.js"
 import { clamp } from "../../tools/Utils.js"
 import { BoxHelper } from 'https://cdn.skypack.dev/three@0.141.0';
 
@@ -16,11 +17,13 @@ export default class Controller {
             left: false,
         }
         
-        this.vertical = 0,
-        this.horizontal = 0,
+        this.vertical = 0
+        this.horizontal = 0
+        this.upDown = 0
 
-        this.jumpRequest = false,
-        this.sprint = false,
+        this.jumpRequest = false
+        this.sprint = false
+        this.crouch = false
         this.flying = false
 
         this.debug = {
@@ -36,34 +39,50 @@ export default class Controller {
 
     
     keyDown(e){
+        if(e.ctrlKey && e.code == 'KeyW') {
+            e.preventDefault()
+            e.stopPropagation()
+        }
         switch(e.code){
             case 'KeyW': case 'ArrowUp':
                 if(!this.movement.front) this.vertical++
-                this.movement.front = true;
-                break;
+                this.movement.front = true
+                break
 
             case 'KeyS': case 'ArrowDown':
                 if(!this.movement.back) this.vertical--
-                this.movement.back = true;
-                break;
+                this.movement.back = true
+                break
 
             case 'KeyA': case 'ArrowLeft':
                 if(!this.movement.left) this.horizontal--
-                this.movement.left = true;
-                break;
+                this.movement.left = true
+                break
 
             case 'KeyD': case 'ArrowRight':
                 if(!this.movement.right) this.horizontal++
-                this.movement.right = true;
-                break;
+                this.movement.right = true
+                break
 
             case 'ShiftLeft':
-                this.sprint = true;
-                break;
+                this.sprint = true
+                break
+
+            case 'ControlLeft':
+                if(this.flying) {
+                    this.upDown--
+                    this.crouch = false
+                } else 
+                    this.crouch = true
+                break
 
             case 'Space':
-                if(!this.flying) this.jumpRequest = true
-                return
+                if(this.flying) {
+                    this.upDown++
+                    this.crouch = false
+                } else if(!this.flying) 
+                    this.jumpRequest = true
+                break
 
             case 'KeyP':
                 this.toggleDebugPanel()
@@ -71,16 +90,19 @@ export default class Controller {
 
             case 'KeyF':
                 this.flying = !this.flying
-                this.player.vertVel = 0
-                break;
+                break
 
             case 'KeyQ':
                 this.player.drop()
-                return;
+                return
 
             case 'KeyE':
                 this.player.inventory.toggle(this)
                 return
+
+            case 'KeyG':
+                this.player.gamemode = (this.player.gamemode + 1) % 3
+                break
         }
 
         if(e.code.startsWith('Digit')){
@@ -92,37 +114,48 @@ export default class Controller {
 
         this.horizontal = clamp(this.horizontal, -1, 1)
         this.vertical = clamp(this.vertical, -1, 1)
+        this.upDown = clamp(this.upDown, -1, 1)
     }
     
     keyUp(e){
         switch(e.code){
             case 'KeyW': case 'ArrowUp':
                 if(this.movement.front) this.vertical--
-                this.movement.front = false;
-                break;
+                this.movement.front = false
+                break
 
             case 'KeyS': case 'ArrowDown':
                 if(this.movement.back) this.vertical++
-                this.movement.back = false;
-                break;
+                this.movement.back = false
+                break
 
             case 'KeyA': case 'ArrowLeft':
                 if(this.movement.left) this.horizontal++
-                this.movement.left = false;
-                break;
+                this.movement.left = false
+                break
 
             case 'KeyD': case 'ArrowRight':
                 if(this.movement.right) this.horizontal--
-                this.movement.right = false;
-                break;
+                this.movement.right = false
+                break
 
             case 'ShiftLeft':
-                this.sprint = false;
-                break;
+                this.sprint = false
+                break
+
+            case 'ControlLeft':
+                if(this.flying) this.upDown++
+                this.crouch = false
+                break
+
+            case 'Space':
+                if(this.flying) this.upDown--
+                break
         }
         
         this.horizontal = clamp(this.horizontal, -1, 1)
         this.vertical = clamp(this.vertical, -1, 1)
+        this.upDown = clamp(this.upDown, -1, 1)
     }
 
     onMouseScroll(e){
@@ -130,9 +163,9 @@ export default class Controller {
     }
     
     connect(){
-        document.addEventListener('wheel', this.onMouseScroll.bind(this));
-        document.addEventListener('keydown', this.keyDown.bind(this));
-        document.addEventListener('keyup', this.keyUp.bind(this));
+        document.addEventListener('wheel', this.onMouseScroll.bind(this))
+        document.addEventListener('keydown', this.keyDown.bind(this))
+        document.addEventListener('keyup', this.keyUp.bind(this))
         document.addEventListener('click', () => {
             if(!this.locked && !this.inGUI) document.body.requestPointerLock()
         })
@@ -146,6 +179,9 @@ export default class Controller {
         for(let prop of this.debug.properties){
             debug.insertAdjacentHTML('beforeend', `<div id=info-${prop}></div>`)
         }
+        const gamemodeName = this.player.gamemode == GAMEMODE.SURVIVAL ? 'Survival' : this.player.gamemode == GAMEMODE.CREATIVE ? 'Creative' : 'Spectator'
+        debug.insertAdjacentHTML('beforeend', `<div id=info-gamemode>${gamemodeName}</div>`)
+
         this.debug.helpers.player = new BoxHelper(this.player.model, 0xffff00)
         window.scene.add(this.debug.helpers.player)
     }

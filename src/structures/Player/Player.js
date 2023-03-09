@@ -96,7 +96,7 @@ export default class Player {
         this.calculateVelocity(delta)
         if(this.controller.jumpRequest && this.grounded) this.jump()
         this.model.translateOnAxis(this.velocity, delta)
-
+        
         this.pickupEntities()
         
         let curChunk = window.game.world.getChunkFromPos(this.position)
@@ -124,109 +124,57 @@ export default class Player {
      * 5. handle steps
      * 6. push when partially inside a block
      * 
+     * always generate closest aabb directly below and above the player and apply swept aabb
+     * 
      */
-    collide(target) {
-        const AABBs = []
-        const topAABBs = []
-        const bottomAABBs = []
-
-        let feetPos = this.feetPos.floor()
+    collide(target, delta) {
+        const AABBs = this.surroundingAABBs()
         const playerBB = this.getAABB()
-        console.log(playerBB.yMin)
-        this.eyePos
-        for(let x = feetPos.x - 1; x <= feetPos.x + 1; x++) {
-            for(let z = feetPos.z - 1; z <= feetPos.z + 1; z++) {
-                for(let y = feetPos.y + 2; y >= feetPos.y - 2; y--) {
-                    let pos = new Vector3(x, y, z)
-                    if(!this.world.checkVoxelVec(pos)) continue
-                    const bbs = AABB.fromBlock(this.world.getVoxelFromPos(pos), pos)
-
-                    //if(bb.yMax < feetPos.y) bottomAABBs.push(bb)
-                    //else if(y == feetPos.y + 2) topAABBs.push(bb)
-                    for(let bb of bbs) {
-                        if(bb.yMax <= playerBB.yMin + 0.1) bottomAABBs.push(bb)
-                        else if(bb.yMin >= playerBB.yMax - 0.1) topAABBs.push(bb)
-                        else AABBs.push(bb)
-                    }
-                }
-            }
-        }
-        //console.log(feetPos.y, bottomAABBs)
-        let upStep = 0
+        
+        let result = { time: 1 }
         for(let bb of AABBs) {
-            if(playerBB.intersects(bb)) {
-                const dir = playerBB.direction(bb)
-                const yDiff = bb.yMax - this.feetPos.y
-                if(this.grounded && yDiff > 5e-2 && yDiff <= this.maxUpStep) {
-                    //target.y = dir.y *100 + 0.1
-                    upStep = yDiff
-                }
-
-                if(target.x > 0 && dir.x == -1 || target.x < 0 && dir.x == 1)
-                    target.x = 0
-                    
-                if(target.z > 0 && dir.z == -1 || target.z < 0 && dir.z == 1)
-                    target.z = 0
-            }
-        }
-        
-
-        if(target.y > 0) {
-            for(let bb of topAABBs) {
-                if(playerBB.intersects(bb)){
-                    target.y = Math.min(target.y, 0)
-                }
-            }
-        } else {
-            this.grounded = false
-            for(let bb of bottomAABBs) {
-                if(playerBB.intersects(bb)){
-                    this.grounded = true
-                    target.y = Math.max(target.y, 0)
-                }
-            }
-        }
-        
-        
-        if(upStep) {
-            this.jump(upStep * 1.5)
+            let outcome = AABB.aabbSwept3D(playerBB, bb, target.clone().multiplyScalar(delta))
+            if(outcome.time < result.time)
+                result = outcome
         }
 
-        return target
+        if(result.time != 1) {
+            const remainingSpeed = target.clone().multiplyScalar(1 - result.time)
+            target.multiplyScalar(result.time)
+            const bDotB = result.dir.dot(result.dir)
+            const aDotB = remainingSpeed.dot(result.dir)
+            if(bDotB != 0) 
+                target.add(remainingSpeed.sub(result.dir.multiplyScalar(aDotB / bDotB)))
+        }
+        
+        //this.grounded = target.y == 0
     }
 
+
     calculateVelocity(delta){
-        if(!this.controller.flying){
+        if(!this.controller.flying && !this.grounded){
             this.velocity.y += delta * this.world.gravity * 1.5
         }else{
-            this.velocity.y = 0
+            this.velocity.y = this.controller.upDown * BASE_PLAYER_SETTINGS.speed
         }
-
+        
         const curSpeed = (this.controller.sprint ? BASE_PLAYER_SETTINGS.sprintMultiplier : 1) * BASE_PLAYER_SETTINGS.speed
         let moveDir = new Vector3(this.controller.horizontal, 0, -this.controller.vertical).normalize().multiplyScalar(curSpeed)
 
-        const Y = this.velocity.y //+ this.vertVel
-        this.velocity = moveTowards(this.velocity.clone(), moveDir.clone(), BASE_PLAYER_SETTINGS.acceleration * delta)
-        this.velocity.y = (this.grounded ? 0 : clamp(Y, -80, 20))
 
-        if(!this.controller.flying){
+        this.eyePos //has to be called otherwise the game freezes? figure out why TODO
+
+        //if(!this.controller.flying){
+        const Y = this.velocity.y
+        this.velocity = moveTowards(this.velocity.clone(), moveDir.clone(), BASE_PLAYER_SETTINGS.acceleration * delta)
+        this.velocity.y = clamp(Y, -80, 20)//todo implement drag
+        //}
+        if(this.gamemode != GAMEMODE.SPECTATOR){
             let dir = this.model.getWorldDirection(new Vector3())
             let rot = Math.atan2(dir.x, dir.z);
-            let worldDir = this.velocity.applyAxisAngle(UP, rot)
-
-            worldDir = this.collide(worldDir)
-            // if(worldDir.z > 0 && this.back || worldDir.z < 0 && this.front)
-            //     this.velocity.z = 0
-
-            // if(worldDir.x > 0 && this.right || worldDir.x < 0 && this.left)
-            //     this.velocity.x = 0
-
-            // if(this.velocity.y <= 0) this.velocity.y = this.checkDownSpeed(this.velocity.y)
-            // else if(this.velocity.y > 0) this.velocity.y = this.checkUpSpeed(this.velocity.y)
-            
+            const worldDir = this.velocity.applyAxisAngle(UP, rot)
+            this.collide(worldDir, delta)//.multiplyScalar(delta))
             this.velocity.applyAxisAngle(UP, -rot)
-        }else {
-            this.camera.getWorldPosition(new Vector3()) //has to be called otherwise the game freezes? figure out why TODO
         }
     }
 
@@ -275,7 +223,6 @@ export default class Player {
     attack(){
         //console.warn('Attack not implemented')
     }
-
 
     //TODO move to use context?
     destroy(){
@@ -371,86 +318,6 @@ export default class Player {
         }
     }
 
-    get left(){
-        let pos = this.camera.getWorldPosition(new Vector3())
-        pos.addScaledVector(RIGHT, -WIDTH)
-        
-        if(
-            this.world.checkVoxel(...pos.toArray()) ||
-            this.world.checkVoxel(...pos.sub(UP.clone()).toArray())
-        ) return true
-
-        return false
-    }
-
-    get right(){
-        let pos = this.camera.getWorldPosition(new Vector3())
-        pos.addScaledVector(RIGHT, WIDTH)
-
-        if(
-            this.world.checkVoxel(...pos.toArray()) ||
-            this.world.checkVoxel(...pos.sub(UP.clone()).toArray())
-        ) return true
-
-        return false
-    }
-
-    get front(){
-        let pos = this.camera.getWorldPosition(new Vector3())
-        pos.addScaledVector(FORWARD, WIDTH)
-        
-        if(
-            this.world.checkVoxel(...pos.toArray()) ||
-            this.world.checkVoxel(...pos.sub(UP.clone()).toArray())
-        ) return true
-
-        return false
-    }
-
-    get back(){
-        let pos = this.camera.getWorldPosition(new Vector3())
-        pos.addScaledVector(FORWARD, -WIDTH)
-
-        if(
-            this.world.checkVoxel(...pos.toArray()) ||
-            this.world.checkVoxel(...pos.sub(UP.clone()).toArray())
-        ) return true
-        
-        return false
-    }
-
-    
-    checkDownSpeed(downSpeed) {
-        let pos = this.camera.getWorldPosition(new Vector3())
-        pos.addScaledVector(UP, -(PLAYER_DIMENSIONS.height - PLAYER_DIMENSIONS.cameraOffset))
-        
-        if (
-            this.world.checkVoxel(pos.x - Y_WIDTH, pos.y, pos.z - Y_WIDTH) ||
-            this.world.checkVoxel(pos.x + Y_WIDTH, pos.y, pos.z - Y_WIDTH) ||
-            this.world.checkVoxel(pos.x + Y_WIDTH, pos.y, pos.z + Y_WIDTH) ||
-            this.world.checkVoxel(pos.x - Y_WIDTH, pos.y, pos.z + Y_WIDTH)
-        ) {
-            this.grounded = true
-            return 0
-        }
-        this.grounded = false
-        return downSpeed
-    }
-
-    checkUpSpeed(upSpeed) {
-        let pos = this.camera.getWorldPosition(new Vector3())
-        pos.addScaledVector(UP, PLAYER_DIMENSIONS.cameraOffset)
-        
-        if (
-            this.world.checkVoxel(pos.x - Y_WIDTH, pos.y, pos.z - Y_WIDTH) ||
-            this.world.checkVoxel(pos.x + Y_WIDTH, pos.y, pos.z - Y_WIDTH) ||
-            this.world.checkVoxel(pos.x + Y_WIDTH, pos.y, pos.z + Y_WIDTH) ||
-            this.world.checkVoxel(pos.x - Y_WIDTH, pos.y, pos.z + Y_WIDTH)
-        ) return 0
-    
-        return upSpeed;
-    }
-
     getAABB() {
         this.model.geometry.computeBoundingBox()
         const bb = this.model.geometry.boundingBox
@@ -458,7 +325,26 @@ export default class Player {
         return AABB.fromVectors(moved.min, moved.max)//.move(this.model.getWorldPosition(new Vector3()))
     }
 
+    surroundingAABBs() {
+        const AABBs = []
+        const feetPos = this.feetPos.floor()
+        const RADIUS = 1
+        for(let x = feetPos.x - RADIUS; x <= feetPos.x + RADIUS; x++) {
+            for(let z = feetPos.z - RADIUS; z <= feetPos.z + RADIUS; z++) {
+                for(let y = feetPos.y + 1 + RADIUS; y >= feetPos.y - RADIUS - 1; y--) {
+                    let pos = new Vector3(x, y, z)
+                    if(!this.world.checkVoxelVec(pos)) continue
+                    const bbs = AABB.fromBlock(this.world.getVoxelFromPos(pos), pos)
+                    AABBs.push(...bbs)
+                }
+            }
+        }
 
+        //while(!this.world.checkVoxelVec(feetPos.add(new Vector3(0, -1, 0)))){}
+        //AABBs.push(...AABB.fromBlock(this.world.checkVoxelVec(feetPos), feetPos))
+
+        return AABBs        
+    }
     
     onMouseClick(e){
         if(this.controller.inGUI) return
