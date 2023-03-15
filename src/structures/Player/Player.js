@@ -129,25 +129,33 @@ export default class Player {
      */
     collide(target, delta) {
         const AABBs = this.surroundingAABBs()
-        const playerBB = this.getAABB()
+        const playerBB = this.getCollisionAABB()
         
         let result = { time: 1 }
         for(let bb of AABBs) {
-            let outcome = AABB.aabbSwept3D(playerBB, bb, target.clone().multiplyScalar(delta))
+            let outcome = AABB.aabbSwept(playerBB, bb, target.clone().multiplyScalar(delta))
             if(outcome.time < result.time)
                 result = outcome
         }
-
+        
         if(result.time != 1) {
+            const yDiff = result.bb.yMax - this.feetPos.y
+            if(this.grounded && yDiff > 0 && yDiff <= this.maxUpStep) {
+                this.position.y += yDiff + 0.1
+                return
+            //    this.grounded = true
+            }
+
             const remainingSpeed = target.clone().multiplyScalar(1 - result.time)
             target.multiplyScalar(result.time)
+            this.position = this.position.clone()//.add(result.dir.multiplyScalar(0.005))
             const bDotB = result.dir.dot(result.dir)
             const aDotB = remainingSpeed.dot(result.dir)
             if(bDotB != 0) 
                 target.add(remainingSpeed.sub(result.dir.multiplyScalar(aDotB / bDotB)))
+
+            if(result.dir.y < 0 && target.y == 0) this.grounded = true
         }
-        
-        //this.grounded = target.y == 0
     }
 
 
@@ -173,7 +181,9 @@ export default class Player {
             let dir = this.model.getWorldDirection(new Vector3())
             let rot = Math.atan2(dir.x, dir.z);
             const worldDir = this.velocity.applyAxisAngle(UP, rot)
-            this.collide(worldDir, delta)//.multiplyScalar(delta))
+            this.grounded = false
+            for(let i = 0; i < 3; i++)//fixes weird bug where the player would get stuck in a block
+                this.collide(worldDir, delta)
             this.velocity.applyAxisAngle(UP, -rot)
         }
     }
@@ -323,6 +333,10 @@ export default class Player {
         const bb = this.model.geometry.boundingBox
         const moved = bb.clone().applyMatrix4(this.model.matrixWorld)
         return AABB.fromVectors(moved.min, moved.max)//.move(this.model.getWorldPosition(new Vector3()))
+    }
+
+    getCollisionAABB() {
+        return AABB.fromVectors(this.feetPos.add(new Vector3(-0.3, 0, -0.3)), this.feetPos.add(new Vector3(0.3, 1.8, 0.3)))
     }
 
     surroundingAABBs() {

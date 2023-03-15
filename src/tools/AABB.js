@@ -127,7 +127,37 @@ export default class AABB {
         return new AABB(this.xMin, this.yMin, this.zMin, this.xMax, this.yMax, this.zMax)
     }
 
-    static aabbSwept3D(objectBB, otherBB, velocity) {
+    static aabbSwept1D(objectBB, otherBB, velocity, axis = "y") {
+        let dEntry, dExit
+        let entry, exit
+
+        let min = `${axis}Min`
+        let max = `${axis}Max`
+
+        if (velocity > 0) {
+            dEntry = otherBB[min] - objectBB[max]
+            dExit = otherBB[max] - objectBB[min]
+        } else {
+            dEntry = otherBB[max] - objectBB[min]
+            dExit = otherBB[min] - objectBB[max]
+        }
+
+        if (velocity == 0) {
+            entry = -Infinity
+            exit = Infinity
+        } else {
+            entry = dEntry / velocity
+            exit = dExit / velocity
+        }
+
+        if (entry > exit || entry < 0 || entry > 1)
+            return { time: 1 }
+
+        return { time: entry }
+    }
+
+
+    static aabbSwept(objectBB, otherBB, velocity) {
         let xMin = velocity.x > 0 ? objectBB.xMin : objectBB.xMin + velocity.x
         let yMin = velocity.y > 0 ? objectBB.yMin : objectBB.yMin + velocity.y
         let zMin = velocity.z > 0 ? objectBB.zMin : objectBB.zMin + velocity.z
@@ -212,26 +242,6 @@ export default class AABB {
             dir.z = velocity.z > 0 ? -1 : 1;
         }
         
-//         if (txEntry > tyEntry && txEntry > tzEntry) {
-//             if (dxEntry < 0) {
-//                 dir.x = 1
-//             } else {
-//                 dir.x = -1
-//             }
-//         } else if (tyEntry > tzEntry) {
-//             if (dyEntry < 0) {
-//                 dir.y = -1
-//             } else {
-//                 dir.y = 1
-//             }
-//         } else {
-//             if (dzEntry < 0) {
-//                 dir.z = 1
-//             } else {
-//                 dir.z = -1
-//             }
-//         }
-        
-         return { time: entryTime, dir }
+         return { time: entryTime, dir, bb: otherBB }
      }
 }
