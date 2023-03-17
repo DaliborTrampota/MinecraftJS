@@ -1,9 +1,11 @@
 import { Vector3, Vector2, Euler, Raycaster } from 'https://cdn.skypack.dev/three@0.141.0';
-import Controller from './Controller.js';
-import ItemEntity from '../Entities/ItemEntity.js';
 import { PI_2, GAMEMODE, BASE_PLAYER_SETTINGS, PLAYER_DIMENSIONS, RIGHT, UP, FORWARD, MATERIAL, CrossCheck, CornerCheck, MOUSE_BUTTON, sides } from '../../tools/Constants.js'
 import { clamp, moveTowards } from '../../tools/Utils.js'
 
+import ItemEntity from '../Entities/ItemEntity.js';
+import LivingEntity from '../Entities/LivingEntity.js';
+
+import Controller from './Controller.js';
 import Inventory from '../Interfaces/PlayerInventory.js';
 import Chunk from '../Chunk.js';
 import BlockPlaceContext from '../Contexts/BlockPlaceContext.js';
@@ -15,10 +17,10 @@ const WIDTH = PLAYER_DIMENSIONS.width
 const Y_WIDTH = WIDTH * 0.75
 
 
-export default class Player {
+export default class Player extends LivingEntity {
 
     constructor(model, camera){
-        this.model = model
+        super(model)
         this.camera = camera
 
         this.locked = false
@@ -28,15 +30,10 @@ export default class Player {
         this.health = BASE_PLAYER_SETTINGS.health;
         this.gamemode = GAMEMODE.CREATIVE
         this.inventory = new Inventory()
-
-        this.velocity = new Vector3(0, 0, 0)
-        this.chunkCoords = new Vector2(0, 0)
-        this.vertTarget = 0
+        this.controller = new Controller(this)
 
         this.placeDelay = 0
 
-        this.grounded = false
-        this.controller = new Controller(this)
         this.holding = {
             clickStack: [],
             RMB: false,
@@ -47,24 +44,6 @@ export default class Player {
         document.addEventListener('mouseup', this.onMouseRelease.bind(this));
 
         this.maxUpStep = 0.6
-    }
-
-    get world() {
-        return window.game.world
-    }
-
-    get chunk() {
-        return window.game.world.chunks[Chunk.id(this.chunkCoords.x, this.chunkCoords.y)]
-    } 
-
-    get position() {
-        return this.model.position
-    }
-
-    set position(vector){
-        this.model.position.copy(vector)
-        let chunk = window.game.world.getChunkFromPos(vector)
-        if(chunk) this.chunkCoords = new Vector2(chunk.x, chunk.y)
     }
 
     get eyePos(){
@@ -92,21 +71,9 @@ export default class Player {
     }
 
     Update(delta){
-        this.delta = delta
-        this.calculateVelocity(delta)
         if(this.controller.jumpRequest && this.grounded) this.jump()
-        this.model.translateOnAxis(this.velocity, delta)
-        
+        super.Update(delta)
         this.pickupEntities()
-        
-        let curChunk = window.game.world.getChunkFromPos(this.position)
-        if(!curChunk) return
-        let curChunkPos = new Vector2(curChunk.x, curChunk.y)
-
-        if(this.chunkCoords.x != curChunkPos.x || this.chunkCoords.y != curChunkPos.y){
-            this.chunkCoords = curChunkPos;
-            //window.game.world.updateViewDistance()
-        }
 
         if(this.holding.LMB || this.holding.clickStack[0] == MOUSE_BUTTON.LMB){
             this.interact(MOUSE_BUTTON.LMB)
@@ -116,47 +83,7 @@ export default class Player {
         }
     }
 
-    /**
-     * 1. get all blocks around the player done
-     * 2. generate aabbs  done
-     * 3. check collisions with player's aabb done
-     * 4. block velocity 
-     * 5. handle steps
-     * 6. push when partially inside a block
-     * 
-     * always generate closest aabb directly below and above the player and apply swept aabb
-     * 
-     */
-    collide(target, delta) {
-        const AABBs = this.surroundingAABBs()
-        const playerBB = this.getCollisionAABB()
-        
-        let result = { time: 1 }
-        for(let bb of AABBs) {
-            let outcome = AABB.aabbSwept(playerBB, bb, target.clone().multiplyScalar(delta))
-            if(outcome.time < result.time)
-                result = outcome
-        }
-        
-        if(result.time != 1) {
-            const yDiff = result.bb.yMax - this.feetPos.y
-            if(this.grounded && yDiff > 0 && yDiff <= this.maxUpStep) {
-                this.position.y += yDiff + 0.1
-                return
-            //    this.grounded = true
-            }
-
-            const remainingSpeed = target.clone().multiplyScalar(1 - result.time)
-            target.multiplyScalar(result.time)
-            this.position = this.position.clone()//.add(result.dir.multiplyScalar(0.005))
-            const bDotB = result.dir.dot(result.dir)
-            const aDotB = remainingSpeed.dot(result.dir)
-            if(bDotB != 0) 
-                target.add(remainingSpeed.sub(result.dir.multiplyScalar(aDotB / bDotB)))
-
-            if(result.dir.y < 0 && target.y == 0) this.grounded = true
-        }
-    }
+    
 
 
     calculateVelocity(delta){
@@ -168,7 +95,6 @@ export default class Player {
         
         const curSpeed = (this.controller.sprint ? BASE_PLAYER_SETTINGS.sprintMultiplier : 1) * BASE_PLAYER_SETTINGS.speed
         let moveDir = new Vector3(this.controller.horizontal, 0, -this.controller.vertical).normalize().multiplyScalar(curSpeed)
-
 
         this.eyePos //has to be called otherwise the game freezes? figure out why TODO
 
@@ -184,6 +110,7 @@ export default class Player {
             this.grounded = false
             for(let i = 0; i < 3; i++)//fixes weird bug where the player would get stuck in a block
                 this.collide(worldDir, delta)
+
             this.velocity.applyAxisAngle(UP, -rot)
         }
     }
@@ -328,38 +255,10 @@ export default class Player {
         }
     }
 
-    getAABB() {
-        this.model.geometry.computeBoundingBox()
-        const bb = this.model.geometry.boundingBox
-        const moved = bb.clone().applyMatrix4(this.model.matrixWorld)
-        return AABB.fromVectors(moved.min, moved.max)//.move(this.model.getWorldPosition(new Vector3()))
-    }
-
     getCollisionAABB() {
         return AABB.fromVectors(this.feetPos.add(new Vector3(-0.3, 0, -0.3)), this.feetPos.add(new Vector3(0.3, 1.8, 0.3)))
     }
 
-    surroundingAABBs() {
-        const AABBs = []
-        const feetPos = this.feetPos.floor()
-        const RADIUS = 1
-        for(let x = feetPos.x - RADIUS; x <= feetPos.x + RADIUS; x++) {
-            for(let z = feetPos.z - RADIUS; z <= feetPos.z + RADIUS; z++) {
-                for(let y = feetPos.y + 1 + RADIUS; y >= feetPos.y - RADIUS - 1; y--) {
-                    let pos = new Vector3(x, y, z)
-                    if(!this.world.checkVoxelVec(pos)) continue
-                    const bbs = AABB.fromBlock(this.world.getVoxelFromPos(pos), pos)
-                    AABBs.push(...bbs)
-                }
-            }
-        }
-
-        //while(!this.world.checkVoxelVec(feetPos.add(new Vector3(0, -1, 0)))){}
-        //AABBs.push(...AABB.fromBlock(this.world.checkVoxelVec(feetPos), feetPos))
-
-        return AABBs        
-    }
-    
     onMouseClick(e){
         if(this.controller.inGUI) return
         switch(e.which){

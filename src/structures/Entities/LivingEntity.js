@@ -1,15 +1,17 @@
-import { Vector3, Vector2, Euler, Raycaster } from 'https://cdn.skypack.dev/three@0.141.0';
-import { PI_2, GAMEMODE, BASE_PLAYER_SETTINGS, RIGHT, UP, FORWARD, MATERIAL, CrossCheck, CornerCheck, MOUSE_BUTTON, sides } from '../../tools/Constants.js'
+import { Vector3, Vector2 } from 'https://cdn.skypack.dev/three@0.141.0';
+import { BASE_PLAYER_SETTINGS, RIGHT, UP, FORWARD } from '../../tools/Constants.js'
 import { clamp, moveTowards } from '../../tools/Utils.js'
 
 import Chunk from '../Chunk.js';
 import AABB from '../../tools/AABB.js';
 
 
-export default class Entity {
+export default class LivingEntity {
 
     constructor(model){
         this.model = model
+
+        this.health = 100
 
         this.velocity = new Vector3(0, 0, 0)
         this.chunkCoords = new Vector2(0, 0)
@@ -37,13 +39,21 @@ export default class Entity {
         return this.model.position
     }
 
-    set position(vector) {
+    set position(vector){
         this.model.position.copy(vector)
         let chunk = window.game.world.getChunkFromPos(vector)
         if(chunk) this.chunkCoords = new Vector2(chunk.x, chunk.y)
     }
+    
+    get feetPos(){
+        return this.position.clone().sub(new Vector3(0, 1.925, 0))
+    }
 
-    Update(delta) {
+    get range(){
+        return 5 //todo take in account gamemode, item in hand, etc
+    }
+
+    Update(delta){
         this.delta = delta
         this.calculateVelocity(delta)
         this.model.translateOnAxis(this.velocity, delta)
@@ -56,17 +66,6 @@ export default class Entity {
             this.chunkCoords = curChunkPos;
             //window.game.world.updateViewDistance()
         }
-    }
-    
-    despawn(){
-        this.model.removeFromParent()
-        //this.model.bb.removeFromParent()
-        for(let ch of this.model.children) {
-            ch.geometry.dispose()
-        }
-        delete this.chunk.entities[this.id]
-        window.game.removeUpdateSub(this)
-        //todo dispose box3 somehow?
     }
 
     /**
@@ -92,7 +91,7 @@ export default class Entity {
         }
         
         if(result.time != 1) {
-            const yDiff = result.bb.yMax - entityBB.yMin//this.feetPos.y
+            const yDiff = result.bb.yMax - this.feetPos.y
             if(this.grounded && yDiff > 0 && yDiff <= this.maxUpStep) {
                 this.position.y += yDiff + 0.1
                 return
@@ -117,11 +116,13 @@ export default class Entity {
             this.velocity.y += delta * this.world.gravity * 1.5
         }
         
+        // const curSpeed = (this.controller.sprint ? BASE_PLAYER_SETTINGS.sprintMultiplier : 1) * BASE_PLAYER_SETTINGS.speed
+        // let moveDir = new Vector3(this.controller.horizontal, 0, -this.controller.vertical).normalize().multiplyScalar(curSpeed)
 
         const Y = this.velocity.y
-        this.velocity = moveTowards(this.velocity.clone(), new Vector3(0, 0, 0), BASE_PLAYER_SETTINGS.acceleration * delta)
+        this.velocity = moveTowards(this.velocity.clone(), moveDir.clone(), BASE_PLAYER_SETTINGS.acceleration * delta)
         this.velocity.y = clamp(Y, -80, 20)//todo implement drag
-        
+
         let dir = this.model.getWorldDirection(new Vector3())
         let rot = Math.atan2(dir.x, dir.z);
         const worldDir = this.velocity.applyAxisAngle(UP, rot)
@@ -144,11 +145,12 @@ export default class Entity {
 
     surroundingAABBs() {
         const AABBs = []
-        const feetPos = this.feetPos.floor()
+        const bb = this.getCollisionAABB()
+        const center = bb.center()
         const RADIUS = 1
-        for(let x = feetPos.x - RADIUS; x <= feetPos.x + RADIUS; x++) {
-            for(let z = feetPos.z - RADIUS; z <= feetPos.z + RADIUS; z++) {
-                for(let y = feetPos.y + 1 + RADIUS; y >= feetPos.y - RADIUS - 1; y--) {
+        for(let x = Math.floor(center.x - RADIUS - bb.width/2); x <= Math.ceil(center.x + RADIUS + bb.width/2); x++) {
+            for(let z = Math.floor(center.z - RADIUS - bb.depth/2); z <= Math.ceil(center.z + RADIUS + bb.depth/2); z++) {
+                for(let y = Math.floor(center.y + RADIUS + bb.height/2) + 1; y >= Math.ceil(center.y - RADIUS - bb.height/2) - 1; y--) {
                     let pos = new Vector3(x, y, z)
                     if(!this.world.checkVoxelVec(pos)) continue
                     const bbs = AABB.fromBlock(this.world.getVoxelFromPos(pos), pos)
@@ -161,5 +163,5 @@ export default class Entity {
         //AABBs.push(...AABB.fromBlock(this.world.checkVoxelVec(feetPos), feetPos))
 
         return AABBs        
-    }    
+    }
 }
