@@ -1,3 +1,4 @@
+import InterfaceFactory from "./InterfaceFactory.js";
 import StorageInterface from "./StorageInterface.js";
 
 
@@ -6,14 +7,21 @@ export default class Inventory extends StorageInterface {
     constructor(hotbarSize = 10){
         super(4, 10)
 
-        this.htmlSlots = []
+        this.htmlHotbarSlots = []
         this.hotbar = new Array(hotbarSize)
         this.selectedSlot = 0
 
-        this.background = '/src/resources/images/gui/inventory.png'
+        //this.background = '/src/resources/images/gui/inventory.png'
 
         Inventory.makeHotbar(hotbarSize)
         Inventory.formatSlots(this)
+
+        const html = new InterfaceFactory(5, 5)
+            .section(10, 4, 0, 0)
+            .section(10, 1, 0, 4 * InterfaceFactory.Slot.HEIGHT + 4 * 5 + 10)
+            .build()
+
+        this.setInterface(html, this.background)
     }
 
     get slot() {
@@ -24,8 +32,8 @@ export default class Inventory extends StorageInterface {
         if(index >= this.hotbar.length) index = 0
         else if(index < 0) index = this.hotbar.length - 1
 
-        let curSlot = this.htmlSlots[this.selectedSlot]
-        let newSlot = this.htmlSlots[index]
+        let curSlot = this.htmlHotbarSlots[this.selectedSlot]
+        let newSlot = this.htmlHotbarSlots[index]
 
         curSlot.slot.id = ""
         newSlot.slot.id = "selected"
@@ -99,16 +107,16 @@ export default class Inventory extends StorageInterface {
     updateHotbarSlot(index = this.selectedSlot){
         const stack = this.hotbar[index]
         if(stack && stack.amount){
-            this.htmlSlots[index].count.innerHTML = stack.amount
-            this.htmlSlots[index].image.src = stack.item.image
+            this.htmlHotbarSlots[index].count.innerHTML = stack.amount
+            this.htmlHotbarSlots[index].image.src = stack.item.image
             if(stack.item.pixelated){
-                this.htmlSlots[index].image.classList.add('pixelated')
+                this.htmlHotbarSlots[index].image.classList.add('pixelated')
             }else{
-                this.htmlSlots[index].image.classList.remove('pixelated')
+                this.htmlHotbarSlots[index].image.classList.remove('pixelated')
             }
         }else{
-            this.htmlSlots[index].image.src = Inventory.empty
-            this.htmlSlots[index].count.innerHTML = ''
+            this.htmlHotbarSlots[index].image.src = Inventory.empty
+            this.htmlHotbarSlots[index].count.innerHTML = ''
             this.hotbar[index] = undefined
         }
     }
@@ -117,7 +125,7 @@ export default class Inventory extends StorageInterface {
         let hotbar = document.getElementById("hotbar")
         for(let i = 0; i < hotbarSize; i++){
             hotbar.insertAdjacentHTML('beforeend',
-                `<div class="slot" id=${i == 0 ? `selected` : ''}>
+                `<div class="hotbar-slot" id=${i == 0 ? `selected` : ''}>
                     <span>${i + 1}</span>
                     <img src="${Inventory.empty}" alt="item"/>
                     <span></span>
@@ -137,7 +145,7 @@ export default class Inventory extends StorageInterface {
             }
             formatted.push(o)
         }
-        inv.htmlSlots = formatted
+        inv.htmlHotbarSlots = formatted
 
     }
 }

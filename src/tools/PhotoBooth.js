@@ -2,7 +2,7 @@ import { BoxGeometry, Mesh, OrthographicCamera, WebGLRenderer, Scene } from 'htt
 
 const iconRenderer = new WebGLRenderer({ alpha: true, antialias: true });
 iconRenderer.setPixelRatio(1)
-document.getElementById('image-gen').appendChild(iconRenderer.domElement)
+document.getElementById('photo-booth').appendChild(iconRenderer.domElement)
 
 const PLANE = 1.2//0.9
 const iconCamera = new OrthographicCamera(-PLANE, PLANE, PLANE, -PLANE, 0.001, 10)

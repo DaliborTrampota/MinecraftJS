@@ -1,3 +1,4 @@
+import InterfaceFactory from "./InterfaceFactory.js"
 
 
 export default class StorageInterface {
@@ -8,6 +9,7 @@ export default class StorageInterface {
         this.rows = rows
         this.columns = columns
         this.slots = new Array(rows * columns)
+        this.htmlSlots = []
 
         this.background 
         this.open = false
@@ -22,11 +24,41 @@ export default class StorageInterface {
         return this.emptySlot != -1
     }
 
+    setInterface(html, background) {
+        while (this.GUI.firstChild) {
+            this.GUI.removeChild(this.GUI.lastChild);
+        }
+        this.GUI.appendChild(html)
+
+        let bg = document.createElement('img')
+        bg.setAttribute('id', 'gui-bg')
+        bg.setAttribute('draggable', 'false')
+        bg.src = background
+        this.GUI.appendChild(bg)
+        this.GUI_IMAGE = bg
+
+        this.htmlSlots = document.getElementsByClassName('gui-slot')//].sort((a, b) => a.dataset.id - b.dataset.id)
+    }
+
+    update() {
+        for(let i = 0; i < this.htmlSlots.length; ++i) {
+            let stack = this.slots[i]
+            console.log(stack)
+            stack ? InterfaceFactory.setSlot(this.htmlSlots[i], stack) : InterfaceFactory.clearSlot(this.htmlSlots[i])
+        }
+    }
+
     slotFor(stack){
         for(let i = 0; i < this.slots.length; ++i){
             if(!this.slots[i]) return i
         }
         return -1
+    }
+
+
+    setStack2(stack, index){
+        this.slots[index] = stack
+        this.update()
     }
 
 
@@ -37,7 +69,7 @@ export default class StorageInterface {
         if(this.open){
             controller.inGUI = true
             document.exitPointerLock()
-            this.GUI_IMAGE.src = this.background
+            //this.GUI_IMAGE.src = this.background
             this.GUI.style.display = 'block'
             this.connect()
         }else{
@@ -59,44 +91,24 @@ export default class StorageInterface {
     }
 
     dragStart(e){
-        e.dataTransfer.setData("slot-id", e.target.id);
+        console.log(e)
+        e.dataTransfer.setData("id", e.target.dataset.id);
     }
 
     onDrop(e){
         e.preventDefault();
-        const slotID = e.dataTransfer.getData("slot-id");
+        const sourceSlotID = e.dataTransfer.getData("id");
+        const targetSlotID = e.target.dataset.id;
 
-        const slot = document.getElementById(slotID)
-        const slotData = slot.firstElementChild
-        slot.replaceChild(this.generateSlotData(), slotData)
-
-        const targetSlot = e.target.parentNode
-        const curSlotData = targetSlot.firstElementChild
-
-        targetSlot.replaceChild(slotData, curSlotData);
+        const temp = this.slots[sourceSlotID]
+        this.slots[sourceSlotID] = this.slots[targetSlotID]
+        this.slots[targetSlotID] = temp
+        
+        this.update()
     }
 
     allowDrop(e){
         //console.log(e)
         e.preventDefault()
-    }
-
-    generateSlotData(stack){
-        let slotData = document.createElement('div')
-        let image = document.createElement('img')
-        let counter = document.createElement('span')
-
-        slotData.setAttribute('class', 'gui-slot-data')
-        image.setAttribute('alt', 'image')
-        if(stack?.item.pixelated)
-            image.setAttribute('class', 'pixelated')
-
-        image.src = stack ? stack.item.image : StorageInterface.empty
-        counter.innerHTML = stack ? stack.amount : ''
-
-        slotData.appendChild(image)
-        slotData.appendChild(counter)
-
-        return slotData
     }
 }
