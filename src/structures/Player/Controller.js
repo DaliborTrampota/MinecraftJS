@@ -102,6 +102,9 @@ export default class Controller {
 
             case 'KeyG':
                 this.player.gamemode = (this.player.gamemode + 1) % 3
+                if(this.player.gamemode == GAMEMODE.SPECTATOR) this.flying = true
+                if(this.player.gamemode == GAMEMODE.SURVIVAL) this.flying = false
+
                 break
         }
 
@@ -180,7 +183,7 @@ export default class Controller {
             debug.insertAdjacentHTML('beforeend', `<div id=info-${prop}></div>`)
         }
         const gamemodeName = this.player.gamemode == GAMEMODE.SURVIVAL ? 'Survival' : this.player.gamemode == GAMEMODE.CREATIVE ? 'Creative' : 'Spectator'
-        debug.insertAdjacentHTML('beforeend', `<div id=info-gamemode>${gamemodeName}</div>`)
+        debug.insertAdjacentHTML('beforeend', `<div id=info-gamemode>Gamemode: ${gamemodeName}</div>`)
 
         this.debug.helpers.player = new BoxHelper(this.player.model, 0xffff00)
         window.scene.add(this.debug.helpers.player)
@@ -208,6 +211,8 @@ export default class Controller {
             let { prop, value } = this.getProp(renderer.info, propPath)
             document.getElementById(`info-${propPath}`).innerHTML = `${prop}: ${typeof value == 'number' ? value.toLocaleString() : value}`
         }
+        const gamemodeName = this.player.gamemode == GAMEMODE.SURVIVAL ? 'Survival' : this.player.gamemode == GAMEMODE.CREATIVE ? 'Creative' : 'Spectator'
+        document.getElementById('info-gamemode').innerHTML = `Gamemode: ${gamemodeName}`
         for(let helper in this.debug.helpers) {
             this.debug.helpers[helper].update()
         } 

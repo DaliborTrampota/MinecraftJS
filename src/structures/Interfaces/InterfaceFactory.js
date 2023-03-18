@@ -7,10 +7,10 @@ class InterfaceFactory {
         this.yGap = yGap ?? 5
     }
 
-    section(xCount, yCount, x, y) {
+    section(xCount, yCount, x, y, name) {
         for(let i = 0; i < yCount; i++) {
             for(let j = 0; j < xCount; j++) {
-                this.slots.push(new Slot(x + j * this.xGap + Slot.WIDTH * j, y + i * this.yGap + Slot.HEIGHT * i))
+                this.slots.push(new Slot(x + j * this.xGap + Slot.WIDTH * j, y + i * this.yGap + Slot.HEIGHT * i, name))
             }
         }
         return this
@@ -58,9 +58,10 @@ class Slot {
     static WIDTH = 48
     static HEIGHT = 48
 
-    constructor(x, y) {
+    constructor(x, y, section) {
         this.x = x
         this.y = y
+        this.section = section
     }
 
     build() {
@@ -78,6 +79,7 @@ class Slot {
         slot.style.height = Slot.HEIGHT + 'px'
         slot.style.left = this.x + 'px'
         slot.style.top = this.y + 'px'
+        slot.dataset.section = this.section
 
         image.src = Slot.EMPTY
         counter.innerHTML = ''
@@ -89,6 +91,37 @@ class Slot {
     }
 }
 
+class Hotbar {
 
+    constructor(size) {
+        this.size = size
+    }
+
+    build(hotbar) {
+        const slots = []
+        for(let i = 0; i < this.size; i++) {
+            const slot = document.createElement('div')
+            const index = document.createElement('span')
+            const image = document.createElement('img')
+            const count = document.createElement('span')
+
+            slot.setAttribute('class', 'hotbar-slot')
+            slot.setAttribute('id', i == 0 ? 'selected' : '')
+            index.innerHTML = i + 1
+            image.src = Slot.EMPTY
+            image.setAttribute('alt', 'empty hotbar slot')
+
+            slot.appendChild(index)
+            slot.appendChild(image)
+            slot.appendChild(count)
+
+            slots.push({ html: slot, image, count })
+            hotbar.appendChild(slot)
+        }
+        return slots
+    }
+}
+
+InterfaceFactory.Hotbar = Hotbar
 InterfaceFactory.Slot = Slot
 export default InterfaceFactory

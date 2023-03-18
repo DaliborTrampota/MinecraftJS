@@ -34,4 +34,28 @@ function preventClose(e) {
 document.onresize = onWindowResize
 window.onbeforeunload = preventClose
 
+
+Array.prototype.view = function(start, end) {
+    return new Proxy(this, {
+        get(target, prop) {
+            if(prop == 'view') return target.slice(start, end)
+            if(prop === 'length') return end - start
+            if(isNaN(prop)) return Reflect.get(...arguments)
+            return target[start + Number(prop)]
+        },
+        set(target, prop, value) {
+            if(isNaN(prop)) return Reflect.set(...arguments)
+            target[start + Number(prop)] = value
+            return true
+        }
+    })
+}
+
+Array.prototype.findIndexFrom = function(start, callback) {
+    for(let i = start; i < this.length; i++) {
+        if(callback(this[i], i, this)) return i
+    }
+    return -1
+}
+
 new Game(renderer, camera)

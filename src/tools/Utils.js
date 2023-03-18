@@ -197,5 +197,5 @@ export {
     map,
     
     TwoWayMap,
-    IDMap
+    IDMap,
 }

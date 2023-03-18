@@ -1,14 +1,12 @@
 import InterfaceFactory from "./InterfaceFactory.js"
 
 
-export default class StorageInterface {
+export default class Interface {
 
     static empty = '/src/resources/images/empty.png'
     
-    constructor(rows, columns){
-        this.rows = rows
-        this.columns = columns
-        this.slots = new Array(rows * columns)
+    constructor(){
+        this.slots = []
         this.htmlSlots = []
 
         this.background 
@@ -23,6 +21,20 @@ export default class StorageInterface {
     get hasEmptySlot(){
         return this.emptySlot != -1
     }
+
+
+    slotFor(stack){
+        for(let i = 0; i < this.slots.length; ++i){
+            if(!this.slots[i]) return i
+        }
+        return -1
+    }
+
+
+    setStack(stack, index){
+        this.slots[index] = stack
+    }
+
 
     setInterface(html, background) {
         while (this.GUI.firstChild) {
@@ -43,30 +55,15 @@ export default class StorageInterface {
     update() {
         for(let i = 0; i < this.htmlSlots.length; ++i) {
             let stack = this.slots[i]
-            console.log(stack)
             stack ? InterfaceFactory.setSlot(this.htmlSlots[i], stack) : InterfaceFactory.clearSlot(this.htmlSlots[i])
         }
     }
-
-    slotFor(stack){
-        for(let i = 0; i < this.slots.length; ++i){
-            if(!this.slots[i]) return i
-        }
-        return -1
-    }
-
-
-    setStack2(stack, index){
-        this.slots[index] = stack
-        this.update()
-    }
-
-
 
     toggle(controller){
         this.open = !this.open
 
         if(this.open){
+            this.update()
             controller.inGUI = true
             document.exitPointerLock()
             //this.GUI_IMAGE.src = this.background
@@ -91,7 +88,6 @@ export default class StorageInterface {
     }
 
     dragStart(e){
-        console.log(e)
         e.dataTransfer.setData("id", e.target.dataset.id);
     }
 
@@ -108,7 +104,6 @@ export default class StorageInterface {
     }
 
     allowDrop(e){
-        //console.log(e)
         e.preventDefault()
     }
 }

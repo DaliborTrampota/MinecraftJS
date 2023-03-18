@@ -31,7 +31,7 @@ export default class BlockPlaceContext extends Context {
 
         let chunk = this.player.world.getChunkFromPos(this.hitResult.position)
         chunk.addVoxel(this.hitResult.position, this.block.id)
-        this.player.inventory.updateHotbarSlot()
+        this.player.inventory.updateHotbar()
     }
     
 }
