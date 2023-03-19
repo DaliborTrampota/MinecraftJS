@@ -19,9 +19,11 @@ const Y_WIDTH = WIDTH * 0.75
 
 export default class Player extends LivingEntity {
 
-    constructor(model, camera){
-        super(model)
+    constructor(camera){
+        super()
         this.camera = camera
+        this.camera.parent = this.model
+        this.camera.position.set(0, -PLAYER_DIMENSIONS.cameraOffset, 0)
 
         this.locked = false
         this.viewDistance = BASE_PLAYER_SETTINGS.viewDistance
@@ -235,14 +237,18 @@ export default class Player extends LivingEntity {
         let block = getBlockAt(position, this.world)
         let totalDistance = 0
 
-        while((options.ignoreLiquids && block.material == MATERIAL.LIQUID) || block.material == MATERIAL.AIR){
+        while((options.ignoreLiquids && block.material == Material.LIQUID) || block.material == Material.AIR){
             prevPos = position.clone()
             block = getBlockAt(position.add(dir), this.world)
+            if(block.voxel) {
+                const bbs = AABB.fromBlock(block, position.clone().floor())
+                if(!bbs.some(bb => bb.contains(...position.toArray()))) block = { material: Material.AIR } 
+            }
             totalDistance += dirLen
             if(totalDistance >= range) break
         }
 
-        if(block.material == MATERIAL.AIR && !options.placeOnAir) return { found: false }
+        if(block.material == Material.AIR && !options.placeOnAir) return { found: false }
 
         return { block, position, normal: position.clone().floor().sub(prevPos.floor()), found: true }
     }
@@ -318,5 +324,23 @@ export default class Player extends LivingEntity {
 
         this.model.quaternion.setFromEuler(modelRot)
         this.camera.quaternion.setFromEuler(camRot);
+    }
+
+    
+
+    createModel(){
+        const geometry = new BoxGeometry(PLAYER_DIMENSIONS.width * 2, PLAYER_DIMENSIONS.height, PLAYER_DIMENSIONS.depth * 2)
+        const material = new MeshBasicMaterial( { color: 0x00ff00, opacity: 0.3, transparent: true } );
+        const model = new Mesh( geometry, material )
+        model.geometry.translate(0, -1, 0)
+        //window.scene.add(model)
+
+        model.bb = new Box3().setFromObject(model)
+
+        model.h = geometry.parameters.height
+        model.w = geometry.parameters.width
+        model.d = geometry.parameters.depth
+        
+        return model
     }
 }

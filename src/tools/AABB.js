@@ -127,6 +127,17 @@ export default class AABB {
         return new AABB(this.xMin, this.yMin, this.zMin, this.xMax, this.yMax, this.zMax)
     }
 
+    getPlanes() {
+        return [
+            { normal: new Vector3(1, 0, 0), point: new Vector3(this.xMin, this.yMin + this.height / 2, this.zMin + this.depth / 2) },// left
+            { normal: new Vector3(-1, 0, 0), point: new Vector3(this.xMax, this.yMin + this.height / 2, this.zMin + this.depth / 2) },// right
+            { normal: new Vector3(0, 1, 0), point: new Vector3(this.xMin + this.width / 2, this.yMin, this.zMin + this.depth / 2) },// top
+            { normal: new Vector3(0, -1, 0), point: new Vector3(this.xMin + this.width / 2, this.yMax, this.zMin + this.depth / 2) },// bottom
+            { normal: new Vector3(0, 0, 1), point: new Vector3(this.xMin + this.width / 2, this.yMin + this.height / 2, this.zMin) },// front
+            { normal: new Vector3(0, 0, -1), point: new Vector3(this.xMin + this.width / 2, this.yMin + this.height / 2, this.zMax) }// back
+        ]
+    }
+
     static aabbSwept1D(objectBB, otherBB, velocity, axis = "y") {
         let dEntry, dExit
         let entry, exit

@@ -1,5 +1,6 @@
 import { Vector3 } from 'https://cdn.skypack.dev/three@0.141.0';
-import { MATERIAL } from '../../tools/Constants.js';
+import { Material } from '../../tools/Constants.js';
+import AABB from '../../tools/AABB.js';
 
 
 export default class Context {
@@ -7,6 +8,10 @@ export default class Context {
     constructor(player){
         this.player = player
     }
+
+    get world() {
+        return this.player.world
+    } 
 
 
     getAimedBlock(range = 20, options = { ignoreLiquids: true, placeOnAir: false }){
@@ -17,25 +22,55 @@ export default class Context {
             return world.getVoxelFromPos(pos.clone())
         }
 
-        const dirLen = 0.05
+        const dirLen = 0.025
         let dir = this.player.camera.getWorldDirection(new Vector3()).setLength(dirLen)
         
         let position = this.player.camera.getWorldPosition(new Vector3())
         let prevPos = new Vector3()
         let block = getBlockAt(position, this.player.world)
         let totalDistance = 0
+        let bb = false
 
-        while((options.ignoreLiquids && block.material == MATERIAL.LIQUID) || block.material == MATERIAL.AIR){
+        while((options.ignoreLiquids && block.material == Material.LIQUID) || block.material == Material.AIR){
+            bb = false
             prevPos = position.clone()
             block = getBlockAt(position.add(dir), this.player.world)
+            if(block.voxel) {
+                const bbs = AABB.fromBlock(block, position.clone().floor())
+                bb = bbs.find(box => box.contains(...position.toArray()))
+                if(!bb) block = { material: Material.AIR } 
+            }
             totalDistance += dirLen
             if(totalDistance >= range) break
         }
 
-        if(block.material == MATERIAL.AIR && !options.placeOnAir) return { found: false }
-        if(block.material == MATERIAL.LIQUID && options.ignoreLiquids) return { found: false }
+        if(block.material == Material.AIR && !options.placeOnAir) return { found: false }
+        if(block.material == Material.LIQUID && options.ignoreLiquids) return { found: false }
 
-        return { block, position, normal: position.clone().floor().sub(prevPos.floor()), found: true }
+        if(!bb) bb = AABB.fromBlock(block, position.clone().floor())[0]
+        const planes = bb.getPlanes()
+        const closest = { t: -Infinity, normal: new Vector3() }
+        dir.normalize()
+        for(let plane of planes){
+            const t = this.intersectPlane(plane.normal, plane.point.clone(), prevPos, dir)
+            if(t >= 0) {
+                closest.t = t
+                closest.normal = plane.normal
+            }
+        }
+        const angle = closest.normal.angleTo(dir) * 180 / Math.PI
+        return { block, position, normal: closest.normal, angle, found: true }
+    }
+
+    intersectPlane(n, p0, origin, dir) {
+        // assuming vectors are all normalized
+        const denom = n.dot(dir)
+        if (denom > 1e-6) {
+            const diff = p0.sub(origin)
+            return diff.dot(n) / denom 
+        }
+
+        return -Infinity
     }
 
 }

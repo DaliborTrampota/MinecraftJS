@@ -1,4 +1,4 @@
-import { Vector3, Vector2 } from 'https://cdn.skypack.dev/three@0.141.0';
+import { Vector3, Vector2, MeshBasicMaterial, Mesh, BoxGeometry, Box3  } from 'https://cdn.skypack.dev/three@0.141.0';
 import { BASE_PLAYER_SETTINGS, RIGHT, UP, FORWARD } from '../../tools/Constants.js'
 import { clamp, moveTowards } from '../../tools/Utils.js'
 
@@ -8,8 +8,8 @@ import AABB from '../../tools/AABB.js';
 
 export default class LivingEntity {
 
-    constructor(model){
-        this.model = model
+    constructor(){
+        this.model = this.createModel()
 
         this.health = 100
 
@@ -46,7 +46,7 @@ export default class LivingEntity {
     }
     
     get feetPos(){
-        return this.position.clone().sub(new Vector3(0, 1.925, 0))
+        return this.position.clone().sub(new Vector3(0, this.model.h, 0))
     }
 
     get range(){
@@ -163,5 +163,21 @@ export default class LivingEntity {
         //AABBs.push(...AABB.fromBlock(this.world.checkVoxelVec(feetPos), feetPos))
 
         return AABBs        
+    }
+
+    createModel(){
+        const geometry = new BoxGeometry(0.4, 0.9, 1.8)
+        const material = new MeshBasicMaterial( { color: 0x00ff00, opacity: 0.3, transparent: true } );
+        const model = new Mesh( geometry, material )
+        //model.geometry.translate(0, -1, 0)
+        window.scene.add(model)
+
+        model.bb = new Box3().setFromObject(model)
+
+        model.h = geometry.parameters.height
+        model.w = geometry.parameters.width
+        model.d = geometry.parameters.depth
+        
+        return model
     }
 }
