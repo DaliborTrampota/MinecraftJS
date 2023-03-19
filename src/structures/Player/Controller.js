@@ -1,6 +1,6 @@
 import { GAMEMODE } from "../../tools/Constants.js"
 import { clamp } from "../../tools/Utils.js"
-import { BoxHelper } from 'https://cdn.skypack.dev/three@0.141.0';
+import { BoxHelper, AxesHelper } from 'https://cdn.skypack.dev/three@0.141.0';
 
 
 export default class Controller {
@@ -186,7 +186,14 @@ export default class Controller {
         debug.insertAdjacentHTML('beforeend', `<div id=info-gamemode>Gamemode: ${gamemodeName}</div>`)
 
         this.debug.helpers.player = new BoxHelper(this.player.model, 0xffff00)
+        this.debug.helpers.axis = new AxesHelper(100)
+
+        this.debug.helpers.axis.update = () => {
+            this.debug.helpers.axis.position.copy(this.player.model.position)
+        }
+
         window.scene.add(this.debug.helpers.player)
+        window.scene.add(this.debug.helpers.axis)
     }
 
     toggleDebugPanel(){

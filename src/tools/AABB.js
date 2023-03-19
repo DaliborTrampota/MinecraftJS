@@ -172,11 +172,11 @@ export default class AABB {
         let xMin = velocity.x > 0 ? objectBB.xMin : objectBB.xMin + velocity.x
         let yMin = velocity.y > 0 ? objectBB.yMin : objectBB.yMin + velocity.y
         let zMin = velocity.z > 0 ? objectBB.zMin : objectBB.zMin + velocity.z
-
+        
         if(!new AABB(
             xMin, yMin, zMin, 
-            xMin + objectBB.height + Math.abs(velocity.x), 
-            yMin + objectBB.width + Math.abs(velocity.y),
+            xMin + objectBB.width + Math.abs(velocity.x), 
+            yMin + objectBB.height + Math.abs(velocity.y),
             zMin + objectBB.depth + Math.abs(velocity.z),
         ).intersects(otherBB)) {
             return { time: 1 }

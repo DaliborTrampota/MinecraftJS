@@ -148,9 +148,10 @@ export default class LivingEntity {
         const bb = this.getCollisionAABB()
         const center = bb.center()
         const RADIUS = 1
+        
         for(let x = Math.floor(center.x - RADIUS - bb.width/2); x <= Math.ceil(center.x + RADIUS + bb.width/2); x++) {
             for(let z = Math.floor(center.z - RADIUS - bb.depth/2); z <= Math.ceil(center.z + RADIUS + bb.depth/2); z++) {
-                for(let y = Math.floor(center.y + RADIUS + bb.height/2) + 1; y >= Math.ceil(center.y - RADIUS - bb.height/2) - 1; y--) {
+                for(let y = Math.floor(center.y - RADIUS - bb.height/2); y <= Math.ceil(center.y + RADIUS + bb.height/2) - 1; y++) {
                     let pos = new Vector3(x, y, z)
                     if(!this.world.checkVoxelVec(pos)) continue
                     const bbs = AABB.fromBlock(this.world.getVoxelFromPos(pos), pos)
