@@ -49,9 +49,14 @@ Array.prototype.view = function(start, end) {
     })
 }
 
-Array.prototype.findIndexFrom = function(start, callback) {
+Array.prototype.findIndexFrom = function(start, callback, wrap = false) {
     for(let i = start; i < this.length; i++) {
         if(callback(this[i], i, this)) return i
+    }
+    if(wrap) {
+        for(let i = 0; i < start; i++) {
+            if(callback(this[i], i, this)) return i
+        }
     }
     return -1
 }

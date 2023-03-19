@@ -9,8 +9,12 @@ export default class BlockItem extends Item {
     constructor(block, key){
         super(key ?? block.key)
         this.block = block        
-        this.image = window.getBlockImage(this)
+        this.image
         this.pixelated = false
+    }
+
+    createImage() {
+        this.image = window.getBlockImage(this)
     }
 
     getModel(position){

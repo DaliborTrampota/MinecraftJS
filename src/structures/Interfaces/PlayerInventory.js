@@ -76,9 +76,12 @@ export default class Inventory extends Interface {
                 continue
             }
             index = this.getEmptySlot()
-            if(index != -1) 
+            if(index != -1) {
                 this.slots[index] = stack
+                break
+            }
 
+            console.log('Inventory is full')
             break // full or empty stack was added to empty slot
         }
         this.update()
@@ -86,11 +89,11 @@ export default class Inventory extends Interface {
 
     getSlotFor(stack, priotizeHotbar = true) {
         const search = o => o?.item.id == stack.item.id && !o.full
-        return priotizeHotbar ? this.slots.findIndexFrom(this.hotbarStartIndex, search) : this.slots.findIndex(search)
+        return priotizeHotbar ? this.slots.findIndexFrom(this.hotbarStartIndex, search, true) : this.slots.findIndex(search)
     }
 
     getEmptySlot(priotizeHotbar = true) {
-        return priotizeHotbar ? this.slots.findIndexFrom(this.hotbarStartIndex, o => !o) : this.slots.findIndex(o => !o)
+        return priotizeHotbar ? this.slots.findIndexFrom(this.hotbarStartIndex, o => !o, true) : this.slots.findIndex(o => !o)
     }
 
 

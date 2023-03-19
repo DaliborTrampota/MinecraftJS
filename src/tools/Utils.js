@@ -174,5 +174,4 @@ export {
     dirToSide,
     
     TwoWayMap,
-    IDMap,
 }

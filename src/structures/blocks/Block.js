@@ -103,8 +103,7 @@ export default class Block {
     }
 
     loadTextures() {
-        for(let side in this.rawTextures){
-            console.log(TextureManager.textureMap.get(this.rawTextures[side]), this.rawTextures[side], TextureManager.textureMap)
+        for(let side in this.rawTextures) {
             this.textures[side] = TextureManager.textureMap.get(this.rawTextures[side])
         }
         delete this.rawTextures
