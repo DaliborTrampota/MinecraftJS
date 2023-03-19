@@ -49,7 +49,7 @@ export default class Context {
 
         if(!bb) bb = AABB.fromBlock(block, position.clone().floor())[0]
         const planes = bb.getPlanes()
-        const closest = { t: -Infinity, normal: new Vector3() }
+        const closest = { t: Infinity, normal: undefined }
         dir.normalize()
         for(let plane of planes){
             const t = this.intersectPlane(plane.normal, plane.point.clone(), prevPos, dir)
@@ -59,7 +59,7 @@ export default class Context {
             }
         }
         const angle = closest.normal.angleTo(dir) * 180 / Math.PI
-        return { block, position, normal: closest.normal, angle, found: true }
+        return { block, position, normal: closest.normal.clone().negate(), angle, found: true }
     }
 
     intersectPlane(n, p0, origin, dir) {

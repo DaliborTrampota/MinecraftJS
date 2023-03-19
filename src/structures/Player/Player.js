@@ -1,6 +1,6 @@
 import { Vector3, Vector2, Euler, Raycaster, MeshBasicMaterial, Mesh, BoxGeometry, Box3 } from 'https://cdn.skypack.dev/three@0.141.0';
 import { PI_2, GAMEMODE, BASE_PLAYER_SETTINGS, PLAYER_DIMENSIONS, RIGHT, UP, FORWARD, Material, CrossCheck, CornerCheck, MOUSE_BUTTON, sides } from '../../tools/Constants.js'
-import { clamp, moveTowards } from '../../tools/Utils.js'
+import { clamp, dirToSide, moveTowards } from '../../tools/Utils.js'
 
 import ItemEntity from '../entities/ItemEntity.js';
 import LivingEntity from '../entities/LivingEntity.js';
@@ -52,12 +52,12 @@ export default class Player extends LivingEntity {
         const dir = this.camera.getWorldDirection(new Vector3())
         dir.y = 0
         dir.normalize()
-        const normals = [new Vector3(1, 0, 0), new Vector3(0, 0, 1)]
-        
-        for(let n of normals){
-            let angle = Math.acos(dir.dot(n)) - Math.PI/2
-            if(Math.abs(angle) <= Math.PI/4) 
-                return n.x && dir.z > 0 || n.z && dir.x > 0 ? n : n.negate()
+        if(Math.abs(dir.x) > Math.abs(dir.z)) {
+            const normal = new Vector3(1, 0, 0)
+            return dir.x > 0 ? normal : normal.negate()
+        } else {
+            const normal = new Vector3(0, 0, 1)
+            return dir.z > 0 ? normal : normal.negate()
         }
     }
 
@@ -86,7 +86,6 @@ export default class Player extends LivingEntity {
     }
 
     Update(delta){
-        this.facingNormal
         if(this.controller.jumpRequest && this.grounded) this.jump()
         super.Update(delta)
         this.pickupEntities()

@@ -48,6 +48,7 @@ export default class Blocks extends AbstractRegister {
             this.STAIRS = this.register(blockData, new Block('stairs', Material.SOLID))
             this.SLAB = this.register(blockData, new Block('slab', Material.SOLID))
             this.VERTICAL_SLAB = this.register(blockData, new Block('vertical_slab', Material.SOLID))
+            this.OAK_LOG = this.register(blockData, new Block('oak_log', Material.SOLID))
         })
     }
 }

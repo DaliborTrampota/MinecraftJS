@@ -1,7 +1,8 @@
-import { Mesh } from 'https://cdn.skypack.dev/three@0.141.0';
-import { DirectionsY } from '../../tools/Constants.js';
+import { Vector3 } from 'https://cdn.skypack.dev/three@0.141.0';
+import { DirectionsY, Directions } from '../../tools/Constants.js';
 import TextureManager from "../../tools/TextureManager.js"
 import VoxelBuilder from "../../tools/VoxelBuilder.js"
+import BlockState from './BlockState.js';
 
 export default class Block {
 
@@ -15,6 +16,8 @@ export default class Block {
         this.solid = true
 
         this.textures = {}
+        this.variants = {}
+        this.orientable = {}
 
         this.voxel = false
         this.elements = false
@@ -30,10 +33,15 @@ export default class Block {
         this.#generateModel(data.elements)
     }
 
+    get isOrientable() {
+        return Object.keys(this.orientable).length
+    }
+
     get materials() {
         let textures = []
         let tempTextures = this.textures
-        if(this.orientableY) tempTextures = this.getTextures()
+        if(this.orientable.y) tempTextures = this.getTextures()
+        else if(this.orientable.all) tempTextures = this.getTextures(BlockState.pillarUp())
         if(this.textures.all) textures = this.textures.all
         else {
             textures = [
@@ -49,29 +57,39 @@ export default class Block {
     }
 
     getTextures(blockState) {
-        if(this.orientableY) {
-            const back = blockState?.direction ?? 'south'
-            const front = DirectionsY[(DirectionsY[back] + 2) % 4]
+        if(!this.isOrientable) return this.textures
 
-            const right = DirectionsY[(DirectionsY[front] + 1) % 4]
-            const left = DirectionsY[(DirectionsY[right] + 2) % 4]
+        let front = 'north', back = 'south'
+        let right = 'east', left = 'west'
+        let top = 'up', bottom = 'down'
 
-            const top = 'up'
-            const bottom = 'down'
-            
-            const textures = {
-                [front]: this.textures.front,
-            }
+        if(this.orientable.y) {
+            front = blockState?.side ?? 'north'
+            back = DirectionsY[(DirectionsY[front] + 2) % 4]
 
-            textures[back] = this.textures.back ?? this.textures.side
-            textures[top] = this.textures.top ?? this.textures.side
-            textures[bottom] = this.textures.bottom ?? this.textures.side
-            textures[right] = this.textures.right ?? this.textures.side
-            textures[left] = this.textures.left ?? this.textures.side
-            
-            return textures
+            right = DirectionsY[(DirectionsY[front] + 1) % 4]
+            left = DirectionsY[(DirectionsY[right] + 2) % 4]
+        }else if(this.orientable.all) {
+            front = blockState?.side ?? 'north'
+            back = Directions[(Directions[front] + 3) % 6]
+
+            right = Directions[(Directions[front] + 1) % 6]
+            left = Directions[(Directions[right] + 3) % 6]
+
+            top = Directions[(Directions[front] + 2) % 6]
+            bottom = Directions[(Directions[top] + 3) % 6]
         }
-        return this.textures
+        
+        const textures = {}
+            
+        textures[front] = this.textures.front ?? this.textures.side
+        textures[back] = this.textures.back ?? this.textures.side
+        textures[top] = this.textures.top ?? this.textures.side
+        textures[bottom] = this.textures.bottom ?? this.textures.side
+        textures[right] = this.textures.right ?? this.textures.side
+        textures[left] = this.textures.left ?? this.textures.side
+
+        return textures
     }
 
     side(side, culled) {
@@ -111,7 +129,18 @@ export default class Block {
 
     #setProperties(data){
         this.renderSides = Boolean(data?.renderSides ?? true)
-        this.orientableY = Boolean(data?.orientableY ?? false)
+        if(data.orientableY) this.orientable.y = true
+        if(data.orientable) this.orientable.all = true
+        // const DEG_TO_RAD = Math.PI / 180
+        // if(data.variants) {
+        //     for(let key in data.variants) {
+        //         let [prop, value] = key.split('=')
+        //         if(prop == 'axis') {
+        //             this.variants[prop] ??= {}
+        //             this.variants[prop][value] = new Vector3((data.variants[key].x ?? 0) * DEG_TO_RAD, (data.variants[key].y ?? 0) * DEG_TO_RAD, (data.variants[key].z ?? 0) * DEG_TO_RAD)
+        //         }
+        //     }
+        // }
 
         if(data?.animation) 
             this.animation = data.animation 

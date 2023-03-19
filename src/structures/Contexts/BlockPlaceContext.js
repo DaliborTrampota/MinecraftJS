@@ -19,10 +19,10 @@ export default class BlockPlaceContext extends Context {
     get canPlace(){
         if(!this.hitResult.found) return false
 
-        this.hitResult.position.sub(this.hitResult.normal).floor()
+        this.hitResult.position.add(this.hitResult.normal).floor()
         let playerBlockPos = this.player.eyePos.floor()
 
-        if(this.world.getVoxelFromPos(this.hitResult.position).material != Material.AIR && this.world.getVoxelFromPos(this.hitResult.position.add(this.hitResult.normal).material != Material.AIR)) {
+        if(this.world.getVoxelFromPos(this.hitResult.position).material != Material.AIR && this.world.getVoxelFromPos(this.hitResult.position.sub(this.hitResult.normal).material != Material.AIR)) {
             return false
         }
         
@@ -36,8 +36,7 @@ export default class BlockPlaceContext extends Context {
         this.player.setPlaceDelay()
 
         //get normal of player's facing direction
-
-        const blockState = new BlockState(this.hitResult.position.floor(), { direction: dirToSide(this.player.facingNormal) })
+        const blockState = this.block.isOrientable ? BlockState.create(this) : undefined
 
         let chunk = this.player.world.getChunkFromPos(this.hitResult.position)
         chunk.addVoxel(this.hitResult.position, this.block.id, blockState)

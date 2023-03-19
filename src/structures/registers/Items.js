@@ -51,6 +51,7 @@ export default class Items extends AbstractRegister {
             this.STAIRS = this.registerBlock(data, Blocks.STAIRS, 'DEFAULT')
             this.SLAB = this.registerBlock(data, Blocks.SLAB, 'DEFAULT')
             this.VERTICAL_SLAB = this.registerBlock(data, Blocks.VERTICAL_SLAB, 'DEFAULT')
+            this.OAK_LOG = this.registerBlock(data, Blocks.OAK_LOG, 'DEFAULT')
         })
     }
 }

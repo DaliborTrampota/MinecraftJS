@@ -1,6 +1,7 @@
 import { Vector3, BufferGeometry, BufferAttribute, Mesh } from 'https://cdn.skypack.dev/three@0.141.0';
 import { ChunkHeight, ChunkSize, sides, triangles, UVs, vertices } from "../tools/Constants.js"
 import TextureManager from "../tools/TextureManager.js";
+import VoxelBuilder from '../tools/VoxelBuilder.js';
 
 export default class TerrainBuilder {
 
@@ -64,8 +65,8 @@ export default class TerrainBuilder {
                         let textureIndex = 'all' in blockData.textures ? blockData.textures.all : blockData.getTextures(blockState)[side]
                         
                         const key = `${textureIndex}_${blockID}`
-                        if(textureGroups.hasOwnProperty(`${textureIndex}_${blockID}`)) textureGroups[key].push({ side, pos, breaking })
-                        else textureGroups[key] = [{ side, pos, breaking }]
+                        if(textureGroups.hasOwnProperty(`${textureIndex}_${blockID}`)) textureGroups[key].push({ side, pos, breaking, blockState })
+                        else textureGroups[key] = [{ side, pos, breaking, blockState }]
                     }
                 }
             }
@@ -98,7 +99,7 @@ export default class TerrainBuilder {
                     this.vertices.push(vertices[vert].z + o.pos.z)
                 }
                 if(blockData.animation) this.UVs.push(...UVs[o.side].map((u, i) => i % 2 ? u / blockData.animation.frames : u))
-                else this.UVs.push(...UVs[o.side])
+                else this.UVs.push(...(blockData.orientable.all && o.blockState.shouldRotateUVsFor(o.side, textureIndex) ? VoxelBuilder.rotateUVs(UVs[o.side]) : UVs[o.side]))
                 groupCount += 6
             }
         

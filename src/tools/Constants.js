@@ -194,6 +194,7 @@ export {
     CrossCheck,
     CornerCheck,
     
+    Directions,
     DirectionsX,
     DirectionsY,
     DirectionsZ,

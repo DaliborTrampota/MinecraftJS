@@ -1,4 +1,5 @@
 import { BoxGeometry, SphereGeometry, Mesh, BoxHelper, MeshBasicMaterial, Vector3 } from 'https://cdn.skypack.dev/three@0.141.0';
+import { sides } from './Constants.js';
 
 function create3DArray(x, y, height){
     let arr = new Array(x)
@@ -149,6 +150,7 @@ function map(value, x1, y1, x2, y2){
 }
 
 function dirToSide(normal){
+    return sides.find(side => side.dir.equals(normal)).side
     if(normal.x == 1) return 'north'
     if(normal.x == -1) return 'south'
     if(normal.y == 1) return 'up'
