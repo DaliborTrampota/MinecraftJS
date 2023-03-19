@@ -1,5 +1,5 @@
 import { Scene, Clock, PerspectiveCamera, WebGLRenderer } from 'https://cdn.skypack.dev/three@0.141.0';
-import Game from './Game.js'
+import Game from './structures/Game.js'
 import PhotoBooth from './tools/PhotoBooth.js';
 
 const renderer = new WebGLRenderer();
