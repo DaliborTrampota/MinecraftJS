@@ -6,8 +6,8 @@ export default class BlockItem extends Item {
 
     static geometry = new BoxGeometry(0.2, 0.2, 0.2)
 
-    constructor(block, name){
-        super(name ?? block.name)
+    constructor(block, key){
+        super(key ?? block.key)
         this.block = block        
         this.image = window.getBlockImage(this)
         this.pixelated = false

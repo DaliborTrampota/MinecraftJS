@@ -19,11 +19,11 @@ function create2DArray(x, y){
     return arr
 }
 
-function createEnum(arr, reversed = false){
+function createEnum(arr){
     let enumObj = {};
     for(let i = 0; i < arr.length; ++i){
-        if(reversed) enumObj[i] = arr[i];
-        else enumObj[arr[i]] = i;
+        enumObj[i] = arr[i];
+        enumObj[arr[i]] = i;
     }
 
     return enumObj;
@@ -50,39 +50,6 @@ class TwoWayMap extends Map{
     keys(){
         return super.keys()
     }
-}
-
-class IDMap extends Map {
-
-    constructor(iterable){
-        super(iterable)
-        this.id = 0
-    }
-
-    set(key, data){
-        super.set(this.id, data)
-        super.set(key, this.id)
-        this.id++
-        return this.id - 1
-    }
-
-    getID(name){
-        return super.get(name)
-    }
-
-    get(key){
-        let data = super.get(key)
-        let id = key
-        if(data == undefined) return data
-        if(typeof data == 'number'){
-            id = super.get(key)
-            data = super.get(id)
-        }
-        if(typeof data == 'object') 
-            data.id = id
-        return data
-    }
-
 }
 
 
@@ -181,6 +148,15 @@ function map(value, x1, y1, x2, y2){
     return (value - x1) * (y2 - x2) / (y1 - x1) + x2;
 }
 
+function dirToSide(normal){
+    if(normal.x == 1) return 'north'
+    if(normal.x == -1) return 'south'
+    if(normal.y == 1) return 'up'
+    if(normal.y == -1) return 'down'
+    if(normal.z == 1) return 'east'
+    if(normal.z == -1) return 'west'
+}
+
 export {
     create3DArray,
     create2DArray,
@@ -195,6 +171,7 @@ export {
     moveTowards,
     deltaAngle,
     map,
+    dirToSide,
     
     TwoWayMap,
     IDMap,

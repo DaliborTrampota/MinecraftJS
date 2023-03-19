@@ -3,6 +3,7 @@ import { ChunkHeight, ChunkSize, WORLD_SETTINGS } from "../tools/Constants.js";
 import Chunk from "./Chunk.js"
 
 export default class World {
+    
     constructor(generator, register, player){
         this.generator = generator
         this.register = register;
@@ -40,11 +41,8 @@ export default class World {
         const start = -this.player.viewDistance
         const end = this.player.viewDistance
 
-        console.log(start, end)
-
         for(let i = start; i < end; ++i){
             for(let j = start; j < end; ++j){
-                console.log(i, j)
                 let chunk = new Chunk(i, j, this)
                 window.scene.add(chunk.generate())
                 chunk.load()
@@ -56,7 +54,7 @@ export default class World {
     }
 
     spawnPlayer(){
-        this.player.position.set(ChunkSize / 2, ChunkHeight - 80, ChunkSize / 2)
+        this.player.position.set(ChunkSize / 2, ChunkHeight - 60, ChunkSize / 2)
         this.player.camera.lookAt(ChunkSize / 2, 0, ChunkSize / 2)
     }
     
@@ -99,24 +97,24 @@ export default class World {
         
         if(pos.y == height) {
             let biome = this.generator.getBiome(pos.x, pos.z)
-            switch(biome){
+            switch(biome.key){
                 case 'forest':
-                    return this.register.blocks.getID('grass_block')
+                    return this.register.getBlockID('grass_block')
                 case 'hills':
-                    return this.register.blocks.getID('stone')
+                    return this.register.getBlockID('stone')
                 case 'desert':
-                    return this.register.blocks.getID('sand')
+                    return this.register.getBlockID('sand')
             }
             //console.log(biome)
-            if(biome > 5) return this.register.blocks.getID('sand')
-            if(biome > 2) return this.register.blocks.getID('gravel')
-            return this.register.blocks.getID('grass_block')
+            if(biome > 5) return this.register.getBlockID('sand')
+            if(biome > 2) return this.register.getBlockID('gravel')
+            return this.register.getBlockID('grass_block')
         }
-        else if(pos.y < height && pos.y > height - 3) return this.register.blocks.getID('dirt')
-        else if(pos.y < height) return this.register.blocks.getID('stone')
+        else if(pos.y < height && pos.y > height - 3) return this.register.getBlockID('dirt')
+        else if(pos.y < height) return this.register.getBlockID('stone')
         
-        else if(pos.y <= WORLD_SETTINGS.globalSeaLevel) return this.register.blocks.getID('water_still')
-        else return this.register.blocks.getID('air')
+        else if(pos.y <= WORLD_SETTINGS.globalSeaLevel) return this.register.getBlockID('water_still')
+        else return this.register.getBlockID('air')
         
     }
 

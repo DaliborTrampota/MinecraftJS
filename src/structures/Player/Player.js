@@ -1,16 +1,16 @@
-import { Vector3, Vector2, Euler, Raycaster } from 'https://cdn.skypack.dev/three@0.141.0';
-import { PI_2, GAMEMODE, BASE_PLAYER_SETTINGS, PLAYER_DIMENSIONS, RIGHT, UP, FORWARD, MATERIAL, CrossCheck, CornerCheck, MOUSE_BUTTON, sides } from '../../tools/Constants.js'
+import { Vector3, Vector2, Euler, Raycaster, MeshBasicMaterial, Mesh, BoxGeometry, Box3 } from 'https://cdn.skypack.dev/three@0.141.0';
+import { PI_2, GAMEMODE, BASE_PLAYER_SETTINGS, PLAYER_DIMENSIONS, RIGHT, UP, FORWARD, Material, CrossCheck, CornerCheck, MOUSE_BUTTON, sides } from '../../tools/Constants.js'
 import { clamp, moveTowards } from '../../tools/Utils.js'
 
-import ItemEntity from '../Entities/ItemEntity.js';
-import LivingEntity from '../Entities/LivingEntity.js';
+import ItemEntity from '../entities/ItemEntity.js';
+import LivingEntity from '../entities/LivingEntity.js';
 
 import Controller from './Controller.js';
-import Inventory from '../Interfaces/PlayerInventory.js';
+import Inventory from '../interfaces/PlayerInventory.js';
 import Chunk from '../Chunk.js';
-import BlockPlaceContext from '../Contexts/BlockPlaceContext.js';
-import BlockItem from '../../registers/BlockItem.js';
-import Stack from '../Interfaces/Stack.js';
+import BlockPlaceContext from '../contexts/BlockPlaceContext.js';
+import BlockItem from '../item/BlockItem.js';
+import Stack from '../item/Stack.js';
 import AABB from '../../tools/AABB.js';
 
 const WIDTH = PLAYER_DIMENSIONS.width
@@ -46,6 +46,19 @@ export default class Player extends LivingEntity {
         this.maxUpStep = 0.6
     }
 
+    get facingNormal() {
+        const dir = this.camera.getWorldDirection(new Vector3())
+        dir.y = 0
+        dir.normalize()
+        const normals = [new Vector3(1, 0, 0), new Vector3(0, 0, 1)]
+        
+        for(let n of normals){
+            let angle = Math.acos(dir.dot(n)) - Math.PI/2
+            if(Math.abs(angle) <= Math.PI/4) 
+                return n.x && dir.z > 0 || n.z && dir.x > 0 ? n : n.negate()
+        }
+    }
+
     get eyePos(){
         return this.camera.getWorldPosition(new Vector3())
     }
@@ -71,6 +84,7 @@ export default class Player extends LivingEntity {
     }
 
     Update(delta){
+        this.facingNormal
         if(this.controller.jumpRequest && this.grounded) this.jump()
         super.Update(delta)
         this.pickupEntities()
@@ -84,8 +98,6 @@ export default class Player extends LivingEntity {
     }
 
     
-
-
     calculateVelocity(delta){
         if(!this.controller.flying && !this.grounded){
             this.velocity.y += delta * this.world.gravity * 1.5
@@ -181,7 +193,7 @@ export default class Player extends LivingEntity {
     }
 
     drop(amount = 1){
-        let stack = this.inventory.drop(amount) || new Stack(this.world.register.getItem('vertical_slab'), 5)
+        let stack = this.inventory.drop(amount) || Stack.create('vertical_slab', 5)
         if(!stack) return false
         
         let model = stack.item.getModel(this.eyePos.add(new Vector3(0, -0.20, 0)))

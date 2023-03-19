@@ -1,5 +1,4 @@
 {
-    "solid": true,
     "textures": {
         "up": "grass_block_top",
         "down": "dirt",

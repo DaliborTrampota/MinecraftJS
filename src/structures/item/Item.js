@@ -2,10 +2,10 @@
 
 export default class Item {
 
-    constructor(name){
-        this.name = name
+    constructor(key){
+        this.key = key
 
-        this.image = `/src/resources/textures/blocks/${name}.png`//"https://raw.githubusercontent.com/ZtechNetwork/MCBVanillaResourcePack/master/textures/items/wheat.png"
+        this.image = `/src/resources/textures/blocks/${key}.png`//"https://raw.githubusercontent.com/ZtechNetwork/MCBVanillaResourcePack/master/textures/items/wheat.png"
         this.pixelated = true
         this.stack = 64
         this.tab = "DEFAULT"

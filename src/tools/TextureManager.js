@@ -1,7 +1,7 @@
 import { TwoWayMap } from "./Utils.js";
 import { TextureLoader, MeshBasicMaterial, NearestFilter, DoubleSide, FrontSide, DefaultLoadingManager } from 'https://cdn.skypack.dev/three@0.141.0';
-import Register from "../Register.js";
-import { MATERIAL } from "./Constants.js";
+import Register from "../structures/registers/RegisterManager.js";
+import { Material } from "./Constants.js";
 
 
 export default class TextureManager {
@@ -21,23 +21,23 @@ export default class TextureManager {
         textures.push(...await fetch('/textures').then(r => r.json()))
 
         for(let name of textures){
-            let texture = this.loader.load(`resources/textures/blocks/${name}`)
+            const texture = this.loader.load(`resources/textures/blocks/${name}`)
             texture.magFilter = NearestFilter
             //texture.anisotropy = 4
             
-            let blockName = name.split('.')[0] 
-            let blockData = Register.blockData[blockName]
-            let material = new MeshBasicMaterial({ map: texture, transparent: !blockData?.solid || true, side: blockData?.liquid ? DoubleSide : FrontSide })
+            const textureName = name.split('.')[0]
+            const block = register.getBlock(textureName)
+            const material = new MeshBasicMaterial({ map: texture, transparent: block?.opaque ?? textureName.startsWith('break_'), side: block?.material == Material.LIQUID ? DoubleSide : FrontSide })
             
             TextureManager.textures.push(material)
-            TextureManager.textureMap.add(blockName)
+            TextureManager.textureMap.add(textureName)
 
-            if(blockData?.animated){
-                this.animatedTextures[TextureManager.textureMap.get(blockName)] = {
+            if(block?.animated){
+                this.animatedTextures[TextureManager.textureMap.get(textureName)] = {
                     frame: 0,
-                    end: blockData.animation.frames,
-                    interval: blockData.animation.interval,
-                    step: 1 / blockData.animation.frames
+                    end: block.animation.frames,
+                    interval: block.animation.interval,
+                    step: 1 / block.animation.frames
                 }
             }
         }

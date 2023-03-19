@@ -1,15 +1,11 @@
-import { Clock, DirectionalLight, DirectionalLightHelper, TextureLoader, MeshBasicMaterial, Mesh, PlaneGeometry, CubeTextureLoader, BoxGeometry, Box3, Vector3 } from 'https://cdn.skypack.dev/three@0.141.0';
+import { Clock, DirectionalLight, DirectionalLightHelper, CubeTextureLoader } from 'https://cdn.skypack.dev/three@0.141.0';
 import Stats from 'https://cdn.jsdelivr.net/npm/three@0.141.0/examples/jsm/libs/stats.module.js';
-import { MATERIAL, PI_2, PLAYER_DIMENSIONS } from './tools/Constants.js';
-import Register from './Register.js';
-import Player from './structures/Player/Player.js';
+import RegisterManager from './structures/registers/RegisterManager.js';
+import Player from './structures/player/Player.js';
 import World from './structures/World.js';
 import TextureManager from './tools/TextureManager.js';
-import Block from './registers/Block.js';
-import Biome from './registers/Biome.js';
-import BlockItem from './registers/BlockItem.js';
-import BiomeGenerator from './structures/Generators/BiomeGenerator.js';
-import Stack from './structures/Interfaces/Stack.js';
+import BiomeGenerator from './structures/generators/BiomeGenerator.js';
+import Stack from './structures/item/Stack.js';
 
 export default class Game {
 
@@ -20,10 +16,10 @@ export default class Game {
         this.camera = camera;
 
         this.textureManager = new TextureManager()
-        this.register = new Register()
+        this.register = new RegisterManager()
 
-        this.player = new Player(this.createGameModel(), this.camera, this);
-        this.world;
+        this.player = new Player(this.camera, this);
+        this.world
 
         this.stats = new Stats();
         document.getElementById('target').appendChild(this.stats.dom);
@@ -38,55 +34,23 @@ export default class Game {
         this.createSkybox()
         window.scene.add(this.createLight())
 
-        await this.register.load()
-        await this.textureManager.load()
-
-        const getBlock = (name) => {
-            return this.register.blocks.get(name)
-        }
-
-        this.register
-            .block(new Block('air', MATERIAL.AIR))
-            .block(new Block('dirt', MATERIAL.SOLID))
-            .block(new Block('grass_block', MATERIAL.SOLID))
-            .block(new Block('stone', MATERIAL.SOLID))
-            .block(new Block('cobblestone', MATERIAL.SOLID))
-            .block(new Block('mossy_cobblestone', MATERIAL.SOLID))
-            .block(new Block('gravel', MATERIAL.SOLID))
-            .block(new Block('sand', MATERIAL.SOLID))
-            .block(new Block('sandstone', MATERIAL.SOLID))
-            .block(new Block('end_stone', MATERIAL.SOLID))
-            .block(new Block('furnace', MATERIAL.SOLID))
-            .block(new Block('glass', MATERIAL.SOLID))
-            .block(new Block('water_still', MATERIAL.LIQUID))
-            .block(new Block('stairs', MATERIAL.SOLID))
-            .block(new Block('slab', MATERIAL.SOLID))
-            .block(new Block('vertical_slab', MATERIAL.SOLID))
-
-            .biome(new Biome('forest').setTemperature(0.5).setHumidity(0.35).setAltitude(0.5))
-            .biome(new Biome('desert').setTemperature(0.9).setHumidity(0.15).setAltitude(0.3))
-            .biome(new Biome('hills').setTemperature(0.2).setHumidity(0.6).setAltitude(0.9))
-
-            .item(new BlockItem(getBlock('grass_block')))
-            .item(new BlockItem(getBlock('dirt')))
-            .item(new BlockItem(getBlock('stone')))
-            .item(new BlockItem(getBlock('sand')))
-            .item(new BlockItem(getBlock('glass')))
-            .item(new BlockItem(getBlock('stairs')))
-            .item(new BlockItem(getBlock('slab')))
-            .item(new BlockItem(getBlock('vertical_slab')))
-            
+        await this.textureManager.load(this.register)
+        for(let key of this.register.blocks.map.keys()) 
+            this.register.getBlock(key).loadTextures()
+        console.log('Loaded blocks:', this.register.blocks.map.size, 'Loaded items:', this.register.items.map.size)
+        
         this.world = new World(new BiomeGenerator(this.register), this.register, this.player);
 
         window.clock.start()
         this.addUpdateSub(this.player)
         this.addUpdateSub(this.world)
-
-        this.player.inventory.addStack(new Stack(this.register.getItem('stairs'), 64))
-        this.player.inventory.addStack(new Stack(this.register.getItem('stone'), 64))
-        this.player.inventory.addStack(new Stack(this.register.getItem('slab'), 64))
-        this.player.inventory.addStack(new Stack(this.register.getItem('vertical_slab'), 64))
-        this.player.inventory.addStack(new Stack(this.register.getItem('glass'), 64))
+        
+        this.player.inventory.addStack(Stack.create('stairs', 64))
+        this.player.inventory.addStack(Stack.create('stone', 64))
+        this.player.inventory.addStack(Stack.create('slab', 64))
+        this.player.inventory.addStack(Stack.create('vertical_slab', 64))
+        this.player.inventory.addStack(Stack.create('glass', 64))
+        this.player.inventory.addStack(Stack.create('furnace', 64))
     }
 
     Update(){
@@ -131,23 +95,5 @@ export default class Game {
             'resources/images/skybox/back.png',
         ]);
         window.scene.background = texture;
-    }
-
-    createGameModel(){
-        const geometry = new BoxGeometry(PLAYER_DIMENSIONS.width * 2, PLAYER_DIMENSIONS.height, PLAYER_DIMENSIONS.depth * 2)
-        const material = new MeshBasicMaterial( { color: 0x00ff00, opacity: 0.3, transparent: true } );
-        const model = new Mesh( geometry, material )
-        model.geometry.translate(0, -1, 0)
-        //window.scene.add(model)
-
-        model.bb = new Box3().setFromObject(model)
-
-        model.h = geometry.parameters.height
-        model.w = geometry.parameters.width
-        model.d = geometry.parameters.depth
-        
-        this.camera.parent = model
-        this.camera.position.set(0, -PLAYER_DIMENSIONS.cameraOffset, 0)
-        return model
     }
 }

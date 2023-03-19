@@ -1,4 +1,5 @@
 import { Vector3 } from 'https://cdn.skypack.dev/three@0.141.0';
+import { createEnum } from './Utils.js';
 
 const PI_2 = Math.PI / 2;
 const vertices = [
@@ -107,6 +108,11 @@ const sides = [
     { side: 'west', dir: new Vector3(-1,  0,  0) },
 ]
 
+const Directions = createEnum(['north', 'east', 'up', 'south', 'west', 'down'])
+const DirectionsY = createEnum(['north', 'east', 'south', 'west'])
+const DirectionsX = createEnum(['north', 'up', 'south', 'down'])
+const DirectionsZ = createEnum(['east', 'up', 'west', 'down'])
+
 const CrossCheck = [ 
     new Vector3(1, 0, 0),
     new Vector3(0, 0, 1),
@@ -169,7 +175,7 @@ const UP = new Vector3(0, 1, 0)
 const FORWARD = new Vector3(0, 0, -1)
 const ZERO = new Vector3(0, 0, 0)
 
-const MATERIAL = {
+const Material = {
     AIR: 0,
     SOLID: 1,
     LIQUID: 2
@@ -187,6 +193,10 @@ export {
 
     CrossCheck,
     CornerCheck,
+    
+    DirectionsX,
+    DirectionsY,
+    DirectionsZ,
 
     GAMEMODE,
     MOUSE_BUTTON,
@@ -200,5 +210,5 @@ export {
     FORWARD,
     ZERO,
 
-    MATERIAL
+    Material,
 }

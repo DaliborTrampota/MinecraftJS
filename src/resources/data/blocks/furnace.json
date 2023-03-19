@@ -1,0 +1,9 @@
+{
+    "orientableY": true,
+    "textures": {
+        "top": "furnace_top",
+        "bottom": "furnace_top",
+        "front": "furnace_front_off",
+        "side": "furnace_side"
+    }
+}

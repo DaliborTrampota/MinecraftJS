@@ -1,6 +1,4 @@
 {
-    "solid": true,
-    "transparent": true,
     "renderSides": false,
     "textures": {
         "all": "glass"

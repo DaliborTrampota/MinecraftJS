@@ -1,4 +1,5 @@
 import { GAME_SETTINGS } from "../../tools/Constants.js"
+import Items from "../registers/Items.js"
 
 
 export default class Stack {
@@ -10,6 +11,11 @@ export default class Stack {
 
     get full(){
         return this.amount >= this.item.stack
+    }
+
+    static create(itemName, amount) {
+        const item = Items.get(itemName)
+        return new Stack(item, amount)
     }
 
     //todo merge 

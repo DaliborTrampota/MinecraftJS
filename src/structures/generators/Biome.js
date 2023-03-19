@@ -1,8 +1,8 @@
 
 export default class Biome {
 
-    constructor(name){
-        this.name = name
+    constructor(key){
+        this.key = key
     }
 
     setTemperature(n){
