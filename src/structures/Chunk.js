@@ -55,6 +55,10 @@ export default class Chunk {
         }
     }
 
+    getBlockState(pos) {
+        return this.metadata[`${Math.floor(pos.x)}_${Math.floor(pos.y)}_${Math.floor(pos.z)}`]
+    }
+
     /**
     * returns true if a block is on the position and should render the face
     */

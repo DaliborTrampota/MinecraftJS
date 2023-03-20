@@ -1,5 +1,6 @@
 import { Material } from "../../tools/Constants.js";
 import Block from "../blocks/Block.js";
+import FurnaceBlock from "../blocks/FurnaceBlock.js";
 import AbstractRegister from "./AbstractRegister.js";
 
 export default class Blocks extends AbstractRegister {
@@ -42,7 +43,7 @@ export default class Blocks extends AbstractRegister {
             this.SAND = this.register(blockData, new Block('sand', Material.SOLID))
             this.SANDSTONE = this.register(blockData, new Block('sandstone', Material.SOLID))
             this.END_STONE = this.register(blockData, new Block('end_stone', Material.SOLID))
-            this.FURNACE = this.register(blockData, new Block('furnace', Material.SOLID))
+            this.FURNACE = this.register(blockData, new FurnaceBlock('furnace', Material.SOLID))
             this.GLASS = this.register(blockData, new Block('glass', Material.SOLID).isOpaque())
             this.WATER_STILL = this.register(blockData, new Block('water_still', Material.LIQUID).hasNoCollisions())
             this.STAIRS = this.register(blockData, new Block('stairs', Material.SOLID))

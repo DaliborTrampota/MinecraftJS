@@ -12,6 +12,8 @@ import BlockPlaceContext from '../contexts/BlockPlaceContext.js';
 import BlockItem from '../item/BlockItem.js';
 import Stack from '../item/Stack.js';
 import AABB from '../../tools/AABB.js';
+import Context from '../contexts/Context.js';
+import BlockInteractContext from '../contexts/BlockInteractContext.js';
 
 const WIDTH = PLAYER_DIMENSIONS.width
 const Y_WIDTH = WIDTH * 0.75
@@ -134,6 +136,12 @@ export default class Player extends LivingEntity {
         this.velocity.y += (height ?? BASE_PLAYER_SETTINGS.jump) * 8
     }
 
+
+    openInterface(iface) {
+        if(this.inventory.isOpen) return console.warn("tried to open interface when inventory already open")
+        this.inventory.openWith(iface)
+    }
+
     interact(button){
         this.holding.clickStack = []
         
@@ -142,10 +150,20 @@ export default class Player extends LivingEntity {
                 this.pick()
             return
         }
-
+//check if UsableItem
         if(button == MOUSE_BUTTON.RMB){
+            const context = new Context(this, this.inventory.slot)
+            const hitRes = context.getAimedBlock(this.range)
+            if(!hitRes.found) return
+            
+            if(hitRes.block.isInteractable()) {
+                this.holding.RMB = false
+                if(this.placeDelay > 0) return
+                return hitRes.block.interact(BlockInteractContext.from(context, hitRes))
+            }
             let stack = this.inventory.slot
             if(!stack) return false
+
             if(this.placeDelay > 0) return
 
             if(stack.item instanceof BlockItem){
@@ -291,7 +309,7 @@ export default class Player extends LivingEntity {
         }
     }
 
-    onMouseRelease(e){
+    onMouseRelease(e){   
         switch(e.which){
             case MOUSE_BUTTON.LMB:
                 this.holding.LMB = false

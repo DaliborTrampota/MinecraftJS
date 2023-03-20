@@ -60,7 +60,7 @@ export default class TerrainBuilder {
                     for(let { side, dir } of sides){
                         //if(blockData.voxel) console.log(side, dir, this.checkVoxel(pos.clone().add(dir), blockData, side, update))
                         if(this.chunk.checkVoxel(pos.clone().add(dir), blockData, side, update)) continue sides;
-                        const blockState = this.chunk.metadata[`${i}_${j}_${k}`]
+                        const blockState = this.chunk.getBlockState(new Vector3(i, j, k))
                         //console.log(blockState, this.chunk.metadata, i, j, k)
                         let textureIndex = 'all' in blockData.textures ? blockData.textures.all : blockData.getTextures(blockState)[side]
                         

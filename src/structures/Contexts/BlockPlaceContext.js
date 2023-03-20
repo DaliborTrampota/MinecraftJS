@@ -1,15 +1,13 @@
 import BlockState from "../blocks/BlockState.js"
 import { Material, UP } from "../../tools/Constants.js"
-import { dirToSide } from "../../tools/Utils.js"
 import Context from "./Context.js"
 
 
 export default class BlockPlaceContext extends Context {
 
-    constructor(player, stack){
-        super(player)
-        this.stack = stack
-        this.hitResult = this.getAimedBlock(this.player.range)
+    constructor(player, stack, hitRes){
+        super(player, stack)
+        this.hitResult = hitRes ?? this.getAimedBlock(this.player.range)
     }
 
     get block() {
@@ -36,7 +34,7 @@ export default class BlockPlaceContext extends Context {
         this.player.setPlaceDelay()
 
         //get normal of player's facing direction
-        const blockState = this.block.isOrientable ? BlockState.create(this) : undefined
+        const blockState = this.block.hasEntity || this.block.isOrientable ? BlockState.fromContext(this) : undefined
 
         let chunk = this.player.world.getChunkFromPos(this.hitResult.position)
         chunk.addVoxel(this.hitResult.position, this.block.id, blockState)

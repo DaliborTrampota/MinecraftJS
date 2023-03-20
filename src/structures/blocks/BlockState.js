@@ -7,6 +7,7 @@ export default class BlockState {
         this.pos = pos
         this.id = `${pos.x}_${pos.y}_${pos.z}`
 
+        this.entity = meta?.entity ?? null
         this.direction = meta?.direction ?? new Vector3(1, 0, 0)//'north'
         //this.inventory = new MachineInterface(meta.inventory ?? []) 
     }
@@ -38,7 +39,7 @@ export default class BlockState {
         // return this.direction.x && side == 'west' || this.direction.y && side == 'up' || this.direction.z && side == 'north'
     }
 
-    static create(context) {
+    static fromContext(context) {
         const state = new BlockState(context.hitResult.position.floor())
         if(context.block.orientable.all) {
             state.direction = context.hitResult.normal.clone()
@@ -50,6 +51,10 @@ export default class BlockState {
             // }
         } else if(context.block.orientable.y) {
             state.direction = context.player.facingNormal.negate()
+        }
+
+        if(context.block.hasEntity) {
+            state.entity = new context.block.entityClass()
         }
 
         return state

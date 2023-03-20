@@ -23,6 +23,16 @@ export default class Block {
         this.elements = false
         this.renderSides = true
         this.animation = false
+
+        this.entityClass = false
+    }
+
+    get hasEntity() {
+        return this.entityClass
+    }
+
+    isInteractable() {
+        return false
     }
 
     loadData(data) {

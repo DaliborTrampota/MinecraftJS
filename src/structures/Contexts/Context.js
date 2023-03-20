@@ -5,8 +5,9 @@ import AABB from '../../tools/AABB.js';
 
 export default class Context {
 
-    constructor(player){
+    constructor(player, stack){
         this.player = player
+        this.stack = stack
     }
 
     get world() {
