@@ -97,7 +97,7 @@ export default class Controller {
                 return
 
             case 'KeyE':
-                this.player.inventory.toggle(this)
+                this.player.inventory.toggle()
                 return
 
             case 'KeyG':
@@ -115,30 +115,30 @@ export default class Controller {
             return
         }
 
-        this.horizontal = clamp(this.horizontal, -1, 1)
-        this.vertical = clamp(this.vertical, -1, 1)
-        this.upDown = clamp(this.upDown, -1, 1)
+        this.horizontal = this.inGUI ? 0 : clamp(this.horizontal, -1, 1)
+        this.vertical = this.inGUI ? 0 : clamp(this.vertical, -1, 1)
+        this.upDown = this.inGUI ? 0 : clamp(this.upDown, -1, 1)
     }
     
     keyUp(e){
         switch(e.code){
             case 'KeyW': case 'ArrowUp':
-                if(this.movement.front) this.vertical--
+                if(this.movement.front) this.vertical--// = Math.max(this.vertical - 1, 0)
                 this.movement.front = false
                 break
 
             case 'KeyS': case 'ArrowDown':
-                if(this.movement.back) this.vertical++
+                if(this.movement.back) this.vertical++// = Math.min(this.vertical + 1, 0)
                 this.movement.back = false
                 break
 
             case 'KeyA': case 'ArrowLeft':
-                if(this.movement.left) this.horizontal++
+                if(this.movement.left) this.horizontal++// = Math.min(this.horizontal + 1, 0)
                 this.movement.left = false
                 break
 
             case 'KeyD': case 'ArrowRight':
-                if(this.movement.right) this.horizontal--
+                if(this.movement.right) this.horizontal--// = Math.max(this.horizontal - 1, 0)
                 this.movement.right = false
                 break
 
@@ -155,10 +155,10 @@ export default class Controller {
                 if(this.flying) this.upDown--
                 break
         }
-        
-        this.horizontal = clamp(this.horizontal, -1, 1)
-        this.vertical = clamp(this.vertical, -1, 1)
-        this.upDown = clamp(this.upDown, -1, 1)
+
+        this.horizontal = this.inGUI ? 0 : clamp(this.horizontal, -1, 1)
+        this.vertical = this.inGUI ? 0 : clamp(this.vertical, -1, 1)
+        this.upDown = this.inGUI ? 0 : clamp(this.upDown, -1, 1)
     }
 
     onMouseScroll(e){

@@ -10,12 +10,14 @@ export default class Interface {
         this.htmlSlots = []
 
         this.background 
-        this.open = false
+        this.isOpen = false
 
         this.GUI = document.getElementById('gui')
         this.GUI_IMAGE = document.getElementById('gui-bg')
 
         this.dragging = false
+
+        this.interfaces = {}
     }
 
     get hasEmptySlot(){
@@ -37,43 +39,52 @@ export default class Interface {
 
 
     setInterface(html, background) {
+        let bg = document.createElement('img')
+        bg.setAttribute('class', 'gui-bg')
+        bg.setAttribute('draggable', 'false')
+        bg.src = background
+        html.appendChild(bg)
+        this.GUI_IMAGE = bg
+
+        this.GUI.appendChild(html)
+    }
+
+    clearInterface() {
         while (this.GUI.firstChild) {
             this.GUI.removeChild(this.GUI.lastChild);
         }
-        this.GUI.appendChild(html)
-
-        let bg = document.createElement('img')
-        bg.setAttribute('id', 'gui-bg')
-        bg.setAttribute('draggable', 'false')
-        bg.src = background
-        this.GUI.appendChild(bg)
-        this.GUI_IMAGE = bg
-
-        this.htmlSlots = document.getElementsByClassName('gui-slot')//].sort((a, b) => a.dataset.id - b.dataset.id)
     }
 
     update() {
+        if(!this.htmlSlots.length) this.htmlSlots = this.html.getElementsByClassName('gui-slot') 
         for(let i = 0; i < this.htmlSlots.length; ++i) {
             let stack = this.slots[i]
             stack ? InterfaceFactory.setSlot(this.htmlSlots[i], stack) : InterfaceFactory.clearSlot(this.htmlSlots[i])
         }
     }
 
-    toggle(controller){
-        this.open = !this.open
 
-        if(this.open){
-            this.update()
-            controller.inGUI = true
-            document.exitPointerLock()
-            //this.GUI_IMAGE.src = this.background
-            this.GUI.style.display = 'block'
-            this.connect()
-        }else{
-            controller.inGUI = false
-            this.GUI.style.display = 'none'
-            document.body.requestPointerLock()
-        }
+    open() {
+        this.setInterface(this.html, this.background)
+        this.update()
+        this.GUI_IMAGE.src = this.background
+        this.GUI.style.display = 'block'
+        document.exitPointerLock()
+        this.connect()
+    }
+
+    close() {
+        this.clearInterface()
+        this.GUI.style.display = 'none'
+        document.body.requestPointerLock()
+        this.interfaces = {}
+    }
+
+    toggle(){
+        this.isOpen = !this.isOpen
+
+        if(this.isOpen) this.open()
+        else this.close()
     }
 
 
@@ -89,18 +100,29 @@ export default class Interface {
 
     dragStart(e){
         e.dataTransfer.setData("id", e.target.dataset.id);
+        e.dataTransfer.setData("originSection", e.target.dataset.section);
+        e.dataTransfer.setData("originInterface", e.target.parentNode.dataset.interface);
     }
 
     onDrop(e){
         e.preventDefault();
         const sourceSlotID = e.dataTransfer.getData("id");
-        const targetSlotID = e.target.dataset.id;
+        const sourceInterfaceName = e.dataTransfer.getData("originInterface");
+        const sourceSection = e.dataTransfer.getData("originSection");
 
-        const temp = this.slots[sourceSlotID]
-        this.slots[sourceSlotID] = this.slots[targetSlotID]
-        this.slots[targetSlotID] = temp
+        const targetSlotID = e.target.dataset.id;
+        const targetInterfaceName = e.target.parentNode.dataset.interface;
+        const targetSection = e.target.dataset.section;
         
-        this.update()
+        const sourceInterface = this.interfaces[sourceInterfaceName] ?? this
+        const targetInterface = this.interfaces[targetInterfaceName] ?? this
+        
+        const temp = sourceInterface.slots[sourceSlotID]
+        sourceInterface.slots[sourceSlotID] = targetInterface.slots[targetSlotID]
+        targetInterface.slots[targetSlotID] = temp
+        
+        sourceInterface.update()
+        targetInterface.update()
     }
 
     allowDrop(e){

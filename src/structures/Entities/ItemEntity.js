@@ -3,7 +3,7 @@ import { Sphere, Vector3 } from 'https://cdn.skypack.dev/three@0.141.0';
 import { BASE_PLAYER_SETTINGS, ChunkSize, CornerCheck, CrossCheck } from '../../tools/Constants.js';
 import { moveTowards } from '../../tools/Utils.js';
 import Chunk from '../Chunk.js';
-import Stack from '../Interfaces/Stack.js';
+import Stack from '../item/Stack.js';
 
 import Entity from "./Entity.js";
 

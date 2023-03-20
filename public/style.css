@@ -79,9 +79,8 @@ body {
     display: none;
 }
 
-#gui > img {
-    width: 512px;
-    image-rendering: pixelated;
+#gui > div {
+    margin: 10px auto;
 }
 
 .gui-slot {
@@ -107,6 +106,19 @@ body {
 
 .gui-slot > * {
     pointer-events: none;
+}
+
+.gui-container {
+    position: relative;
+    margin: 0 auto;
+}
+
+.gui-bg {
+    image-rendering: pixelated;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    position: absolute;
 }
 
 [draggable="true"] {

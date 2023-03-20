@@ -1,11 +1,11 @@
-import Register from "../Register.js"
-import Stack from "./Interfaces/Stack.js"
+//import Register from "../Register.js"
+import Stack from "./item/Stack.js"
 
 
 export default class LootTable {
 
     constructor(name, context){
-        this.data = Register.lootTables[name]
+        //this.data = Register.lootTables[name]
         this.name = name
         this.context = context
     }

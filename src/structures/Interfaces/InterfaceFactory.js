@@ -1,6 +1,7 @@
 class InterfaceFactory {
 
-    constructor(xGap, yGap) {
+    constructor(xGap, yGap, name) {
+        this.name = name
         this.slots = []
         this.htmlSlots = {}
         this.xGap = xGap ?? 5
@@ -8,6 +9,9 @@ class InterfaceFactory {
     }
 
     section(xCount, yCount, x, y, name) {
+        x = x * Slot.WIDTH + x * this.xGap
+        y = y * Slot.HEIGHT + y * this.yGap
+        
         for(let i = 0; i < yCount; i++) {
             for(let j = 0; j < xCount; j++) {
                 this.slots.push(new Slot(x + j * this.xGap + Slot.WIDTH * j, y + i * this.yGap + Slot.HEIGHT * i, name))
@@ -18,7 +22,9 @@ class InterfaceFactory {
 
     build() {
         const div = document.createElement('div')
-        div.setAttribute('id', 'gui-container')
+        div.setAttribute('class', 'gui-container')
+        div.dataset.interface = this.name
+        
         let minX = Infinity 
         let minY = Infinity
         let maxX = -Infinity
@@ -49,6 +55,12 @@ class InterfaceFactory {
         htmlSlot.children[0].src = Slot.EMPTY
         htmlSlot.children[0].setAttribute('alt', 'empty slot')
         htmlSlot.children[1].innerHTML = ''
+    }
+
+    static bake(iface1, iface2) {
+        const height = iface1.style.height
+        const top = parseInt(iface1.style.top)
+
     }
 }
 

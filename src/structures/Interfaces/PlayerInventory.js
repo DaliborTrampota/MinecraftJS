@@ -7,8 +7,9 @@ export default class Inventory extends Interface {
     static COL = 10
     static ROW = 4
 
-    constructor(hotbarSize = 10){
+    constructor(player, hotbarSize = 10){
         super()
+        this.player = player
         this.hotbarSize = hotbarSize
         this.htmlHotbarSlots = new InterfaceFactory.Hotbar(hotbarSize).build(document.getElementById("hotbar"))
         
@@ -19,12 +20,10 @@ export default class Inventory extends Interface {
 
         //this.background = '/src/resources/images/gui/inventory.png'
 
-        const html = new InterfaceFactory(5, 5)
-            .section(Inventory.COL, Inventory.ROW, 0, 0)
-            .section(hotbarSize, 1, 0, Inventory.ROW * InterfaceFactory.Slot.HEIGHT + Inventory.ROW * 5 + 10, 'hotbar')
+        this.html = new InterfaceFactory(5, 5, 'inventory')
+            .section(Inventory.COL, Inventory.ROW, 0, 0, 'inventory')
+            .section(hotbarSize, 1, 0, Inventory.ROW + 0.25, 'hotbar')
             .build()
-
-        this.setInterface(html, this.background)
     }
 
     get hotbarStartIndex() {
@@ -46,6 +45,11 @@ export default class Inventory extends Interface {
         newSlot.html.id = "selected"
 
         this.selectedSlot = index
+    }
+
+    toggle() {
+        super.toggle()
+        this.player.controller.inGUI = this.isOpen
     }
 
     update() {
@@ -110,6 +114,12 @@ export default class Inventory extends Interface {
         
         this.updateHotbar()
         return toDrop
-    }   
+    }  
+    
+    openWith(iface) {
+        this.setInterface(iface.html, iface.background)
+        this.interfaces[iface.html.dataset.interface] = iface
+        this.toggle()
+    }
 }
 

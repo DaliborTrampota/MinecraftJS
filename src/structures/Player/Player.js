@@ -31,7 +31,7 @@ export default class Player extends LivingEntity {
         
         this.health = BASE_PLAYER_SETTINGS.health;
         this.gamemode = GAMEMODE.CREATIVE
-        this.inventory = new Inventory()
+        this.inventory = new Inventory(this)
         this.controller = new Controller(this)
 
         this.placeDelay = 0
