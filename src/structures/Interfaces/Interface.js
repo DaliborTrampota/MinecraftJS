@@ -1,66 +1,37 @@
-import InterfaceFactory from "./InterfaceFactory.js"
-
-
 export default class Interface {
 
     static empty = '/src/resources/images/empty.png'
     
     constructor(){
-        this.slots = []
         this.htmlSlots = []
 
         this.background 
         this.isOpen = false
 
         this.GUI = document.getElementById('gui')
-        this.GUI_IMAGE = document.getElementById('gui-bg')
+        this.GUI_IMAGE// = document.getElementById('gui-bg')
 
         this.dragging = false
-
-        this.interfaces = {}
     }
-
-    get hasEmptySlot(){
-        return this.emptySlot != -1
-    }
-
-
-    slotFor(stack){
-        for(let i = 0; i < this.slots.length; ++i){
-            if(!this.slots[i]) return i
-        }
-        return -1
-    }
-
-
-    setStack(stack, index){
-        this.slots[index] = stack
-    }
-
 
     setInterface(html, background) {
-        let bg = document.createElement('img')
-        bg.setAttribute('class', 'gui-bg')
-        bg.setAttribute('draggable', 'false')
-        bg.src = background
-        html.appendChild(bg)
-        this.GUI_IMAGE = bg
-
+        this.GUI_IMAGE = html.childNodes.item(html.childNodes.length - 1)
         this.GUI.appendChild(html)
+        if(background) this.GUI_IMAGE.src = background
     }
 
     clearInterface() {
         while (this.GUI.firstChild) {
             this.GUI.removeChild(this.GUI.lastChild);
         }
+        
+        let last = this.html.childNodes.item(this.html.childNodes.length - 1)
+        console.log(last.tagName)
+        if(last.tagName == 'img') last.remove() // remove the background
     }
 
     update() {
-        if(!this.htmlSlots.length) this.htmlSlots = this.html.getElementsByClassName('gui-slot') 
-        for(let i = 0; i < this.htmlSlots.length; ++i) {
-            let stack = this.slots[i]
-            stack ? InterfaceFactory.setSlot(this.htmlSlots[i], stack) : InterfaceFactory.clearSlot(this.htmlSlots[i])
-        }
+        if(!this.htmlSlots.length) this.htmlSlots = this.html.getElementsByClassName('gui-slot')
     }
 
 
@@ -77,7 +48,6 @@ export default class Interface {
         this.clearInterface()
         this.GUI.style.display = 'none'
         document.body.requestPointerLock()
-        this.interfaces = {}
     }
 
     toggle(){
@@ -89,9 +59,7 @@ export default class Interface {
 
 
     connect(e){
-        let slots = document.getElementsByClassName('gui-slot')
-
-        for(let s of slots){
+        for(let s of this.htmlSlots){
             s.ondragstart = this.dragStart.bind(this)
             s.ondrop = this.onDrop.bind(this)
             s.ondragover = this.allowDrop.bind(this)
@@ -105,24 +73,15 @@ export default class Interface {
     }
 
     onDrop(e){
-        e.preventDefault();
-        const sourceSlotID = e.dataTransfer.getData("id");
-        const sourceInterfaceName = e.dataTransfer.getData("originInterface");
-        const sourceSection = e.dataTransfer.getData("originSection");
-
-        const targetSlotID = e.target.dataset.id;
-        const targetInterfaceName = e.target.parentNode.dataset.interface;
-        const targetSection = e.target.dataset.section;
-        
-        const sourceInterface = this.interfaces[sourceInterfaceName] ?? this
-        const targetInterface = this.interfaces[targetInterfaceName] ?? this
-        
-        const temp = sourceInterface.slots[sourceSlotID]
-        sourceInterface.slots[sourceSlotID] = targetInterface.slots[targetSlotID]
-        targetInterface.slots[targetSlotID] = temp
-        
-        sourceInterface.update()
-        targetInterface.update()
+        e.preventDefault()
+        return {
+            originID: Number(e.dataTransfer.getData("id")),
+            originSection: e.dataTransfer.getData("originSection"),
+            originInterface: e.dataTransfer.getData("originInterface"),
+            targetID: Number(e.target.dataset.id),
+            targetSection: e.target.dataset.section,
+            targetInterface: e.target.parentNode.dataset.interface
+        }
     }
 
     allowDrop(e){

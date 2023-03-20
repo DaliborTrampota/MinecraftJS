@@ -80,13 +80,13 @@ body {
 }
 
 #gui > div {
-    margin: 10px auto;
+    margin: 20px auto;
 }
 
 .gui-slot {
     position: absolute;
     display: flex;
-    background-color: rgba(20, 20, 20, 0.5);
+    /* background-color: rgba(20, 20, 20, 0.5); */
 }
 
 .gui-slot span {

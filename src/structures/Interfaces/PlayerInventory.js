@@ -18,12 +18,14 @@ export default class Inventory extends Interface {
         this.hotbar = this.slots.view(this.slots.length - hotbarSize, this.slots.length) //view to the hotbar slots in the inventory
         this.selectedSlot = 0
 
+        this.interfaces = {}
+
         //this.background = '/src/resources/images/gui/inventory.png'
 
-        this.html = new InterfaceFactory(5, 5, 'inventory')
+        this.html = new InterfaceFactory(5, 5, 'player-inventory')
             .section(Inventory.COL, Inventory.ROW, 0, 0, 'inventory')
             .section(hotbarSize, 1, 0, Inventory.ROW + 0.25, 'hotbar')
-            .build()
+            .build(true, this)
     }
 
     get hotbarStartIndex() {
@@ -47,6 +49,11 @@ export default class Inventory extends Interface {
         this.selectedSlot = index
     }
 
+    close() {
+        super.close()
+        this.interfaces = {}
+    }
+
     toggle() {
         super.toggle()
         this.player.controller.inGUI = this.isOpen
@@ -54,6 +61,10 @@ export default class Inventory extends Interface {
 
     update() {
         super.update()
+        for(let i = 0; i < this.htmlSlots.length; ++i) {
+            let stack = this.slots[i]
+            stack ? InterfaceFactory.setSlot(this.htmlSlots[i], stack) : InterfaceFactory.clearSlot(this.htmlSlots[i])
+        }
         this.updateHotbar()
     }
 
@@ -117,9 +128,39 @@ export default class Inventory extends Interface {
     }  
     
     openWith(iface) {
-        this.setInterface(iface.html, iface.background)
+        iface.open(this)
         this.interfaces[iface.html.dataset.interface] = iface
         this.toggle()
     }
-}
 
+    dragStart(e){
+        e.dataTransfer.setData("id", e.target.dataset.id)//e.target.dataset.section == 'hotbar' ? Number(e.target.dataset.id) + this.hotbarStartIndex : e.target.dataset.id);
+        e.dataTransfer.setData("originSection", e.target.dataset.section);
+        e.dataTransfer.setData("originInterface", e.target.parentNode.dataset.interface);
+    }
+
+    onDrop(e){
+        const data = super.onDrop(e)
+        console.log('onDrop inv', data)
+
+        if(data.originSection == 'hotbar') data.originID += this.hotbarStartIndex
+        if(data.targetSection == 'hotbar') data.targetID += this.hotbarStartIndex
+        
+        let originSlots
+        const targetSlots = this.slots
+
+        const originInterface = this.interfaces[data.originInterface] ?? this
+        if(originInterface instanceof Inventory) {
+            originSlots = originInterface.slots
+        } else {
+            originSlots = originInterface.entity.slots(data.originSection)
+        }
+
+        const temp = originSlots[data.originID]
+        originSlots[data.originID] = targetSlots[data.targetID]
+        targetSlots[data.targetID] = temp
+        
+        originInterface.update()
+        this.update()
+    }
+}

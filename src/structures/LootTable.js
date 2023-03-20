@@ -1,11 +1,11 @@
-//import Register from "../Register.js"
+import Register from "./registers/RegisterManager.js"
 import Stack from "./item/Stack.js"
 
 
 export default class LootTable {
 
     constructor(name, context){
-        //this.data = Register.lootTables[name]
+        this.data = Register.lootTables[name]
         this.name = name
         this.context = context
     }
@@ -29,7 +29,7 @@ export default class LootTable {
 
     dropToStack(drop){
         //console.log(drop)
-        if(drop.type == 'item') return new Stack(this.context.register.getItem(drop.name), drop.amount ?? 1)
+        if(drop.type == 'item') return Stack.create(drop.name, drop.amount ?? 1)
 
     }
 

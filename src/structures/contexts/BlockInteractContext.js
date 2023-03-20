@@ -11,9 +11,12 @@ export default class BlockInteractContext extends Context {
     }
 
     get canInteract(){
+        return true
     }
 
     interact(){
+        if(this.state.entity.hasInterface)
+            this.state.entity.openInterface(this.player)
     }
 
     static from(context, hitRes) {

@@ -1,15 +1,15 @@
 import FurnaceEntity from "../entities/blocks/FurnaceEntity.js";
 import FurnaceInterface from "../interfaces/FurnaceInterface.js";
-import Block from "./Block.js";
+import FunctionalBlock from "./FunctionalBlock.js";
 
 
-export default class FurnaceBlock extends Block {
+export default class FurnaceBlock extends FunctionalBlock {
 
     constructor(key, material){
         super(key, material)
 
         this.entityClass = FurnaceEntity
-        this.interface = new FurnaceInterface()
+        this.interfaceClass = FurnaceInterface
     }
 
     isInteractable() {
@@ -17,7 +17,10 @@ export default class FurnaceBlock extends Block {
     }
 
     interact(context) {
-        console.log(context, context)
-        context.player.openInterface(this.interface)
+        if(context.canInteract){
+            context.interact()
+            return true
+        }
+        return false
     }
 }
