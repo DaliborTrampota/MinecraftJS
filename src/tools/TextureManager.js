@@ -1,7 +1,7 @@
-import { TwoWayMap } from "./Utils.js";
 import { TextureLoader, MeshBasicMaterial, NearestFilter, DoubleSide, FrontSide, DefaultLoadingManager } from 'https://cdn.skypack.dev/three@0.141.0';
-import Register from "../structures/registers/RegisterManager.js";
+import { TwoWayMap } from "./Utils.js";
 import { Material } from "./Constants.js";
+import Blocks from "../structures/registers/Blocks.js";
 
 
 export default class TextureManager {
@@ -14,21 +14,43 @@ export default class TextureManager {
         this.animatedTextures = {}
     }
 
-    async load(register){
+    async loadBlock(textures, block) {
+        for(let name of textures) {
+            const textureName = name.split('.')[0]
+            if(TextureManager.textureMap.has(textureName)) continue
+
+            const texture = this.loader.load(`resources/textures/blocks/${name}`)
+            texture.magFilter = NearestFilter
+            //texture.anisotropy = 4
+            
+            const material = new MeshBasicMaterial({ map: texture, transparent: block?.opaque ?? textureName.startsWith('break_'), side: block?.material == Material.LIQUID ? DoubleSide : FrontSide })
+            
+            TextureManager.textures.push(material)
+            TextureManager.textureMap.add(textureName)
+
+            if(block?.animated){
+                this.animatedTextures[TextureManager.textureMap.get(textureName)] = {
+                    frame: 0,
+                    end: block.animation.frames,
+                    interval: block.animation.interval,
+                    step: 1 / block.animation.frames
+                }
+            }
+        }
+    }
+
+    async load(){
         console.info('Loading textures...')
 
-        let textures = []
-        textures.push(...await fetch('/textures').then(r => r.json()))
-
-        for(let name of textures){
+        for(let name of window.textures){
             const texture = this.loader.load(`resources/textures/blocks/${name}`)
             texture.magFilter = NearestFilter
             //texture.anisotropy = 4
             
             const textureName = name.split('.')[0]
-            const block = register.getBlock(textureName)
+            const block = Blocks.get(textureName.split('_')[0])
             const material = new MeshBasicMaterial({ map: texture, transparent: block?.opaque ?? textureName.startsWith('break_'), side: block?.material == Material.LIQUID ? DoubleSide : FrontSide })
-            
+
             TextureManager.textures.push(material)
             TextureManager.textureMap.add(textureName)
 
@@ -47,7 +69,6 @@ export default class TextureManager {
         this.animateTextures()
     }
 
-    
     //todo make one 100ms interval for all textures
     animateTextures(){
         for(let idx in this.animatedTextures){

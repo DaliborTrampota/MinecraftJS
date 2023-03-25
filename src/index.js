@@ -1,37 +1,5 @@
 import { Scene, Clock, PerspectiveCamera, WebGLRenderer } from 'https://cdn.skypack.dev/three@0.141.0';
-import Game from './structures/Game.js'
 import PhotoBooth from './tools/PhotoBooth.js';
-
-const renderer = new WebGLRenderer();
-renderer.setPixelRatio(1)
-renderer.setSize( window.innerWidth, window.innerHeight );
-document.getElementById('target').appendChild(renderer.domElement);
-
-window.getBlockImage = PhotoBooth
-window.scene = new Scene();
-window.clock = new Clock();
-const camera = new PerspectiveCamera(90, window.innerWidth / window.innerHeight, 1, 500 );
-
-camera.near = 0.01
-camera.updateProjectionMatrix()
-
-
-function onWindowResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-}
-
-function preventClose(e) {
-    if(window.game.player.controller.locked) {
-        e.preventDefault()
-        return e.returnValue = 'Are you sure you want to leave?'
-    }
-}
-
-document.onresize = onWindowResize
-window.onbeforeunload = preventClose
-
 
 Array.prototype.view = function(start, end) {
     return new Proxy(this, {
@@ -61,4 +29,53 @@ Array.prototype.findIndexFrom = function(start, callback, wrap = false) {
     return -1
 }
 
-new Game(renderer, camera)
+
+async function main() {
+
+    const renderer = new WebGLRenderer();
+    renderer.setPixelRatio(1)
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    document.getElementById('target').appendChild(renderer.domElement);
+    
+    window.getBlockImage = PhotoBooth
+    window.scene = new Scene();
+    window.clock = new Clock();
+    const camera = new PerspectiveCamera(90, window.innerWidth / window.innerHeight, 1, 500 );
+    
+    camera.near = 0.01
+    camera.updateProjectionMatrix()
+
+
+    function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+    
+    function preventClose(e) {
+        if(window.game.player.controller.locked) {
+            e.preventDefault()
+            return e.returnValue = 'Are you sure you want to leave?'
+        }
+    }
+    
+    document.onresize = onWindowResize
+    window.onbeforeunload = preventClose
+    await fetchData()
+    const Game = await import('./structures/Game.js').then(res => res.default)
+    new Game(renderer, camera)
+} 
+main()
+
+
+async function fetchData() {
+    window.textures = await fetch('/textures').then(res => res.json())
+    window.blockData = await fetch('/blockData').then(res => res.json())
+    window.itemData = await fetch('/itemData').then(res => res.json())
+    // window.recipeData = await fetch('/recipes').then(res => res.json())
+    // let entityData = await fetch('/entities').then(res => res.json())
+    // let biomeData = await fetch('/biomes').then(res => res.json())
+    // let dimensionData = await fetch('/dimensions').then(res => res.json())
+    // let structureData = await fetch('/structures').then(res => res.json())
+    window.lootTableData = await fetch('/lootTables').then(res => res.json())
+}

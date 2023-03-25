@@ -1,4 +1,4 @@
-import { BufferGeometry, BufferAttribute, Box3, Vector3 } from 'https://cdn.skypack.dev/three@0.141.0';
+import { BufferGeometry, BufferAttribute, Box3, Vector3, Matrix4 } from 'https://cdn.skypack.dev/three@0.141.0';
 import { sides, triangles, vertices, UVs } from './Constants.js';
 
 
@@ -17,10 +17,7 @@ export default class VoxelBuilder {
             east: [],
             west: []
         }
-        /*const vertData = {
-                unculled: [],
-                culled: [],
-            }*/
+        
         const uvData = {
             up: [],
             down: [],
@@ -72,7 +69,7 @@ export default class VoxelBuilder {
                     else vertData[side].push({ type: 'unculled', data: tempVerts})
 
                     if(uvData[side].at(-1)?.type == 'unculled') uvData[side].at(-1).data.push(...sideUVs)
-                    else uvData[side].push({ type: 'unculled', data: sideUVs})
+                    else uvData[side].push({ type: 'unculled', data: sideUVs })
                     // vertData[side].unculled.push(...tempVerts)
                     // uvData[side].unculled.push(...sideUVs)
                 }
@@ -86,6 +83,34 @@ export default class VoxelBuilder {
         geometry.setAttribute('uv', new BufferAttribute(new Float32Array(uvs), 2))
 
         return { geometry, vertices: vertData, UVs: uvData }
+    }
+
+    static rotateVertices(verts, direction) {
+        
+        console.log(direction)
+        verts = verts.map(v => v - 0.5)
+        const rotationAxis = direction.clone()
+        if(rotationAxis.x) {
+            rotationAxis.z = -rotationAxis.x
+            rotationAxis.x = 0
+        } else {
+            rotationAxis.x = -rotationAxis.z
+            rotationAxis.z = 0
+        }
+        console.log(rotationAxis, direction.angleTo(new Vector3(0, 0, 1)), direction)
+
+        const matrix = new Matrix4()
+        matrix.makeRotationAxis(new Vector3(0, 1, 0), direction.angleTo(new Vector3(-1, 0, 0)))
+
+        for(let i = 0; i < verts.length; i += 3){
+            const vert = new Vector3(verts[i], verts[i + 1], verts[i + 2])
+            vert.applyMatrix4(matrix)
+            verts[i] = vert.x
+            verts[i + 1] = vert.y
+            verts[i + 2] = vert.z
+        }
+
+        return verts.map(v => v + 0.5)
     }
 
     static rotateUVs(uvs){

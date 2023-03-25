@@ -1,4 +1,5 @@
 {
+    "pillar": true,
     "orientable": true,
     "textures": {
         "front": "oak_log_top",

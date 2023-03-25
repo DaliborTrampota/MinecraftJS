@@ -57,7 +57,7 @@ export default class TerrainBuilder {
                     }
                     
                     sides:
-                    for(let { side, dir } of sides){
+                    for(let { side, dir } of sides) {
                         //if(blockData.voxel) console.log(side, dir, this.checkVoxel(pos.clone().add(dir), blockData, side, update))
                         if(this.chunk.checkVoxel(pos.clone().add(dir), blockData, side, update)) continue sides;
                         const blockState = this.chunk.getBlockState(new Vector3(i, j, k))
@@ -80,16 +80,18 @@ export default class TerrainBuilder {
         let blockData = this.chunk.register.getBlock(blockID)
         
         for(let o of data){
-            if(blockData.voxel){
+            let curGroupCount = 0
+            if(blockData.voxel) {
                 //let b = this.world.getVoxelFromPos(o.pos.clone().add(sides.find(s => s.side == o.side).dir))
                 //console.log(o, b)
-                const { vertices, uvs } = blockData.side(o.side, true)
+                const { vertices, uvs } = blockData.side(o.side, true, o.blockState)
                 
-                for(let i = 0; i < vertices.length; i += 3){
+                for(let i = 0; i < vertices.length; i += 3) {
                     this.vertices.push(vertices[i    ] + o.pos.x)
                     this.vertices.push(vertices[i + 1] + o.pos.y)
                     this.vertices.push(vertices[i + 2] + o.pos.z)
                     groupCount++
+                    curGroupCount++
                 }
                 this.UVs.push(...uvs)
             }else{
@@ -101,14 +103,15 @@ export default class TerrainBuilder {
                 if(blockData.animation) this.UVs.push(...UVs[o.side].map((u, i) => i % 2 ? u / blockData.animation.frames : u))
                 else this.UVs.push(...(blockData.orientable.all && o.blockState.shouldRotateUVsFor(o.side, textureIndex) ? VoxelBuilder.rotateUVs(UVs[o.side]) : UVs[o.side]))
                 groupCount += 6
+                curGroupCount += 6
             }
         
-            if(o.breaking) breakingGroups.push({ start: this.groupStart + groupCount, texture: o.breaking.textureIndex })
+            if(o.breaking) breakingGroups.push({ start: this.groupStart + groupCount - curGroupCount, size: curGroupCount, texture: o.breaking.textureIndex })
             
         }
         
         this.geometry.addGroup(this.groupStart, groupCount, Number(textureIndex))
-        for(let { start, texture } of breakingGroups) this.geometry.addGroup(start, 6, texture)
+        for(let { start, size, texture } of breakingGroups) this.geometry.addGroup(start, size, texture)
 
         this.groupStart += groupCount;
     }

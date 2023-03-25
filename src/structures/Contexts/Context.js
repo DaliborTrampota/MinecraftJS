@@ -57,10 +57,11 @@ export default class Context {
             if(t >= 0) {
                 closest.t = t
                 closest.normal = plane.normal
+                closest.point = this.getIntersectedPoint(prevPos.clone(), dir.clone(), t)
             }
         }
         const angle = closest.normal.angleTo(dir) * 180 / Math.PI
-        return { block, position, normal: closest.normal.clone().negate(), angle, found: true }
+        return { block, position, normal: closest.normal.clone().negate(), angle, point: closest.point.sub(position.clone().floor()), found: true }
     }
 
     intersectPlane(n, p0, origin, dir) {
@@ -72,6 +73,10 @@ export default class Context {
         }
 
         return -Infinity
+    }
+
+    getIntersectedPoint(origin, dir, t) {
+        return origin.add(dir.multiplyScalar(t))
     }
 
 }

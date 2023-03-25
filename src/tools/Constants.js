@@ -181,6 +181,14 @@ const Material = {
     LIQUID: 2
 }
 
+const Section = {
+    CENTER: 0,
+    TOP: 1,
+    RIGHT: 2,
+    BOTTOM: 3,
+    LEFT: 4,
+}
+
 export {
     sides,
     PI_2,
@@ -193,6 +201,7 @@ export {
 
     CrossCheck,
     CornerCheck,
+    Section,
     
     Directions,
     DirectionsX,

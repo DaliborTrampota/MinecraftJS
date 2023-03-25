@@ -4,7 +4,12 @@ const fs = require('fs');
 
 const app = express()
 
-app.use('/src', express.static(__dirname + '/src'));
+async function test(req, res, next) {
+    // console.log(req.path)
+    next()
+}
+
+app.use('/src', test, express.static(__dirname + '/src'));
 app.use('/resources', express.static(__dirname + '/src/resources'))
 app.use('/public', express.static(__dirname + '/public'))
 //app.use('/node_modules', express.static(__dirname + '/node_modules'))

@@ -42,8 +42,8 @@ export default class BlockState {
     static fromContext(context) {
         const state = new BlockState(context.hitResult.position.floor())
         if(context.block.orientable.all) {
-            state.direction = context.hitResult.normal.clone()
-            
+            if(context.block.pillar) state.direction = context.hitResult.normal.clone()
+            else state.direction = context.player.facingNormal.negate()
             // if(context.block.variants.axis && false) {
             //     if(context.hitResult.normal.x && context.block.variants.axis.x) state.rotate(context.block.variants.axis.x)
             //     else if(context.hitResult.normal.y && context.block.variants.axis.y) state.rotate(context.block.variants.axis.y)

@@ -1,6 +1,7 @@
 import { Vector3 } from 'https://cdn.skypack.dev/three@0.141.0';
-import { DirectionsY, Directions } from '../../tools/Constants.js';
+import { DirectionsY, Directions, sides } from '../../tools/Constants.js';
 import TextureManager from "../../tools/TextureManager.js"
+import { dirToSide } from '../../tools/Utils.js';
 import VoxelBuilder from "../../tools/VoxelBuilder.js"
 import BlockState from './BlockState.js';
 
@@ -25,6 +26,8 @@ export default class Block {
         this.animation = false
 
         this.entityClass = false
+
+        this.loadData(window.blockData[key])
     }
 
     get hasEntity() {
@@ -37,7 +40,6 @@ export default class Block {
 
     loadData(data) {
         if(!data) return console.warn('Missing block data for', this.key)
-
         this.rawTextures = data.textures
         this.#setProperties(data)
         this.#generateModel(data.elements)
@@ -66,21 +68,29 @@ export default class Block {
         return Array.isArray(textures) ? textures.map(idx => TextureManager.textures[idx]): TextureManager.textures[textures]
     }
 
-    getTextures(blockState) {
-        if(!this.isOrientable) return this.textures
+    rotateSide(side) {
 
+    }
+
+    rotateSides(side, sideMap = false) {
         let front = 'north', back = 'south'
         let right = 'east', left = 'west'
         let top = 'up', bottom = 'down'
 
+        
+        if(!side) {
+            if(sideMap) return { north: 'north', south: 'south', east: 'east', west: 'west', up: 'up', down: 'down' }
+            return { front, back, right, left, top, bottom }
+        }
+
         if(this.orientable.y) {
-            front = blockState?.side ?? 'north'
+            front = side ?? 'north'
             back = DirectionsY[(DirectionsY[front] + 2) % 4]
 
             right = DirectionsY[(DirectionsY[front] + 1) % 4]
             left = DirectionsY[(DirectionsY[right] + 2) % 4]
         }else if(this.orientable.all) {
-            front = blockState?.side ?? 'north'
+            front = side ?? 'north'
             back = Directions[(Directions[front] + 3) % 6]
 
             right = Directions[(Directions[front] + 1) % 6]
@@ -89,6 +99,36 @@ export default class Block {
             top = Directions[(Directions[front] + 2) % 6]
             bottom = Directions[(Directions[top] + 3) % 6]
         }
+        // else if(this.orientable.facing) {
+        //     const rotationAxis = sides.find(s => s.side == side).dir
+        //     if(rotationAxis.x) {
+        //         rotationAxis.z = -rotationAxis.x
+        //         rotationAxis.x = 0
+        //     } else {
+        //         rotationAxis.x = -rotationAxis.z
+        //         rotationAxis.z = 0
+        //     }
+            
+        // }
+
+        if(sideMap) {    
+            const map = {}
+            map['north'] = front
+            map['south'] = back
+            map['east'] = right
+            map['west'] = left
+            map['up'] = top
+            map['down'] = bottom
+            return map
+        }
+
+        return { front, back, right, left, top, bottom }
+    }
+
+    getTextures(blockState) {
+        if(!this.isOrientable) return this.textures
+
+        const { front, back, right, left, top, bottom } = this.rotateSides(blockState?.side)
         
         const textures = {}
             
@@ -102,10 +142,13 @@ export default class Block {
         return textures
     }
 
-    side(side, culled) {
+    side(side, culled, state) {
+        const sideMap = this.rotateSides(state?.side, true)
+        if(state) console.log(sideMap, side, culled, sideMap[side])
+
         const data = {
-            vertices: this.vertices[side].filter(o => !culled ? o.type == 'unculled' : true).map(o => o.data).flat(),
-            uvs: this.UVs[side].filter(o => !culled ? o.type == 'unculled' : true).map(o => o.data).flat(),
+            vertices: VoxelBuilder.rotateVertices(this.vertices[sideMap[side]].filter(o => !culled ? o.type == 'unculled' : true).map(o => o.data).flat(), state.direction),
+            uvs: this.UVs[sideMap[side]].filter(o => !culled ? o.type == 'unculled' : true).map(o => o.data).flat(),
         }
         return data
     }
@@ -137,10 +180,12 @@ export default class Block {
         delete this.rawTextures
     }
 
-    #setProperties(data){
+    #setProperties(data) {
         this.renderSides = Boolean(data?.renderSides ?? true)
         if(data.orientableY) this.orientable.y = true
         if(data.orientable) this.orientable.all = true
+        if(data.orientableFacing) this.orientable.facing = true
+        if(data.pillar) this.pillar = true
         // const DEG_TO_RAD = Math.PI / 180
         // if(data.variants) {
         //     for(let key in data.variants) {

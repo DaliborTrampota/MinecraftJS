@@ -1,6 +1,6 @@
 import FurnaceInterface from "../../interfaces/FurnaceInterface.js";
-import Blocks from "../../registers/Blocks.js";
 import BlockEntity from "../BlockEntity.js";
+import Blocks from "../../registers/Blocks.js";
 
 
 export default class FurnaceEntity extends BlockEntity {
@@ -11,6 +11,16 @@ export default class FurnaceEntity extends BlockEntity {
         this.inputSlots = new Array(6)
         this.fuelSlots = new Array(1)
         this.outputSlots = new Array(2)
+
+        this.fuelMap = new Map()
+        this.Init()
+    }
+
+    async Init() {
+        super.Init()
+        const Items = await import('./../../registers/Items.js').then(r => r.default)
+
+        this.fuelMap.set(Items.OAK_LOG, 200)
     }
 
     slots(section) {
@@ -57,7 +67,7 @@ export default class FurnaceEntity extends BlockEntity {
     }
 
     isFuel(item) {
-        return item.key == 'oak_log'
+        return this.fuelMap.has(item)
     }
 
 

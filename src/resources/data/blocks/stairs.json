@@ -1,4 +1,5 @@
 {
+    "orientable": true,
     "textures": {
         "all": "oak_planks"
     },

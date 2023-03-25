@@ -7,7 +7,6 @@ import BiomeGenerator from './generators/BiomeGenerator.js';
 import World from './World.js';
 
 import Player from './player/Player.js';
-import BlockItem from './item/BlockItem.js';
 import Stack from './item/Stack.js';
 
 export default class Game {
@@ -37,13 +36,9 @@ export default class Game {
         this.createSkybox()
         window.scene.add(this.createLight())
 
-        await this.textureManager.load(this.register)
-        for(let key of this.register.blocks.map.keys()) 
-            this.register.getBlock(key).loadTextures()
-        for(let key of this.register.items.map.keys()) {
-            const item = this.register.getItem(key)
-            if(item instanceof BlockItem) item.createImage()
-        }
+        await this.textureManager.load()
+        this.register.blocks.reloadTextures()
+        this.register.items.generateIcons()
         
         console.log('Loaded blocks:', this.register.blocks.map.size, 'Loaded items:', this.register.items.map.size)
         
@@ -54,15 +49,10 @@ export default class Game {
         this.addUpdateSub(this.world)
         
         for(let key of this.register.items.map.keys()) {
-            this.player.inventory.addStack(Stack.create(key, 64))
-            console.log(key)
+            // this.player.inventory.addStack(Stack.create(key, 64))
         }
-        // this.player.inventory.addStack(Stack.create('stairs', 64))
-        // this.player.inventory.addStack(Stack.create('stone', 64))
-        // this.player.inventory.addStack(Stack.create('slab', 64))
-        // this.player.inventory.addStack(Stack.create('vertical_slab', 64))
-        // this.player.inventory.addStack(Stack.create('glass', 64))
-        // this.player.inventory.addStack(Stack.create('furnace', 64))
+        this.player.inventory.addStack(Stack.create('stairs', 64))
+
     }
 
     Update(){
