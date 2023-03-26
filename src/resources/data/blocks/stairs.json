@@ -1,5 +1,5 @@
 {
-    "orientable": true,
+    "type": "rotatable",
     "textures": {
         "all": "oak_planks"
     },

@@ -34,8 +34,37 @@ export default class Block {
         return this.entityClass
     }
 
-    isInteractable() {
+    get isOrientable() {
+        return Object.keys(this.orientable).length
+    }
+
+    get isInteractable() {
         return false
+    }
+    
+    getStateForPlacement(context) {
+        if(!this.isOrientable && !this.hasEntity) return false
+
+        const state = new BlockState(context.hitResult.position.floor(), context.block)
+        
+        if(this.orientable.side) {
+            state.direction = context.clickNormal
+        } else if(this.orientable.facing) {
+            state.direction = context.facingDir
+        } else if(this.orientable.rotatable) {
+            state.direction = context.facingDir
+
+            if(context.clickAngle > 0.5) {
+                const rotateAxis = context.facingDir.clone().applyAxisAngle(new Vector3(0, 1, 0), Math.PI / 2).round()
+                state.direction.applyAxisAngle(rotateAxis, -Math.PI/2).round()
+            }
+        }
+        // console.log(state, state.side)
+        if(this.hasEntity) {
+            state.entity = new this.entityClass()
+        }
+
+        return state
     }
 
     loadData(data) {
@@ -45,15 +74,12 @@ export default class Block {
         this.#generateModel(data.elements)
     }
 
-    get isOrientable() {
-        return Object.keys(this.orientable).length
-    }
 
     get materials() {
         let textures = []
         let tempTextures = this.textures
-        if(this.orientable.y) tempTextures = this.getTextures()
-        else if(this.orientable.all) tempTextures = this.getTextures(BlockState.pillarUp())
+        if(this.orientable.facing || this.orientable.rotatable) tempTextures = this.getTextures()
+        else if(this.orientable.side) tempTextures = this.getTextures(BlockState.pillarUp())
         if(this.textures.all) textures = this.textures.all
         else {
             textures = [
@@ -73,62 +99,12 @@ export default class Block {
     }
 
     rotateSides(side, sideMap = false) {
-        let front = 'north', back = 'south'
-        let right = 'east', left = 'west'
-        let top = 'up', bottom = 'down'
-
-        
-        if(!side) {
-            if(sideMap) return { north: 'north', south: 'south', east: 'east', west: 'west', up: 'up', down: 'down' }
-            return { front, back, right, left, top, bottom }
-        }
-
-        if(this.orientable.y) {
-            front = side ?? 'north'
-            back = DirectionsY[(DirectionsY[front] + 2) % 4]
-
-            right = DirectionsY[(DirectionsY[front] + 1) % 4]
-            left = DirectionsY[(DirectionsY[right] + 2) % 4]
-        }else if(this.orientable.all) {
-            front = side ?? 'north'
-            back = Directions[(Directions[front] + 3) % 6]
-
-            right = Directions[(Directions[front] + 1) % 6]
-            left = Directions[(Directions[right] + 3) % 6]
-
-            top = Directions[(Directions[front] + 2) % 6]
-            bottom = Directions[(Directions[top] + 3) % 6]
-        }
-        // else if(this.orientable.facing) {
-        //     const rotationAxis = sides.find(s => s.side == side).dir
-        //     if(rotationAxis.x) {
-        //         rotationAxis.z = -rotationAxis.x
-        //         rotationAxis.x = 0
-        //     } else {
-        //         rotationAxis.x = -rotationAxis.z
-        //         rotationAxis.z = 0
-        //     }
-            
-        // }
-
-        if(sideMap) {    
-            const map = {}
-            map['north'] = front
-            map['south'] = back
-            map['east'] = right
-            map['west'] = left
-            map['up'] = top
-            map['down'] = bottom
-            return map
-        }
-
-        return { front, back, right, left, top, bottom }
     }
 
     getTextures(blockState) {
         if(!this.isOrientable) return this.textures
 
-        const { front, back, right, left, top, bottom } = this.rotateSides(blockState?.side)
+        const { front, back, right, left, top, bottom } = blockState?.sides.rotated ?? {}
         
         const textures = {}
             
@@ -142,13 +118,10 @@ export default class Block {
         return textures
     }
 
-    side(side, culled, state) {
-        const sideMap = this.rotateSides(state?.side, true)
-        if(state) console.log(sideMap, side, culled, sideMap[side])
-
+    side(side, culled, state, oldSide) {
         const data = {
-            vertices: VoxelBuilder.rotateVertices(this.vertices[sideMap[side]].filter(o => !culled ? o.type == 'unculled' : true).map(o => o.data).flat(), state.direction),
-            uvs: this.UVs[sideMap[side]].filter(o => !culled ? o.type == 'unculled' : true).map(o => o.data).flat(),
+            vertices: VoxelBuilder.rotateVertices(this.vertices[side].filter(o => !culled ? o.type == 'unculled' : true).map(o => o.data).flat(), state.direction),
+            uvs: this.UVs[oldSide ?? side].filter(o => !culled ? o.type == 'unculled' : true).map(o => o.data).flat(),
         }
         return data
     }
@@ -182,10 +155,9 @@ export default class Block {
 
     #setProperties(data) {
         this.renderSides = Boolean(data?.renderSides ?? true)
-        if(data.orientableY) this.orientable.y = true
-        if(data.orientable) this.orientable.all = true
-        if(data.orientableFacing) this.orientable.facing = true
-        if(data.pillar) this.pillar = true
+        if(data.type == 'facing') this.orientable.facing = true
+        if(data.type == 'rotatable') this.orientable.rotatable = true
+        if(data.type == 'orientable') this.orientable.side = true
         // const DEG_TO_RAD = Math.PI / 180
         // if(data.variants) {
         //     for(let key in data.variants) {

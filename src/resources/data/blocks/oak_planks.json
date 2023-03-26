@@ -1,4 +1,5 @@
 {
+    "type": "facing",
     "textures": {
         "all": "oak_planks"
     }

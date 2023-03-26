@@ -156,7 +156,7 @@ export default class Player extends LivingEntity {
             const hitRes = context.getAimedBlock(this.range)
             if(!hitRes.found) return
             
-            if(hitRes.block.isInteractable()) {
+            if(hitRes.block.isInteractable) {
                 this.holding.RMB = false
                 if(this.placeDelay > 0) return
                 return hitRes.block.interact(BlockInteractContext.from(context, hitRes))

@@ -11,10 +11,11 @@ export default class BlockPlaceContext extends Context {
         this.hitResult = hitRes ?? this.getAimedBlock(this.player.range)
 
         this.facingDir = player.facingNormal.negate()
-        this.clickDir = this.hitResult.normal
+        this.clickNormal = this.hitResult.normal
         this.clickAngle = player.facingNormal.angleTo(player.camera.getWorldDirection(new Vector3()))
         this.clickSection = BlockPlaceContext.getClickSection(this.hitResult.point, this.hitResult.normal)
-        console.log(this.clickAngle, this.clickSection)
+
+        if(this.hitResult.position.y < player.position.y + player.camera.position.y) this.clickAngle = -this.clickAngle
     }
 
     get block() {
@@ -40,10 +41,9 @@ export default class BlockPlaceContext extends Context {
         if(!this.player.inCreative) this.stack.amount--
         this.player.setPlaceDelay()
 
-        //get normal of player's facing direction
-        const blockState = this.block.hasEntity || this.block.isOrientable ? BlockState.fromContext(this) : undefined
+        const blockState = this.block.getStateForPlacement(this)
 
-        let chunk = this.player.world.getChunkFromPos(this.hitResult.position)
+        const chunk = this.player.world.getChunkFromPos(this.hitResult.position)
         chunk.addVoxel(this.hitResult.position, this.block.id, blockState)
         this.player.inventory.updateHotbar()
     }

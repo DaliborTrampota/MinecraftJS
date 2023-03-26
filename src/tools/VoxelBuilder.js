@@ -87,7 +87,6 @@ export default class VoxelBuilder {
 
     static rotateVertices(verts, direction) {
         
-        console.log(direction)
         verts = verts.map(v => v - 0.5)
         const rotationAxis = direction.clone()
         if(rotationAxis.x) {
@@ -97,7 +96,6 @@ export default class VoxelBuilder {
             rotationAxis.x = -rotationAxis.z
             rotationAxis.z = 0
         }
-        console.log(rotationAxis, direction.angleTo(new Vector3(0, 0, 1)), direction)
 
         const matrix = new Matrix4()
         matrix.makeRotationAxis(new Vector3(0, 1, 0), direction.angleTo(new Vector3(-1, 0, 0)))

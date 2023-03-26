@@ -113,6 +113,8 @@ const DirectionsY = createEnum(['north', 'east', 'south', 'west'])
 const DirectionsX = createEnum(['north', 'up', 'south', 'down'])
 const DirectionsZ = createEnum(['east', 'up', 'west', 'down'])
 
+const Half = createEnum(['Top', 'Bottom'])
+
 const CrossCheck = [ 
     new Vector3(1, 0, 0),
     new Vector3(0, 0, 1),
@@ -207,6 +209,7 @@ export {
     DirectionsX,
     DirectionsY,
     DirectionsZ,
+    Half,
 
     GAMEMODE,
     MOUSE_BUTTON,

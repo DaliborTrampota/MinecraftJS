@@ -159,6 +159,7 @@ export default class Chunk {
         }
         
         this.setVoxel(pos, this.register.getBlockID('air'))
+        delete this.metadata[`${pos.x}_${pos.y}_${pos.z}`]
         this.rebuildNeighbourChunks(pos, worldPos)
         return true
     }

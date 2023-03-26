@@ -52,6 +52,9 @@ export default class Game {
             // this.player.inventory.addStack(Stack.create(key, 64))
         }
         this.player.inventory.addStack(Stack.create('stairs', 64))
+        this.player.inventory.addStack(Stack.create('stone', 64))
+        this.player.inventory.addStack(Stack.create('vertical_slab', 64))
+        this.player.inventory.addStack(Stack.create('slab', 64))
 
     }
 
