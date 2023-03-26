@@ -1,14 +1,17 @@
 import { Vector3 } from 'https://cdn.skypack.dev/three@0.141.0'
+import { Half, DirectionsY, Directions } from '../../tools/Constants.js'
 import { dirToSide } from "../../tools/Utils.js"
 
 export default class BlockState {
 
-    constructor(pos, meta) {
+    constructor(pos, block, meta) {
         this.pos = pos
         this.id = `${pos.x}_${pos.y}_${pos.z}`
+        this.block = block
 
         this.entity = meta?.entity ?? null
         this.direction = meta?.direction ?? new Vector3(1, 0, 0)//'north'
+        this.half = meta?.half ?? Half.Bottom
         //this.inventory = new MachineInterface(meta.inventory ?? []) 
     }
 
@@ -16,8 +19,52 @@ export default class BlockState {
         return dirToSide(this.direction)
     }
 
-    setDirection(direction) {
-        this.direction = direction
+    get sides() {
+        let front = 'north', back = 'south'
+        let right = 'east', left = 'west'
+        let top = 'up', bottom = 'down'
+
+
+        if(this.block.orientable.facing || this.block.orientable.rotatable) {
+            if(this.side != 'north') {
+                front = this.side
+                back = DirectionsY[(DirectionsY[front] + 2) % 4]
+    
+                right = DirectionsY[(DirectionsY[front] + 1) % 4]
+                left = DirectionsY[(DirectionsY[right] + 2) % 4]
+            }
+        }else if(this.block.orientable.side) {
+            if(this.side != 'north') {
+                front = this.side
+                back = Directions[(Directions[front] + 3) % 6]
+
+                right = Directions[(Directions[front] + 1) % 6]
+                left = Directions[(Directions[right] + 3) % 6]
+
+                top = Directions[(Directions[front] + 2) % 6]
+                bottom = Directions[(Directions[top] + 3) % 6]
+            }
+        }
+
+        if(this.block.orientable.rotatable) {
+
+        }
+  
+        return {
+            map: {
+                north: front,
+                south: back,
+                east: right,
+                west: left,
+                up: top,
+                down: bottom
+            },
+            rotated: { front, back, right, left, top, bottom }
+        }
+    }
+
+    setValue(prop, value) {
+        this[prop] = value
         return this
     }
 
@@ -39,29 +86,8 @@ export default class BlockState {
         // return this.direction.x && side == 'west' || this.direction.y && side == 'up' || this.direction.z && side == 'north'
     }
 
-    static fromContext(context) {
-        const state = new BlockState(context.hitResult.position.floor())
-        if(context.block.orientable.all) {
-            state.direction = context.hitResult.normal.clone()
-            
-            // if(context.block.variants.axis && false) {
-            //     if(context.hitResult.normal.x && context.block.variants.axis.x) state.rotate(context.block.variants.axis.x)
-            //     else if(context.hitResult.normal.y && context.block.variants.axis.y) state.rotate(context.block.variants.axis.y)
-            //     else if(context.hitResult.normal.z && context.block.variants.axis.z) state.rotate(context.block.variants.axis.z)
-            // }
-        } else if(context.block.orientable.y) {
-            state.direction = context.player.facingNormal.negate()
-        }
-
-        if(context.block.hasEntity) {
-            state.entity = new context.block.entityClass()
-        }
-
-        return state
-    }
-
     static pillarUp() {
-        return new BlockState(new Vector3(), { direction: new Vector3(0, 1, 0) })
+        return new BlockState(new Vector3(), null, { direction: new Vector3(0, 1, 0) })
     }
 
 }

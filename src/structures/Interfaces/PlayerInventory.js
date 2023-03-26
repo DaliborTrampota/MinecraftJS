@@ -134,16 +134,16 @@ export default class Inventory extends Interface {
     }
 
     dragStart(e){
-        e.dataTransfer.setData("id", e.target.dataset.id)//e.target.dataset.section == 'hotbar' ? Number(e.target.dataset.id) + this.hotbarStartIndex : e.target.dataset.id);
+        const editedIndex = e.target.dataset.section == 'hotbar' ? Number(e.target.dataset.id) + this.hotbarStartIndex : e.target.dataset.id
+        e.dataTransfer.setData("id", editedIndex);
         e.dataTransfer.setData("originSection", e.target.dataset.section);
         e.dataTransfer.setData("originInterface", e.target.parentNode.dataset.interface);
+        e.dataTransfer.setData(`dragover:${e.target.parentNode.dataset.interface}:${editedIndex}:${e.target.dataset.section}`, true);
     }
 
     onDrop(e){
         const data = super.onDrop(e)
-        console.log('onDrop inv', data)
 
-        if(data.originSection == 'hotbar') data.originID += this.hotbarStartIndex
         if(data.targetSection == 'hotbar') data.targetID += this.hotbarStartIndex
         
         let originSlots
@@ -162,5 +162,21 @@ export default class Inventory extends Interface {
         
         originInterface.update()
         this.update()
+    }
+
+    allowDrop(e) {
+        const [ifaceName, slotID, section] = e.dataTransfer.types.find(t => t.startsWith("dragover"))?.split(":")?.slice(1) ?? []
+        if(!ifaceName || ifaceName == e.target.parentNode.dataset.interface) return super.allowDrop(e)
+        
+        const originInterface = this.interfaces[ifaceName] ?? this
+        const originSlots = originInterface instanceof Inventory ? originInterface.slots : originInterface.entity.slots(section)
+        const stack = originSlots[Number(slotID)]
+        
+        let targetSlotID = Number(e.target.dataset.id)
+
+        if(e.target.dataset.section == 'hotbar') targetSlotID += this.hotbarStartIndex
+
+        const curStack = this.slots[targetSlotID]
+        !curStack ? super.allowDrop(e) : console.log("Slot already occupied")
     }
 }

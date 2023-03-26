@@ -129,7 +129,7 @@ export default class Chunk {
                 return this.removeVoxel(worldPos, true)
             }
         } else {
-            this.breaking.push({ pos, progress: 0, hitpoints: 1000 - damage })
+            this.breaking.push({ pos, progress: 0, hitpoints: 1000 - damage, time: Date.now() })
         }
         
         this.needsUpdate = true
@@ -159,6 +159,7 @@ export default class Chunk {
         }
         
         this.setVoxel(pos, this.register.getBlockID('air'))
+        delete this.metadata[`${pos.x}_${pos.y}_${pos.z}`]
         this.rebuildNeighbourChunks(pos, worldPos)
         return true
     }
@@ -182,7 +183,6 @@ export default class Chunk {
     getVoxel(pos){
         let blockID = this.data[pos.x][pos.y][pos.z]
         if(!blockID && blockID != 0) {
-            console.log(blockID, pos)
             return false
         }
         return this.register.getBlock(blockID)

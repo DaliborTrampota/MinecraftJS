@@ -1,5 +1,5 @@
 {
-    "orientableY": true,
+    "type": "facing",
     "textures": {
         "top": "furnace_top",
         "bottom": "furnace_top",

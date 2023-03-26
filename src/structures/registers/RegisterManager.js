@@ -22,6 +22,10 @@ export default class RegisterManager {
         return Blocks.getID(name)
     }
 
+    getBlocksByTexture(textureName) {
+        return Blocks.getByTexture(textureName)
+    }
+
     getItem(itemIdOrName){
         return Items.get(itemIdOrName)
     }

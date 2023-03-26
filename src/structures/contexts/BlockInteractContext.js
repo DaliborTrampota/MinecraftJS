@@ -7,7 +7,7 @@ export default class BlockInteractContext extends Context {
     constructor(player, stack, hitRes){
         super(player, stack)
         this.hitResult = hitRes ?? this.getAimedBlock(this.player.range)
-        this.state = hitRes.found ? this.player.chunk.getBlockState(this.hitResult.position) : false
+        this.state = hitRes.found ? this.player.chunk.getBlockState(this.hitResult.position, this.hitResult.block) : false
     }
 
     get canInteract(){

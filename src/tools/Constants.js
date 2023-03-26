@@ -113,6 +113,8 @@ const DirectionsY = createEnum(['north', 'east', 'south', 'west'])
 const DirectionsX = createEnum(['north', 'up', 'south', 'down'])
 const DirectionsZ = createEnum(['east', 'up', 'west', 'down'])
 
+const Half = createEnum(['Top', 'Bottom'])
+
 const CrossCheck = [ 
     new Vector3(1, 0, 0),
     new Vector3(0, 0, 1),
@@ -181,6 +183,14 @@ const Material = {
     LIQUID: 2
 }
 
+const Section = {
+    CENTER: 0,
+    TOP: 1,
+    RIGHT: 2,
+    BOTTOM: 3,
+    LEFT: 4,
+}
+
 export {
     sides,
     PI_2,
@@ -193,11 +203,13 @@ export {
 
     CrossCheck,
     CornerCheck,
+    Section,
     
     Directions,
     DirectionsX,
     DirectionsY,
     DirectionsZ,
+    Half,
 
     GAMEMODE,
     MOUSE_BUTTON,

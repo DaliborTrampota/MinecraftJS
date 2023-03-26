@@ -26,7 +26,6 @@ export default class Interface {
         }
         
         let last = this.html.childNodes.item(this.html.childNodes.length - 1)
-        console.log(last.tagName)
         if(last.tagName == 'img') last.remove() // remove the background
     }
 
@@ -70,6 +69,7 @@ export default class Interface {
         e.dataTransfer.setData("id", e.target.dataset.id);
         e.dataTransfer.setData("originSection", e.target.dataset.section);
         e.dataTransfer.setData("originInterface", e.target.parentNode.dataset.interface);
+        e.dataTransfer.setData(`dragover:${e.target.parentNode.dataset.interface}:${e.target.dataset.id}:${e.target.dataset.section}`, true);
     }
 
     onDrop(e){

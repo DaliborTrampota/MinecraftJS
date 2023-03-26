@@ -46,4 +46,15 @@ export default class MachineInterface extends Interface {
         originInterface.update()
         this.update()
     }
+
+    allowDrop(e) {
+        const [ifaceName, slotID, section] = e.dataTransfer.types.find(t => t.startsWith("dragover"))?.split(":")?.slice(1) ?? []
+        if(!ifaceName) return super.allowDrop(e)
+        
+        const originInterface = this.interfaces[ifaceName] ?? this
+        const originSlots = originInterface instanceof Inventory ? originInterface.slots : originInterface.entity.slots(section)
+        const stack = originSlots[Number(slotID)]
+
+        this.entity.validateItem(e.target.dataset.section, stack?.item) ? super.allowDrop(e) : console.log("Invalid item")
+    }
 }
