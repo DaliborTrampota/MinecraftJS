@@ -66,6 +66,7 @@ export default class TextureManager {
         
         await new Promise((res) => this.loader.manager.onLoad = () => (res()))
         console.log('Textures were loaded!')
+        console.log(TextureManager.textureMap)
         this.animateTextures()
     }
 
