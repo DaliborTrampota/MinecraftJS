@@ -1,6 +1,7 @@
 import FurnaceInterface from "../../interfaces/FurnaceInterface.js";
 import BlockEntity from "../BlockEntity.js";
 import Blocks from "../../registers/Blocks.js";
+import Recipes from "../../registers/Recipes.js";
 
 
 export default class FurnaceEntity extends BlockEntity {
@@ -14,6 +15,8 @@ export default class FurnaceEntity extends BlockEntity {
 
         this.fuelMap = new Map()
         this.Init()
+
+        this.validRecipes = []
     }
 
     async Init() {
@@ -21,6 +24,10 @@ export default class FurnaceEntity extends BlockEntity {
         const Items = await import('./../../registers/Items.js').then(r => r.default)
 
         this.fuelMap.set(Items.OAK_LOG, 200)
+    }
+
+    Update(delta) {
+        
     }
 
     slots(section) {
@@ -39,7 +46,7 @@ export default class FurnaceEntity extends BlockEntity {
 
     validateItem(slot, item) {
         if(slot == 'input')
-            return this.findRecipe(item)
+            return true//this.findRecipe(item)
 
         if(slot == 'fuel')
             return this.isFuel(item)
@@ -62,14 +69,39 @@ export default class FurnaceEntity extends BlockEntity {
         return slots.findIndex(s => s?.item.id == stack.item.id && !s.full)
     }
 
-    findRecipe(item) {
-        if(item.key == 'oak_log') return true
+    findRecipe() {
+        let inputted = [
+            [...this.inputSlots.slice(0, 3)],
+            [...this.inputSlots.slice(3, 6)],
+        ]
+        
+        const closestIdx = (line) => {
+            let idx = line.findIndex(o => o)
+            return idx == -1 ? Infinity : idx
+        }
+        let xIdx = Math.min(...inputted.map(closestIdx))
+        let yIdx = Math.min(...transpose(inputted).map(closestIdx))
+        inputted = inputted.map(line => line.slice(xIdx))
+        inputted = transpose(transpose(inputted).map(line => line.slice(yIdx)))
+        console.log(inputted)
+        this.validRecipes = Recipes.getValid(inputted)//, this.validRecipes.length ? this.validRecipes : undefined)
+        return this.validRecipes.length != 0
     }
 
     isFuel(item) {
         return this.fuelMap.has(item)
     }
 
+    
+    onSlotChange(stack, section) {
+        console.log(stack, section)
+        console.log(this.findRecipe(), this.validRecipes)   
+    }
 
 
 }
+
+function transpose(matrix) {
+    return matrix[0]?.map((col, i) => matrix.map(row => row[i]));
+  }
+  

@@ -1,0 +1,12 @@
+{
+    "machine": "furnace",
+    "shapeless": true,
+    "time": 10,
+    
+    "input": ["x"],
+    "output": ["charcoal"],
+
+    "ingredients": {
+        "x": "oak_log"
+    }
+}
