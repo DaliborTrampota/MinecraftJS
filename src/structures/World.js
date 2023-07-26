@@ -15,6 +15,7 @@ export default class World {
         this.activeChunks = []
 
         this.Init()
+        window.game.addUpdateSub(this)
     }
 
     async Init(){

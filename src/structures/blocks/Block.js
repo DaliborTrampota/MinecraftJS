@@ -1,7 +1,6 @@
 import { Vector3 } from 'https://cdn.skypack.dev/three@0.141.0';
-import { DirectionsY, Directions, sides } from '../../tools/Constants.js';
+import { triangles, UVs, vertices } from '../../tools/Constants.js';
 import TextureManager from "../../tools/TextureManager.js"
-import { dirToSide } from '../../tools/Utils.js';
 import VoxelBuilder from "../../tools/VoxelBuilder.js"
 import BlockState from './BlockState.js';
 
@@ -63,8 +62,15 @@ export default class Block {
         if(this.hasEntity) {
             state.entity = new this.entityClass()
         }
-
         return state
+    }
+
+    getFaceFor(side, state, culled) {
+        const data = {
+            vertices: triangles[side].map(idx => vertices[idx].toArray()).flat(),
+            uvs: UVs[side],
+        }
+        return data
     }
 
     loadData(data) {
@@ -79,7 +85,7 @@ export default class Block {
         let textures = []
         let tempTextures = this.textures
         if(this.orientable.facing || this.orientable.rotatable) tempTextures = this.getTextures()
-        else if(this.orientable.side) tempTextures = this.getTextures(BlockState.pillarUp())
+        else if(this.orientable.side) tempTextures = this.getTextures(BlockState.pillarUp(this))
         if(this.textures.all) textures = this.textures.all
         else {
             textures = [
@@ -94,18 +100,11 @@ export default class Block {
         return Array.isArray(textures) ? textures.map(idx => TextureManager.textures[idx]): TextureManager.textures[textures]
     }
 
-    rotateSide(side) {
-
-    }
-
-    rotateSides(side, sideMap = false) {
-    }
-
     getTextures(blockState) {
         if(!this.isOrientable) return this.textures
 
-        const { front, back, right, left, top, bottom } = blockState?.sides.rotated ?? {}
-        
+        const { front, back, right, left, top, bottom } = blockState?.sides.rotated ?? { front: 'north', back: 'south', right: 'east', left: 'west', top: 'up', bottom: 'down'}
+
         const textures = {}
             
         textures[front] = this.textures.front ?? this.textures.side
@@ -117,15 +116,6 @@ export default class Block {
 
         return textures
     }
-
-    side(side, culled, state, oldSide) {
-        const data = {
-            vertices: VoxelBuilder.rotateVertices(this.vertices[side].filter(o => !culled ? o.type == 'unculled' : true).map(o => o.data).flat(), state.direction),
-            uvs: this.UVs[oldSide ?? side].filter(o => !culled ? o.type == 'unculled' : true).map(o => o.data).flat(),
-        }
-        return data
-    }
-
     setHardness(h){
         this.hardness = h
         return this

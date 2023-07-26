@@ -35,6 +35,11 @@ app.get('/textures', (req, res) => {
     res.send(fs.readdirSync('./src/resources/textures/blocks'))
 })
 
+app.get('/recipes', (req, res) => {
+    let itemData = getJsonFiles('recipes')
+    res.send(itemData)
+})
+
 app.listen(8000, null, null, () => console.log("The local server is up and running!", `http://localhost:${8000}`));
 
 function getJsonFiles(path){

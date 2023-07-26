@@ -20,7 +20,7 @@ export default class Game {
         this.textureManager = new TextureManager()
         this.register = new RegisterManager()
 
-        this.player = new Player(this.camera, this);
+        this.player
         this.world
 
         this.stats = new Stats();
@@ -42,11 +42,10 @@ export default class Game {
         
         console.log('Loaded blocks:', this.register.blocks.map.size, 'Loaded items:', this.register.items.map.size)
         
-        this.world = new World(new BiomeGenerator(this.register), this.register, this.player);
+        this.player = new Player(this.camera, this)
+        this.world = new World(new BiomeGenerator(this.register), this.register, this.player)
 
         window.clock.start()
-        this.addUpdateSub(this.player)
-        this.addUpdateSub(this.world)
         
         for(let key of this.register.items.map.keys()) {
             // this.player.inventory.addStack(Stack.create(key, 64))
@@ -55,6 +54,12 @@ export default class Game {
         this.player.inventory.addStack(Stack.create('stone', 64))
         this.player.inventory.addStack(Stack.create('vertical_slab', 64))
         this.player.inventory.addStack(Stack.create('slab', 64))
+        this.player.inventory.addStack(Stack.create('furnace', 64))
+        this.player.inventory.addStack(Stack.create('oak_log', 64))
+        this.player.inventory.addStack(Stack.create('oak_log', 64))
+        this.player.inventory.addStack(Stack.create('sand', 64))
+        this.player.inventory.addStack(Stack.create('sand', 64))
+        this.player.inventory.addStack(Stack.create('sand', 64))
 
     }
 

@@ -56,22 +56,19 @@ export default class TerrainBuilder {
                     if(breaking) breaking.textureIndex = TextureManager.textureMap.get(`break_${breaking.progress}`)
                     
                     const blockState = this.chunk.getBlockState(pos)
-                    if(blockState) console.log(blockState.sides.map, blockState.side)
+                    // if(blockState) console.log(blockState.sides.map, blockState.side)
 
-                    const mappedSides = blockState ? sides.map(s => ({ side: blockState.sides.map[s.side], dir: s.dir, oldSide: s.side })) : sides
+                    //const mappedSides = blockState ? sides.map(s => ({ side: blockState.sides.map[s.side], dir: s.dir, oldSide: s.side })) : sides
                     sides:
-                    for(let { side, dir, oldSide } of mappedSides) {
+                    for(let { side, dir } of sides) {
                         //const newSide = blockState?.sides.map[side] ?? side
-                        if(this.chunk.checkVoxel(pos.clone().add(dir), blockData, side, update)) {
-                            if(blockState) console.log(oldSide, side, dir, blockState.side, blockState.sides.map)
-                            continue sides
-                        }
+                        if(this.chunk.checkVoxel(pos.clone().add(dir), blockData, side, update)) continue sides
 
                         const textureIndex = 'all' in blockData.textures ? blockData.textures.all : blockData.getTextures(blockState)[side]
                         const key = `${textureIndex}_${blockID}`
 
                         if(!textureGroups.hasOwnProperty(key)) textureGroups[key] = []
-                        textureGroups[key].push({ side, oldSide, pos, breaking, blockState })
+                        textureGroups[key].push({ side, pos, breaking, blockState })
                     }
                 }
             }
@@ -84,36 +81,26 @@ export default class TerrainBuilder {
         let breakingGroups = []
         let blockData = this.chunk.register.getBlock(blockID)
         
-        for(let o of data){
+        for(let o of data) {
             let curGroupCount = 0
-            if(blockData.voxel) {
-                //let b = this.world.getVoxelFromPos(o.pos.clone().add(sides.find(s => s.side == o.side).dir))
-                //console.log(o, b)
-                if(o.blockState) console.log(o.side, o.blockState.side)
-                const { vertices, uvs } = blockData.side(o.oldSide, true, o.blockState)
-                
-                for(let i = 0; i < vertices.length; i += 3) {
-                    this.vertices.push(vertices[i    ] + o.pos.x)
-                    this.vertices.push(vertices[i + 1] + o.pos.y)
-                    this.vertices.push(vertices[i + 2] + o.pos.z)
-                    groupCount++
-                    curGroupCount++
-                }
-                this.UVs.push(...uvs)
-            }else{
-                for(let vert of triangles[o.side]){
-                    this.vertices.push(vertices[vert].x + o.pos.x)
-                    this.vertices.push(vertices[vert].y + o.pos.y)
-                    this.vertices.push(vertices[vert].z + o.pos.z)
-                }
-                if(blockData.animation) this.UVs.push(...UVs[o.side].map((u, i) => i % 2 ? u / blockData.animation.frames : u))
-                else this.UVs.push(...(blockData.orientable.side && o.blockState.shouldRotateUVsFor(o.side, textureIndex) ? VoxelBuilder.rotateUVs(UVs[o.side]) : UVs[o.side]))
-                //console.log((blockData.orientable.side && UVs[o.side]))//o.blockState.shouldRotateUVsFor(o.side, textureIndex) ? VoxelBuilder.rotateUVs(UVs[o.side]) : 
-                groupCount += 6
-                curGroupCount += 6
+            let { vertices, uvs } = blockData.getFaceFor(o.side, o.blockState, true)
+            
+            for(let i = 0; i < vertices.length; i += 3) {
+                this.vertices.push(vertices[i    ] + o.pos.x)
+                this.vertices.push(vertices[i + 1] + o.pos.y)
+                this.vertices.push(vertices[i + 2] + o.pos.z)
+                groupCount++
+                curGroupCount++
             }
-        
-            if(o.breaking) breakingGroups.push({ start: this.groupStart + groupCount - curGroupCount, size: curGroupCount, texture: o.breaking.textureIndex })
+            if(blockData.animation) uvs = uvs.map((u, i) => i % 2 ? u / blockData.animation.frames : u)
+            if(o.blockState && blockData.orientable.side && o.blockState.shouldRotateUVsFor(o.side, textureIndex)) uvs = VoxelBuilder.rotateUVs(uvs)
+            this.UVs.push(...uvs)
+     
+            if(o.breaking) breakingGroups.push({ 
+                start: this.groupStart + groupCount - curGroupCount, 
+                size: curGroupCount, 
+                texture: o.breaking.textureIndex
+            })
             
         }
         

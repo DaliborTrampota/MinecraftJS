@@ -2,6 +2,8 @@ import { Vector3 } from 'https://cdn.skypack.dev/three@0.141.0'
 import { Half, DirectionsY, Directions } from '../../tools/Constants.js'
 import { dirToSide } from "../../tools/Utils.js"
 
+const ANGLE_TO_VECTOR = new Vector3(-1, 0, 0)
+
 export default class BlockState {
 
     constructor(pos, block, meta) {
@@ -13,13 +15,27 @@ export default class BlockState {
         this.direction = meta?.direction ?? new Vector3(1, 0, 0)//'north'
         this.half = meta?.half ?? Half.Bottom
         //this.inventory = new MachineInterface(meta.inventory ?? []) 
+
+        this.cache = {}
     }
 
     get side() {
-        return dirToSide(this.direction)
+        return this.cache['side'] ?? (this.cache['side'] = dirToSide(this.direction))
+    }
+
+    get angle() {
+        if(this.cache['angle']) return this.cache['angle']
+
+        let angle = this.direction.angleTo(ANGLE_TO_VECTOR)
+        const cross = this.direction.clone().cross(ANGLE_TO_VECTOR)
+        if(cross.y >= 0) angle = -angle
+        this.cache['angle'] = angle
+        return angle
     }
 
     get sides() {
+        if(this.cache['sides']) return this.cache['sides']
+
         let front = 'north', back = 'south'
         let right = 'east', left = 'west'
         let top = 'up', bottom = 'down'
@@ -50,7 +66,7 @@ export default class BlockState {
 
         }
   
-        return {
+        this.cache['sides'] = {
             map: {
                 north: front,
                 south: back,
@@ -61,21 +77,13 @@ export default class BlockState {
             },
             rotated: { front, back, right, left, top, bottom }
         }
+        return this.cache['sides']
     }
 
     setValue(prop, value) {
         this[prop] = value
         return this
     }
-
-    // rotate(rotateVector) {
-    //     for(let axis of ['x', 'y', 'z']) {
-    //         if(rotateVector[axis]) {
-    //             this.direction.applyAxisAngle(new Vector3(axis == 'x', axis == 'y', axis == 'z'), rotateVector[axis])
-    //         }
-    //     }
-    //     return this
-    // }
 
     shouldRotateUVsFor(side, texture) {
         // console.log(side, texture)
@@ -86,8 +94,7 @@ export default class BlockState {
         // return this.direction.x && side == 'west' || this.direction.y && side == 'up' || this.direction.z && side == 'north'
     }
 
-    static pillarUp() {
-        return new BlockState(new Vector3(), null, { direction: new Vector3(0, 1, 0) })
+    static pillarUp(block) {
+        return new BlockState(new Vector3(), block, { direction: new Vector3(0, 1, 0) })
     }
-
 }

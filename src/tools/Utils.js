@@ -151,12 +151,6 @@ function map(value, x1, y1, x2, y2){
 
 function dirToSide(normal){
     return sides.find(side => side.dir.equals(normal)).side
-    if(normal.x == 1) return 'north'
-    if(normal.x == -1) return 'south'
-    if(normal.y == 1) return 'up'
-    if(normal.y == -1) return 'down'
-    if(normal.z == 1) return 'east'
-    if(normal.z == -1) return 'west'
 }
 
 export {

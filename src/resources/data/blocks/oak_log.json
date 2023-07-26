@@ -1,5 +1,5 @@
 {
-    "type": "pillar",
+    "type": "orientable",
     "textures": {
         "front": "oak_log_top",
         "back": "oak_log_top",

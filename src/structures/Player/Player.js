@@ -48,6 +48,8 @@ export default class Player extends LivingEntity {
         document.addEventListener('mouseup', this.onMouseRelease.bind(this));
 
         this.maxUpStep = 0.6
+
+        window.game.addUpdateSub(this)
     }
 
     get facingNormal() {

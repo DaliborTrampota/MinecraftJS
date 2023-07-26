@@ -1,4 +1,4 @@
-import { BufferGeometry, BufferAttribute, Box3, Vector3, Matrix4 } from 'https://cdn.skypack.dev/three@0.141.0';
+import { BufferGeometry, BufferAttribute, Vector3, Matrix4 } from 'https://cdn.skypack.dev/three@0.141.0';
 import { sides, triangles, vertices, UVs } from './Constants.js';
 
 
@@ -85,30 +85,30 @@ export default class VoxelBuilder {
         return { geometry, vertices: vertData, UVs: uvData }
     }
 
-    static rotateVertices(verts, direction) {
-        
-        verts = verts.map(v => v - 0.5)
-        const rotationAxis = direction.clone()
-        if(rotationAxis.x) {
-            rotationAxis.z = -rotationAxis.x
-            rotationAxis.x = 0
-        } else {
-            rotationAxis.x = -rotationAxis.z
-            rotationAxis.z = 0
-        }
+    static rotateVertices(verts, angle, center = 0.5) {
+        if(center) verts = verts.map(v => v - center)
+
+        // const rotationAxis = direction.clone()
+        // if(rotationAxis.x) {
+        //     rotationAxis.z = -rotationAxis.x
+        //     rotationAxis.x = 0
+        // } else {
+        //     rotationAxis.x = -rotationAxis.z
+        //     rotationAxis.z = 0
+        // }
 
         const matrix = new Matrix4()
-        matrix.makeRotationAxis(new Vector3(0, 1, 0), direction.angleTo(new Vector3(-1, 0, 0)))
+        matrix.makeRotationAxis(new Vector3(0, 1, 0), angle)
 
         for(let i = 0; i < verts.length; i += 3){
             const vert = new Vector3(verts[i], verts[i + 1], verts[i + 2])
             vert.applyMatrix4(matrix)
-            verts[i] = vert.x
+            verts[i    ] = vert.x
             verts[i + 1] = vert.y
             verts[i + 2] = vert.z
         }
 
-        return verts.map(v => v + 0.5)
+        return center ? verts.map(v => v + center) : verts
     }
 
     static rotateUVs(uvs){
@@ -122,18 +122,4 @@ export default class VoxelBuilder {
 
         return uvs.map(v => v + 0.5)
     }
-
-    static buildAABB(elements){
-        let boxes = []
-
-        for(let e of elements){
-            let from = e.from.map(v => v/16)
-            let to = e.to.map(v => v/16)
-            let box = new Box3(new Vector3(...from), new Vector3(...to))
-            boxes.push(box)
-        }
-
-        return boxes
-    }
-
 }
