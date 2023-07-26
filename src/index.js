@@ -62,6 +62,7 @@ async function main() {
     document.onresize = onWindowResize
     window.onbeforeunload = preventClose
     await fetchData()
+    window.images = await loadImages()
     const Game = await import('./structures/Game.js').then(res => res.default)
     new Game(renderer, camera)
 } 
@@ -72,10 +73,29 @@ async function fetchData() {
     window.textures = await fetch('/textures').then(res => res.json())
     window.blockData = await fetch('/blockData').then(res => res.json())
     window.itemData = await fetch('/itemData').then(res => res.json())
-    // window.recipeData = await fetch('/recipes').then(res => res.json())
+    window.recipeData = await fetch('/recipes').then(res => res.json())
     // let entityData = await fetch('/entities').then(res => res.json())
     // let biomeData = await fetch('/biomes').then(res => res.json())
     // let dimensionData = await fetch('/dimensions').then(res => res.json())
     // let structureData = await fetch('/structures').then(res => res.json())
     window.lootTableData = await fetch('/lootTables').then(res => res.json())
+}
+
+async function loadImages() {
+    const images = {
+        slot: await loadImage('/src/resources/images/gui/slot.png'),
+        progressArrow: await loadImage('/src/resources/images/gui/progressArrow.png'),
+    }
+
+    // await Promise.all(Object.values(images))
+    console.log(images)
+    return images
+}
+
+async function loadImage(path) {
+    return new Promise((resolve, reject) => {
+        const image = new Image()
+        image.onload = () => resolve(image)
+        image.src = path
+    })
 }

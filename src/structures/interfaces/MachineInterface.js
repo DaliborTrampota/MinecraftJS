@@ -9,6 +9,23 @@ export default class MachineInterface extends Interface {
         super()
         this.entity = entity
         this.interfaces = {}
+        this.layers = {}
+    }
+
+    get width() {
+        return this.html.querySelector('img.gui-bg').width
+    }
+    
+    get height() {
+        return this.html.querySelector('img.gui-bg').height
+    }
+
+    setInterface(html, background) {
+        super.setInterface(html, background)
+        this.createLayers()
+        // for(const layer in this.layers) {
+        //     this.layers[layer].node.src = this.layers[layer].image
+        // }
     }
 
     open(iface) {
@@ -25,6 +42,10 @@ export default class MachineInterface extends Interface {
             stack ? InterfaceFactory.setSlot(this.htmlSlots[i], stack) : InterfaceFactory.clearSlot(this.htmlSlots[i])
         }
     }
+
+    createLayers() {}
+
+    updateLayers() {}
 
     onDrop(e){
         const data = super.onDrop(e)
@@ -45,6 +66,7 @@ export default class MachineInterface extends Interface {
         
         originInterface.update()
         this.update()
+        this.entity.onSlotChange(temp, data.targetSection)
     }
 
     allowDrop(e) {

@@ -3,18 +3,6 @@ const FRAME = 2
 
 class InterfaceFactory {
 
-    static {
-        this.slotImg = this.loadSlotImage()
-    }
-
-    static async loadSlotImage() {
-        return new Promise((resolve, reject) => {
-            const image = new Image()
-            image.onload = () => resolve(image)
-            image.src = '/src/resources/images/gui/slot.png'
-        })
-    }
-
     constructor(xGap, yGap, name) {
         this.name = name
         this.slots = []
@@ -61,24 +49,23 @@ class InterfaceFactory {
         div.style.height = height + 'px'
 
         if(background) {
-            this.generateBackground(width, height).then(dataURL => {
-                let bg = document.createElement('img')
-                bg.setAttribute('class', 'gui-bg')
-                bg.setAttribute('draggable', 'false')
-                bg.src = dataURL
-                bg.style.top = -MARGIN/2 + 'px'
-                bg.style.left = -MARGIN/2 + 'px'
-                bg.style.width = width + MARGIN + 'px'
-                bg.style.height = height + MARGIN + 'px'
-                div.appendChild(bg)
-                iface.background = dataURL
-            })
+            const dataURL = this.generateBackground(width, height)
+            let bg = document.createElement('img')
+            bg.setAttribute('class', 'gui-bg')
+            bg.setAttribute('draggable', 'false')
+            bg.src = dataURL
+            bg.style.top = -MARGIN/2 + 'px'
+            bg.style.left = -MARGIN/2 + 'px'
+            bg.style.width = width + MARGIN + 'px'
+            bg.style.height = height + MARGIN + 'px'
+            div.appendChild(bg)
+            iface.background = dataURL
         }
 
         return div
     }
 
-    async generateBackground(width, height) {
+    generateBackground(width, height) {
         const canvas = document.createElement('canvas')
         canvas.width = width + MARGIN
         canvas.height = height + MARGIN
@@ -89,10 +76,8 @@ class InterfaceFactory {
         ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'
         ctx.fillRect(FRAME, FRAME, width + MARGIN - FRAME*2, height + MARGIN - FRAME*2)
 
-        const slotImg = await Promise.all([InterfaceFactory.slotImg]).then(img => img[0])
-
         this.slots.forEach(slot => {
-            ctx.drawImage(slotImg, slot.x + MARGIN/2, slot.y + MARGIN/2, Slot.WIDTH, Slot.HEIGHT)
+            ctx.drawImage(window.images.slot, slot.x + MARGIN/2, slot.y + MARGIN/2, Slot.WIDTH, Slot.HEIGHT)
         })
         let dataURL = canvas.toDataURL()
         canvas.remove()

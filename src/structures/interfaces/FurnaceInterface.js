@@ -14,5 +14,45 @@ export default class FurnaceInterface extends MachineInterface {
             .build(true, this)
     }
 
+    createLayers() {
+        this.layers.progress = this.createProgressLayers()
+    }
+
+    createProgressLayers() {
+        const canvas = document.createElement('canvas')
+        canvas.width = this.width
+        canvas.height = this.height
+        console.log(this.html, this.width, this.height)
+
+        const ctx = canvas.getContext('2d')
+        ctx.imageSmoothingEnabled = false
+
+        const arrow = window.images.progressArrow
+        ctx.drawImage(arrow, this.width/2 - arrow.width/2, this.height/2 - arrow.height/2)//, arrow.width, arrow.height)
+
+        let dataURL = canvas.toDataURL()
+        canvas.remove()
+
+        return this.createLayerElement({
+            image: dataURL,
+            width: this.width,
+            height: this.height
+        })
+    }
+
+    updateLayers(entity) {
+        
+    }
+
+    createLayerElement(layer) {
+        const bg = document.createElement('img')
+        bg.setAttribute('class', 'gui-bg')
+        bg.setAttribute('draggable', 'false')
+        bg.src = layer.image
+        bg.style.width = layer.width + 'px'
+        bg.style.height = layer.height + 'px'
+        this.html.appendChild(bg)
+        return bg
+    }
 
 }
