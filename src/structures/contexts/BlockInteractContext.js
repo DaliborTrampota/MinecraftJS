@@ -8,6 +8,7 @@ export default class BlockInteractContext extends Context {
         super(player, stack)
         this.hitResult = hitRes ?? this.getAimedBlock(this.player.range)
         this.state = hitRes.found ? this.player.chunk.getBlockState(this.hitResult.position, this.hitResult.block) : false
+        this.entity = hitRes.found ? this.player.world.getEntityAt(this.hitResult.position) : false
     }
 
     get canInteract(){
@@ -15,8 +16,8 @@ export default class BlockInteractContext extends Context {
     }
 
     interact(){
-        if(this.state.entity.hasInterface)
-            this.state.entity.openInterface(this.player)
+        if(this.entity.hasInterface)
+            this.player.openInventory(this.entity)
     }
 
     static from(context, hitRes) {

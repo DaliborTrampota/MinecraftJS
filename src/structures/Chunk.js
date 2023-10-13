@@ -1,6 +1,6 @@
 import { Vector2, Vector3, BufferGeometry, BufferAttribute, Mesh } from 'https://cdn.skypack.dev/three@0.141.0';
 import { ChunkHeight, ChunkSize, triangles, UVs, vertices, CrossCheck, Material, UP } from "../tools/Constants.js"
-import { create3DArray, map } from "../tools/Utils.js"
+import { PosMap, create3DArray, map } from "../tools/Utils.js"
 import ItemEntity from "./entities/ItemEntity.js";
 import LootTable from "./LootTable.js";
 import TerrainBuilder from "./TerrainBuilder.js";
@@ -19,6 +19,7 @@ export default class Chunk {
         this.data = []
         this.metadata = {}
         this.entities = {}
+        this.blockEntities = new PosMap()
         
         this.enabled = false
         this.needsUpdate = false
@@ -187,6 +188,15 @@ export default class Chunk {
         }
         return this.register.getBlock(blockID)
     }
+
+    setEntityAt(pos, entity){
+        this.blockEntities.set(pos, entity)
+    }
+
+    getEntityAt(pos) {
+        console.log(this.blockEntities, pos)
+        return this.blockEntities.get(pos)
+    } 
 
     setVoxel(pos, blockID){
         this.data[pos.x][pos.y][pos.z] = blockID

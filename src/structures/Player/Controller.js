@@ -97,7 +97,7 @@ export default class Controller {
                 return
 
             case 'KeyE':
-                this.player.inventory.toggle()
+                this.player.inventory.interface.toggle()
                 return
 
             case 'KeyG':

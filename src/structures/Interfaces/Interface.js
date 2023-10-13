@@ -1,59 +1,60 @@
 export default class Interface {
 
     static empty = '/src/resources/images/empty.png'
+    static GUI = document.getElementById('gui')
     
     constructor(){
-        this.htmlSlots = []
-
-        this.background 
         this.isOpen = false
-
-        this.GUI = document.getElementById('gui')
-        this.GUI_IMAGE// = document.getElementById('gui-bg')
-
         this.dragging = false
+        this.background
+
+        this.html
+        this.htmlSlots = []
+        this.htmlBg
     }
 
-    setInterface(html, background) {
-        this.GUI_IMAGE = html.childNodes.item(html.childNodes.length - 1)
-        this.GUI.appendChild(html)
-        if(background) this.GUI_IMAGE.src = background
+    get width() {
+        return this.html.querySelector('img.gui-bg').width
+    }
+    
+    get height() {
+        return this.html.querySelector('img.gui-bg').height
     }
 
-    clearInterface() {
-        while (this.GUI.firstChild) {
-            this.GUI.removeChild(this.GUI.lastChild);
-        }
+    get name() {
+        return this.html.dataset.interface
+    }
+
+    draw() {
+        Interface.GUI.appendChild(this.html)
+        this.htmlSlots = this.html.getElementsByClassName('gui-slot')
         
-        let last = this.html.childNodes.item(this.html.childNodes.length - 1)
-        if(last.tagName == 'img') last.remove() // remove the background
+        if(this.background) {
+            this.htmlBg = this.html.childNodes.item(this.html.childNodes.length - 1)
+            this.htmlBg.src = this.background
+        }
     }
-
-    update() {
-        if(!this.htmlSlots.length) this.htmlSlots = this.html.getElementsByClassName('gui-slot')
-    }
-
 
     open() {
-        this.setInterface(this.html, this.background)
-        this.update()
-        this.GUI_IMAGE.src = this.background
-        this.GUI.style.display = 'block'
+        this.draw()
+        Interface.GUI.style.display = 'block'
         document.exitPointerLock()
         this.connect()
+        this.isOpen = true
+    }
+
+
+    toggle(){
+        this.isOpen
+            ? this.close() 
+            : this.open()
     }
 
     close() {
-        this.clearInterface()
-        this.GUI.style.display = 'none'
+        Interface.GUI.innerHTML = ''
+        Interface.GUI.style.display = 'none'
         document.body.requestPointerLock()
-    }
-
-    toggle(){
-        this.isOpen = !this.isOpen
-
-        if(this.isOpen) this.open()
-        else this.close()
+        this.isOpen = false
     }
 
 
@@ -66,10 +67,11 @@ export default class Interface {
     }
 
     dragStart(e){
-        e.dataTransfer.setData("id", e.target.dataset.id);
-        e.dataTransfer.setData("originSection", e.target.dataset.section);
-        e.dataTransfer.setData("originInterface", e.target.parentNode.dataset.interface);
-        e.dataTransfer.setData(`dragover:${e.target.parentNode.dataset.interface}:${e.target.dataset.id}:${e.target.dataset.section}`, true);
+        const { dataset, parentNode } = e.target
+        e.dataTransfer.setData("id", dataset.id);
+        e.dataTransfer.setData("originSection", dataset.section);
+        e.dataTransfer.setData("originInterface", parentNode.dataset.interface);
+        e.dataTransfer.setData(`dragover:${parentNode.dataset.interface}:${dataset.id}:${dataset.section}`, true);
     }
 
     onDrop(e){
@@ -84,7 +86,26 @@ export default class Interface {
         }
     }
 
-    allowDrop(e){
-        e.preventDefault()
+    allowDrop(e){ //drop from-to same interface
+        const [ifaceName, slotID, section] = e.dataTransfer.types.find(t => t.startsWith("dragover"))?.split(":")?.slice(1) ?? []//origin data
+        if(!ifaceName || ifaceName == e.target.parentNode.dataset.interface) return e.preventDefault(e) //same interface?
+            
+
+        //const originInterface = this.interfaces[ifaceName] ?? this
+        //const originSlots = originInterface.slots(section)
+
+        //const stack = originSlots[Number(slotID)]
+        let targetSlotID = Number(e.target.dataset.id)
+    
+        const curStack = this.slots(e.target.dataset.section)[targetSlotID]
+        !curStack ? e.preventDefault(e) : console.log("Slot already occupied")
     }
+
+    swap(origin, target, data){
+        const temp = origin[data.originID]
+        origin[data.originID] = target[data.targetID]
+        target[data.targetID] = temp
+        console.log(temp, data, origin)
+        return temp
+    } 
 }

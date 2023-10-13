@@ -17,6 +17,7 @@ export default class FurnaceEntity extends BlockEntity {
         this.Init()
 
         this.validRecipes = []
+        this.activeRecipe = null
     }
 
     async Init() {
@@ -27,21 +28,22 @@ export default class FurnaceEntity extends BlockEntity {
     }
 
     Update(delta) {
-        
+        super.Update(delta)
+
+        if(this.activeRecipe) {
+            //console.log(this.activeRecipe)
+            //this.activeRecipe.update(delta)
+        }
     }
 
     slots(section) {
         return this[`${section}Slots`]
     }
 
-    openInterface(player) {
-        const iface = new this.interfaceClass(this)
-        player.openInterface(iface)
-    }
-
-    Update(delta) {
-        super.Update(delta)
-    }
+    // openInterface(player) {
+    //     const iface = new this.interfaceClass(this)
+    //     player.openInterface(iface)
+    // }
 
 
     validateItem(slot, item) {
@@ -75,17 +77,8 @@ export default class FurnaceEntity extends BlockEntity {
             [...this.inputSlots.slice(3, 6)],
         ]
         
-        const closestIdx = (line) => {
-            let idx = line.findIndex(o => o)
-            return idx == -1 ? Infinity : idx
-        }
-        let xIdx = Math.min(...inputted.map(closestIdx))
-        let yIdx = Math.min(...transpose(inputted).map(closestIdx))
-        inputted = inputted.map(line => line.slice(xIdx))
-        inputted = transpose(transpose(inputted).map(line => line.slice(yIdx)))
-        console.log(inputted)
-        this.validRecipes = Recipes.getValid(inputted)//, this.validRecipes.length ? this.validRecipes : undefined)
-        return this.validRecipes.length != 0
+        this.validRecipes = Recipes.getValid(inputted)
+        return this.validRecipes.filter(r => r.validate(inputted, true))
     }
 
     isFuel(item) {
@@ -95,13 +88,15 @@ export default class FurnaceEntity extends BlockEntity {
     
     onSlotChange(stack, section) {
         console.log(stack, section)
-        console.log(this.findRecipe(), this.validRecipes)   
+        const exactMatches = this.findRecipe()
+        console.log(this.validRecipes, exactMatches)   
+        if(exactMatches.length > 0) {
+            this.activeRecipe = exactMatches[0]
+        } else {
+            this.activeRecipe = null
+        }
+        console.log(this.activeRecipe)
     }
 
 
 }
-
-function transpose(matrix) {
-    return matrix[0]?.map((col, i) => matrix.map(row => row[i]));
-  }
-  

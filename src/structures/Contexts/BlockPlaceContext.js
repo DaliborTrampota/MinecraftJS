@@ -42,10 +42,13 @@ export default class BlockPlaceContext extends Context {
         this.player.setPlaceDelay()
 
         const blockState = this.block.getStateForPlacement(this)
-
         const chunk = this.player.world.getChunkFromPos(this.hitResult.position)
+
+        if(this.block.hasEntity)
+            chunk.setEntityAt(this.hitResult.position, new this.block.entityClass())
         chunk.addVoxel(this.hitResult.position, this.block.id, blockState)
-        this.player.inventory.updateHotbar()
+
+        this.player.inventory.interface.updateHotbar()
     }
 
     static SECTION_FRAME = 0.15

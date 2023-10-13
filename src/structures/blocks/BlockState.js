@@ -11,7 +11,6 @@ export default class BlockState {
         this.id = `${pos.x}_${pos.y}_${pos.z}`
         this.block = block
 
-        this.entity = meta?.entity ?? null
         this.direction = meta?.direction ?? new Vector3(1, 0, 0)//'north'
         this.half = meta?.half ?? Half.Bottom
         //this.inventory = new MachineInterface(meta.inventory ?? []) 

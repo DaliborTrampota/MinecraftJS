@@ -30,7 +30,7 @@ export default class Block {
     }
 
     get hasEntity() {
-        return this.entityClass
+        return Boolean(this.entityClass)
     }
 
     get isOrientable() {
@@ -58,10 +58,7 @@ export default class Block {
                 state.direction.applyAxisAngle(rotateAxis, -Math.PI/2).round()
             }
         }
-        // console.log(state, state.side)
-        if(this.hasEntity) {
-            state.entity = new this.entityClass()
-        }
+        
         return state
     }
 

@@ -152,4 +152,16 @@ export default class World {
         if(block) return block.solid
         return false
     }
+
+    getEntityAt(pos) {
+        const chunk = this.getChunkFromPos(pos)
+        console.log(chunk)
+        return chunk.getEntityAt(pos)
+    }
+
+    setEntityAt(pos, entity){
+        const chunk = this.getChunkFromPos(pos)
+        console.log(pos, entity, 'set')
+        return chunk.setEntityAt(pos, entity)
+    }
 }

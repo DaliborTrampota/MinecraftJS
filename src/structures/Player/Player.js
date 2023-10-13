@@ -6,7 +6,7 @@ import ItemEntity from '../entities/ItemEntity.js';
 import LivingEntity from '../entities/LivingEntity.js';
 
 import Controller from './Controller.js';
-import Inventory from '../interfaces/PlayerInventory.js';
+import Inventory from '../entities/Inventory.js';
 import Chunk from '../Chunk.js';
 import BlockPlaceContext from '../contexts/BlockPlaceContext.js';
 import BlockItem from '../item/BlockItem.js';
@@ -139,9 +139,9 @@ export default class Player extends LivingEntity {
     }
 
 
-    openInterface(iface) {
-        if(this.inventory.isOpen) return console.warn("tried to open interface when inventory already open")
-        this.inventory.openWith(iface)
+    openInventory(entity) {
+        if(this.inventory.interface.isOpen) return console.warn("tried to open interface when inventory already open")
+        this.inventory.interface.open(entity)
     }
 
     interact(button){

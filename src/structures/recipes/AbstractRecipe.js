@@ -13,7 +13,7 @@ export default class AbstractRecipe {
 
     get width() {
         if(this.shapeless) return 1
-        return this.inputs[0].length
+        return Math.max(...this.inputs.map(l => l.length))//this.inputs[0].length
     }
 
     get height() {
@@ -21,30 +21,7 @@ export default class AbstractRecipe {
         return this.inputs.length
     }
 
-    validate(inputted) {
-        if(this.shapeless) {
-            inputted = inputted.flat().filter(o => o)
-            for(let itemName of this.inputs) {
-                let idx = inputted.findIndex(s => s.item.key == itemName)
-                if(idx == -1) return false
-                inputted.splice(idx, 1)
-            }
-            if(inputted.length > 0) return false
-            return true
-        }
-        let matched = this.inputs.every((line, y) => {
-            return line.every((item, x) => {
-                console.log(item, y, x, inputted[y][x])
-                let valid = item == inputted[y][x]?.item.key
-                inputted[y][x] = null
-                return valid
-            })
-        })
-        console.log(inputted, 'after', matched)
-        return matched && inputted.some(i => i != null)
-    }
-
-    partiallyValidate(inputted) {
+    validate(inputted, strict = true) {
         if(this.shapeless) {
             inputted = inputted.flat().filter(o => o)
             const inputCopy = [...this.inputs]
@@ -55,15 +32,29 @@ export default class AbstractRecipe {
             }
             return true
         }
+
+
         const inputCopy = this.inputs.map(line => [...line])
-        let matched = inputted.every((line, y) => {
-            return line.every((stack, x) => {
-                let valid = stack?.item.key == inputCopy[y][x]
-                inputCopy[y][x] = null
-                return valid
-            })
-        })
-        return matched
+
+        const xOffsetMax =  Math.max(...inputted.map(l => l.length)) - this.width
+        const yOffsetMax = inputted.length - this.height
+        
+        for(let yOffset = 0; yOffset <= yOffsetMax; yOffset++) {
+            for(let xOffset = 0; xOffset <= xOffsetMax; xOffset++) {
+
+                for(let y = 0; y < inputted.length; y++) {
+                    for(let x = 0; x < inputted[y].length; x++) {
+                        const requiredStack = inputCopy[y + yOffset][x + xOffset]
+                        if(requiredStack == inputted[y][x]?.item.key) 
+                            continue
+                        if(!strict && inputted[y][x] == null && requiredStack) 
+                            continue
+                        return false
+                    }
+                }
+            }
+        }
+        return true
     }
 
 

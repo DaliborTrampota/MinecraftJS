@@ -4,8 +4,9 @@ import MachineInterface from "./MachineInterface.js";
 
 export default class FurnaceInterface extends MachineInterface {
 
-    constructor(entity) {
-        super(entity)
+
+    constructor(entity, inventory) {
+        super(entity, inventory)
         this.entity = entity
         this.html = new InterfaceFactory(5, 5, 'furnace')
             .section(3, 2, 0, 0, 'input')
@@ -40,7 +41,7 @@ export default class FurnaceInterface extends MachineInterface {
         })
     }
 
-    updateLayers(entity) {
+    updateLayers(data) {
         
     }
 

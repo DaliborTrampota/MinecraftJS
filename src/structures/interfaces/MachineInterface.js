@@ -1,23 +1,24 @@
 import Interface from "./Interface.js";
 import InterfaceFactory from "./InterfaceFactory.js";
-import Inventory from "./PlayerInventory.js";
 
 
 export default class MachineInterface extends Interface {
 
-    constructor(entity){
+    constructor(entity, inventory){
         super()
         this.entity = entity
         this.interfaces = {}
         this.layers = {}
+
+        this.inventory = inventory
+        
+        //window.game.addUpdateSub(this, this.updateLayers.bind(this))
     }
 
-    get width() {
-        return this.html.querySelector('img.gui-bg').width
-    }
-    
-    get height() {
-        return this.html.querySelector('img.gui-bg').height
+    slots(section) {
+        const slots = this.entity[`${section}Slots`]
+        if(!slots) throw new Error(`Invalid section: ${section}`)
+        return slots
     }
 
     setInterface(html, background) {
@@ -28,13 +29,8 @@ export default class MachineInterface extends Interface {
         // }
     }
 
-    open(iface) {
-        super.open()
-        this.interfaces[iface.html.dataset.interface] = iface
-    }
-
     update() {
-        super.update()
+        console.log('update')
         for(let i = 0; i < this.htmlSlots.length; ++i) {
             let ID = this.htmlSlots[i].dataset.id
             let section = this.htmlSlots[i].dataset.section
@@ -45,36 +41,35 @@ export default class MachineInterface extends Interface {
 
     createLayers() {}
 
-    updateLayers() {}
+    updateLayers(delta) {}
+
+    // dragStart(e) {
+    //     super.dragStart(e)
+    //     this.entity.onSlotChange()
+    // }
 
     onDrop(e){
         const data = super.onDrop(e)
         
-        let originSlots
-        const targetSlots = this.entity.slots(data.targetSection)
+        const originInterface = data.originInterface == this.name ? this : this.inventory//todo figure out
+        const originSlots = originInterface.slots(data.originSection)
+        const targetSlots = this.slots(data.targetSection)
 
-        const originInterface = this.interfaces[data.originInterface] ?? this
-        if(originInterface instanceof Inventory) {
-            originSlots = originInterface.slots
-        } else {
-            originSlots = originInterface.entity.slots(data.originSection)
-        }
-        
-        const temp = originSlots[data.originID]
-        originSlots[data.originID] = targetSlots[data.targetID]
-        targetSlots[data.targetID] = temp
+        const stack = this.swap(originSlots, targetSlots, data)
         
         originInterface.update()
-        this.update()
-        this.entity.onSlotChange(temp, data.targetSection)
+        if(this != originInterface)
+            this.update()
+
+        this.entity.onSlotChange(stack, data.targetSection)
     }
 
     allowDrop(e) {
         const [ifaceName, slotID, section] = e.dataTransfer.types.find(t => t.startsWith("dragover"))?.split(":")?.slice(1) ?? []
         if(!ifaceName) return super.allowDrop(e)
         
-        const originInterface = this.interfaces[ifaceName] ?? this
-        const originSlots = originInterface instanceof Inventory ? originInterface.slots : originInterface.entity.slots(section)
+        const originInterface = ifaceName == this.name ? this : this.inventory//todo figure out
+        const originSlots = originInterface.slots(section)
         const stack = originSlots[Number(slotID)]
 
         this.entity.validateItem(e.target.dataset.section, stack?.item) ? super.allowDrop(e) : console.log("Invalid item")

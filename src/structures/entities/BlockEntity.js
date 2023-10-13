@@ -11,8 +11,14 @@ export default class BlockEntity {
 
     
     get hasInterface() {
-        return this.interfaceClass
+        return Boolean(this.interfaceClass)
     }
+
+    // open() {
+    //     if(!this.hasInterface) return false
+    //     this.interface = new this.interfaceClass(this)
+    //     return true
+    // }
 
     async Init() {}
 

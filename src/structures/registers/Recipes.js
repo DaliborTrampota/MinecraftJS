@@ -59,6 +59,6 @@ export default class Recipes extends AbstractRegister {
     }
 
     static getValid(inputted, recipes = Recipes.new().recipes) {
-        return recipes.filter(r => r.validate(inputted))
+        return recipes.filter(r => r.validate(inputted, false))
     }
 }

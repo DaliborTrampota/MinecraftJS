@@ -153,6 +153,32 @@ function dirToSide(normal){
     return sides.find(side => side.dir.equals(normal)).side
 }
 
+class PosMap extends Map {
+    constructor(data){
+        super(data)
+    }
+
+    get(vec3){
+        vec3.floor()
+        return super.get(`${vec3.x},${vec3.y},${vec3.z}`)
+    }
+
+    set(vec3, value){
+        vec3.floor()
+        return super.set(`${vec3.x},${vec3.y},${vec3.z}`, value)
+    }
+
+    has(vec3){
+        vec3.floor()
+        return super.has(`${vec3.x},${vec3.y},${vec3.z}`)
+    }
+
+    delete(vec3){
+        vec3.floor()
+        return super.delete(`${vec3.x},${vec3.y},${vec3.z}`)
+    }
+}
+
 export {
     create3DArray,
     create2DArray,
@@ -170,4 +196,5 @@ export {
     dirToSide,
     
     TwoWayMap,
+    PosMap,
 }
