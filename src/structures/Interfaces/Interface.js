@@ -33,6 +33,7 @@ export default class Interface {
             this.htmlBg = this.html.childNodes.item(this.html.childNodes.length - 1)
             this.htmlBg.src = this.background
         }
+        this.update()
     }
 
     open() {

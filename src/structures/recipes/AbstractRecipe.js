@@ -24,6 +24,8 @@ export default class AbstractRecipe {
     validate(inputted, strict = true) {
         if(this.shapeless) {
             inputted = inputted.flat().filter(o => o)
+            if(strict && inputted.length != this.inputs.length) return false
+
             const inputCopy = [...this.inputs]
             for(let stack of inputted) {
                 let idx = inputCopy.findIndex(item => item == stack.item.key)

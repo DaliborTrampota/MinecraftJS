@@ -96,10 +96,12 @@ export default class InventoryInterface extends Interface {
         const targetSlots = this.slots(data.targetSection)
         const originSlots = originInterface.slots(data.originSection)
 
-        this.swap(originSlots, targetSlots, data)
+        const stack = this.swap(originSlots, targetSlots, data)
         this.update()
         if(this != originInterface)
             originInterface.update()
+
+        originInterface.entity.onSlotChange(stack, data.targetSection)
     }
 
     allowDrop(e) {

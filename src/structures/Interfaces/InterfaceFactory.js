@@ -11,6 +11,18 @@ class InterfaceFactory {
         this.yGap = yGap ?? 5
     }
 
+    position(x, y, img, { gapAlignX = false, gapAlignY = false}) {
+        if(!gapAlignX) x -= 1
+        if(!gapAlignY) y -= 1
+        return {
+            top: Slot.HEIGHT * y + y * this.yGap + (gapAlignY ? -this.yGap / 2 : Slot.HEIGHT / 2) - img.height / 2,
+            left: Slot.WIDTH * x + x * this.xGap + (gapAlignX ? -this.xGap / 2 : Slot.WIDTH / 2) - img.width / 2
+        }
+        //5, 1, arrow, { gapAlignY: true }
+        canvas.style.top = InterfaceFactory.Slot.HEIGHT + 2 - arrow.height/2+ 'px';
+        canvas.style.left = InterfaceFactory.Slot.WIDTH*4 + 20 + InterfaceFactory.Slot.WIDTH/2- arrow.width/2 + 'px';
+    }
+    
     section(xCount, yCount, x, y, name) {
         x = x * Slot.WIDTH + x * this.xGap
         y = y * Slot.HEIGHT + y * this.yGap

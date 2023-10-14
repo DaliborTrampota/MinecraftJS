@@ -44,4 +44,10 @@ export default class Stack {
             return new Stack(this.item, amount)
         }
     }
+
+    consume(amount = 1) {
+        this.amount -= amount
+        if(!this.amount) return null
+        return this
+    }
 }
