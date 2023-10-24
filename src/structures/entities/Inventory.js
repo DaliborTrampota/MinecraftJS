@@ -81,7 +81,7 @@ export default class Inventory {
         return toDrop
     }  
 
-    onSlotChange(stack, section) {
+    onSlotChange(stack, section, id) {
         
     }
 

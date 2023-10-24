@@ -1,3 +1,4 @@
+import Stack from '../item/Stack.js'
 
 
 export default class AbstractRecipe {
@@ -21,18 +22,19 @@ export default class AbstractRecipe {
         return this.inputs.length
     }
 
-    validate(inputted, strict = true) {
+    validate(inputted) {
+        let exact = true
         if(this.shapeless) {
             inputted = inputted.flat().filter(o => o)
-            if(strict && inputted.length != this.inputs.length) return false
 
             const inputCopy = [...this.inputs]
             for(let stack of inputted) {
                 let idx = inputCopy.findIndex(item => item == stack.item.key)
-                if(idx == -1) return false
+                if(idx == -1) return { partial: false }
                 inputCopy.splice(idx, 1)
             }
-            return true
+            if(inputted.length != this.inputs.length) exact = false
+            return { partial: true, exact }
         }
 
 
@@ -40,7 +42,6 @@ export default class AbstractRecipe {
 
         const xOffsetMax =  Math.max(...inputted.map(l => l.length)) - this.width
         const yOffsetMax = inputted.length - this.height
-        
         for(let yOffset = 0; yOffset <= yOffsetMax; yOffset++) {
             for(let xOffset = 0; xOffset <= xOffsetMax; xOffset++) {
 
@@ -49,14 +50,16 @@ export default class AbstractRecipe {
                         const requiredStack = inputCopy[y + yOffset][x + xOffset]
                         if(requiredStack == inputted[y][x]?.item.key) 
                             continue
-                        if(!strict && inputted[y][x] == null && requiredStack) 
+                        if(inputted[y][x] == null && requiredStack) {
+                            exact = false
                             continue
-                        return false
+                        } 
+                        return { partial: false }
                     }
                 }
             }
         }
-        return true
+        return { partial: true, exact }
     }
 
 
@@ -64,6 +67,7 @@ export default class AbstractRecipe {
     static fromJSON(key, json) {
         console.log(key, json)
         let inputs = json.input.map(line => line.split('').map(x => json.ingredients[x] ?? null))
+
         if(json.shapeless) inputs = inputs.flat()
         else inputs = inputs.map(line => line.map(x => x))
 

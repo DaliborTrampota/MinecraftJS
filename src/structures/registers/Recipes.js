@@ -12,16 +12,16 @@ export default class Recipes extends AbstractRegister {
     load() {
         for(let recipeName in window.recipeData) {
             let recipe = AbstractRecipe.fromJSON(recipeName, window.recipeData[recipeName])
-            switch(window.recipeData[recipeName].machine) {
-                case 'furnace':
-                    recipe.machine = Blocks.FURNACE
-                    break
+            // switch(window.recipeData[recipeName].machine) {
+            //     case 'furnace':
+            //         recipe.machine = Blocks.FURNACE
+            //         break
 
-                default:
-                    console.error("Unknown machine", window.recipeData[recipeName].machine)
-                    recipe.machine = "CRAFTING"
-                    break
-            }
+            //     default:
+            //         console.error("Unknown machine", window.recipeData[recipeName].machine)
+            //         recipe.machine = "CRAFTING"
+            //         break
+            // }
             Recipes.register(recipe)
         }
     }
@@ -58,7 +58,17 @@ export default class Recipes extends AbstractRegister {
         return this.get(key)?.id ?? -1
     }
 
-    static getValid(inputted, recipes = Recipes.new().recipes) {
-        return recipes.filter(r => r.validate(inputted, false))
+    static getValid(machineKey, inputted, recipePool = Recipes.new().recipes) {
+        const exact = []
+        const recipes = []
+        
+        for(let recipe of recipePool) {
+            if(recipe.machine == machineKey) {
+                const valid = recipe.validate(inputted)
+                if(valid.exact) exact.push(recipe)
+                if(valid.partial) recipes.push(recipe)
+            }
+        }
+        return { exact, recipes }
     }
 }

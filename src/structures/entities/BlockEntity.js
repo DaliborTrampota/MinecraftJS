@@ -1,5 +1,4 @@
 
-
 export default class BlockEntity extends EventTarget {
 
     constructor(block, interfaceClass) {
@@ -10,7 +9,6 @@ export default class BlockEntity extends EventTarget {
         window.game.addUpdateSub(this)
     }
 
-    
     get hasInterface() {
         return Boolean(this.interfaceClass)
     }
@@ -59,8 +57,7 @@ export default class BlockEntity extends EventTarget {
         
     }
 
-    onSlotChange(stack, section) {
-        
+    onSlotChange(stack, section, id) {     
     }
 
 }

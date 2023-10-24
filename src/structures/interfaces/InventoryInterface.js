@@ -35,11 +35,6 @@ export default class InventoryInterface extends Interface {
         newSlot.html.id = "selected"
     }
 
-    draw() {
-        super.draw()
-        this.update()
-    }
-
     open(entity) {
         if(entity) {
             const iface = new entity.interfaceClass(entity, this)
@@ -89,6 +84,12 @@ export default class InventoryInterface extends Interface {
         return slots
     }
 
+    swap(origin, target, data) {
+        const stack = super.swap(origin, target, data)
+        this.inv.onSlotChange(stack, data.targetSection, data.targetID)
+        return stack
+    }
+
     onDrop(e){
         const data = super.onDrop(e)
         
@@ -101,7 +102,7 @@ export default class InventoryInterface extends Interface {
         if(this != originInterface)
             originInterface.update()
 
-        originInterface.entity.onSlotChange(stack, data.targetSection)
+        originInterface.entity.onSlotChange(stack, data.originSection)
     }
 
     allowDrop(e) {

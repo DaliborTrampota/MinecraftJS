@@ -48,6 +48,12 @@ export default class MachineInterface extends Interface {
     //     this.entity.onSlotChange()
     // }
 
+    swap(origin, target, data) {
+        const stack = super.swap(origin, target, data)
+        this.entity.onSlotChange(stack, data.targetSection, data.targetID)
+        return stack
+    }
+
     onDrop(e){
         const data = super.onDrop(e)
         
@@ -56,12 +62,13 @@ export default class MachineInterface extends Interface {
         const targetSlots = this.slots(data.targetSection)
 
         const stack = this.swap(originSlots, targetSlots, data)
-        
+
         originInterface.update()
         if(this != originInterface)
             this.update()
 
         this.entity.onSlotChange(stack, data.targetSection)
+        // originInterface.entity.onSlotChange(stack, data.originSection)
     }
 
     allowDrop(e) {

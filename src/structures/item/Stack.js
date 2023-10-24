@@ -15,6 +15,7 @@ export default class Stack {
 
     static create(itemName, amount) {
         const item = Items.get(itemName)
+        if(!item) console.warn("Tried to create stack with unknown item", itemName, amount)
         return new Stack(item, amount)
     }
 

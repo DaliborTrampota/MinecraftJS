@@ -1,54 +1,28 @@
 import FurnaceInterface from "../../interfaces/FurnaceInterface.js";
-import BlockEntity from "../BlockEntity.js";
 import Blocks from "../../registers/Blocks.js";
-import Recipes from "../../registers/Recipes.js";
 import Items from "../../registers/Items.js";
+import MachineEntity from "../MachineEntity.js";
 
-let Stack
 
-export default class FurnaceEntity extends BlockEntity {
+export default class FurnaceEntity extends MachineEntity {
 
     constructor() {
         super(Blocks.FURNACE, FurnaceInterface)
-
+        
         this.inputSlots = new Array(6)
         this.fuelSlots = new Array(1)
         this.outputSlots = new Array(2)
 
+        this.inputRows = [3, 3]
+
         this.fuelMap = new Map()
         this.Init()
-
-        this.validRecipes = []
-        this.activeRecipe = null
     }
 
     async Init() {
         super.Init()
-        Stack = await import('./../../item/Stack.js').then(r => r.default)
-        console.log(Stack)
 
         this.fuelMap.set(Items.OAK_LOG, 200)
-    }
-
-    Update(delta) {
-        super.Update(delta)
-        
-        if(this.activeRecipe) {
-            this.activeRecipe.progress += delta/this.activeRecipe.time
-            this.dispatchEvent(new CustomEvent('progress', { detail: this.activeRecipe }))
-            if(this.activeRecipe.progress>1) {
-                //console.log(this.inputSlots)
-                this.inputSlots = this.inputSlots.map(s => s?.consume())
-                const outputs = this.activeRecipe.outputs.map(name => Stack.create(name, 1))
-                this.putToSlots(this.outputSlots, outputs)
-
-                this.dispatchEvent(new CustomEvent('recipeFinished', { detail: this.activeRecipe }))
-                this.activeRecipe.progress = 0
-                this.onSlotChange()
-            }
-            //console.log(this.activeRecipe)
-            //this.activeRecipe.update(delta)
-        }
     }
 
     slots(section) {
@@ -65,8 +39,7 @@ export default class FurnaceEntity extends BlockEntity {
         return false
     }
 
-    addStack(slot, stack, index) {
-        const slots = this.slots(slot)
+    addStack(slots, stack, index) {
         index ??= this.getSlotFor(slots, stack)
         if(index == -1) return stack
 
@@ -76,19 +49,25 @@ export default class FurnaceEntity extends BlockEntity {
         return true
     }
 
-    getSlotFor(slots, stack) {
-        return slots.findIndex(s => s?.item.id == stack.item.id && !s.full)
-    }
+    
+    addStack(stack, slots) {
+        while(stack.amount){
+            let index = this.getSlotFor(stack)
+            if(index != -1) {
+                slots[index].merge(stack)
+                continue
+            }
+            index = this.getEmptySlot()
+            if(index != -1) {
+                slots[index] = stack
+                break
+            }
 
-    findRecipe() {
-        let inputted = [
-            [...this.inputSlots.slice(0, 3)],
-            [...this.inputSlots.slice(3, 6)],
-        ]
-        console.log(inputted)
-        this.validRecipes = Recipes.getValid(inputted)
-        console.log(this.validRecipes, 'valid')
-        return this.validRecipes.filter(r => r.validate(inputted, true))
+            console.log('Inventory is full')
+            break // full or empty stack was added to empty slot
+        }
+        return !Boolean(stack.amount)
+        
     }
 
     isFuel(item) {
@@ -96,17 +75,8 @@ export default class FurnaceEntity extends BlockEntity {
     }
 
     
-    onSlotChange(stack, section) {
-        console.log(stack, section, "slot change")
-        const exactMatches = this.findRecipe()
-        console.log(this.validRecipes, exactMatches, this.inputSlots)   
-        if(exactMatches.length > 0) {
-            this.activeRecipe = exactMatches[0]
-            this.activeRecipe.progress = 0
-        } else {
-            this.activeRecipe = null
-        }
-        console.log(this.activeRecipe)
+    onSlotChange(stack, section, id) {
+        super.onSlotChange(stack, section, id)
     }
 
 

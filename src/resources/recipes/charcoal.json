@@ -4,7 +4,9 @@
     "time": 5,
     
     "input": ["x"],
-    "output": ["grass_block"],
+    "output": {
+        "glass": 32
+    },
 
     "ingredients": {
         "x": "oak_log"

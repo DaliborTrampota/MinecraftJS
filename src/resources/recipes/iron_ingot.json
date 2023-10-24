@@ -4,7 +4,9 @@
     "time": 10,
     
     "input": [" x", "yyy"],
-    "output": ["charcoal"],
+    "output": {
+        "charcoal": 2
+    },
 
     "ingredients": {
         "x": "oak_log",

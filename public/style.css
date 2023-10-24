@@ -120,6 +120,12 @@ body {
     height: 100%;
     position: absolute;
 }
+.gui-layer {
+    image-rendering: pixelated;
+    top: -8px;
+    left: -8px;
+    position: absolute;
+}
 
 [draggable="true"] {
     z-index: 1;
