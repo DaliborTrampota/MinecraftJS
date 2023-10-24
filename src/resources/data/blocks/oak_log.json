@@ -1,0 +1,12 @@
+{
+    "type": "orientable",
+    "textures": {
+        "front": "oak_log_top",
+        "back": "oak_log_top",
+        "side": "oak_log"
+    },
+    "variants": {
+        "axis=z": { "y": 90 },
+        "axis=x": { "y": 90 }
+    }
+}

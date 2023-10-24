@@ -1,0 +1,12 @@
+{
+    "renderSides": false,
+    "animated": true,
+
+    "animation": {
+        "frames": 32,
+        "interval": 100
+    },
+    "textures": {
+        "all": "water_still"
+    }
+}
