@@ -2,6 +2,7 @@ import FurnaceInterface from "../../interfaces/FurnaceInterface.js";
 import BlockEntity from "../BlockEntity.js";
 import Blocks from "../../registers/Blocks.js";
 import Recipes from "../../registers/Recipes.js";
+import Items from "../../registers/Items.js";
 
 let Stack
 
@@ -23,7 +24,6 @@ export default class FurnaceEntity extends BlockEntity {
 
     async Init() {
         super.Init()
-        const Items = await import('./../../registers/Items.js').then(r => r.default)
         Stack = await import('./../../item/Stack.js').then(r => r.default)
         console.log(Stack)
 

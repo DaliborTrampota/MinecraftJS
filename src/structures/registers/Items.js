@@ -12,6 +12,7 @@ export default class Items extends AbstractRegister {
     static new() {
         if(!this.INSTANCE) {
             this.INSTANCE = new this()
+            this.init()
         }
         return this.INSTANCE
     }
@@ -34,7 +35,7 @@ export default class Items extends AbstractRegister {
         return item
     }
 
-    static {
+    static init() {
         this.GRASS_BLOCK = this.registerBlock(Blocks.GRASS_BLOCK, 'DEFAULT')
         this.DIRT = this.registerBlock(Blocks.DIRT, 'DEFAULT')
         this.STONE = this.registerBlock(Blocks.STONE, 'DEFAULT')

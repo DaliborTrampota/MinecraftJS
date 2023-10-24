@@ -12,6 +12,8 @@ export default class AbstractRegister {
         this.map = new Map()
     }
 
+    static init(){}
+
     static new() {
         if(!this.INSTANCE) {
             this.INSTANCE = new this()

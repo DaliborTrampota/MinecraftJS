@@ -12,6 +12,7 @@ export default class Biomes extends AbstractRegister {
     static new() {
         if(!this.INSTANCE) {
             this.INSTANCE = new this()
+            this.init()
         }
         return this.INSTANCE
     }

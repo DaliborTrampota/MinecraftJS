@@ -1,5 +1,6 @@
 import { Material } from "../../tools/Constants.js";
 import Block from "../blocks/Block.js";
+import Items from "./Items.js";
 import FurnaceBlock from "../blocks/FurnaceBlock.js";
 import VoxelBlock from "../blocks/VoxelBlock.js";
 import AbstractRegister from "./AbstractRegister.js";
@@ -13,6 +14,7 @@ export default class Blocks extends AbstractRegister {
     static new() {
         if(!this.INSTANCE) {
             this.INSTANCE = new this()
+            this.init()
         }
         return this.INSTANCE
     }
@@ -30,7 +32,7 @@ export default class Blocks extends AbstractRegister {
         return block
     }
 
-    static {
+    static init() {
         this.AIR = this.register(new Block('air', Material.AIR).hasNoCollisions())
         this.DIRT = this.register(new Block('dirt', Material.SOLID))
         this.GRASS_BLOCK = this.register(new Block('grass_block', Material.SOLID))
