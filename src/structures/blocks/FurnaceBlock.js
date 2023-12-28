@@ -1,6 +1,5 @@
 import FurnaceEntity from "../entities/blocks/FurnaceEntity.js";
 import FurnaceInterface from "../interfaces/FurnaceInterface.js";
-import BlockState from "./BlockState.js";
 import FunctionalBlock from "./FunctionalBlock.js";
 
 

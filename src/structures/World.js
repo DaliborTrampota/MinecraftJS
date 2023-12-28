@@ -1,4 +1,3 @@
-import { Vector3 } from 'three';
 import { ChunkHeight, ChunkSize, WORLD_SETTINGS } from "../tools/Constants.js";
 import Chunk from "./Chunk.js"
 
@@ -58,10 +57,6 @@ export default class World {
         this.player.position.set(ChunkSize / 2, ChunkHeight - 60, ChunkSize / 2)
         this.player.camera.lookAt(ChunkSize / 2, 0, ChunkSize / 2)
     }
-    
-    getChunk(x, y){
-        return this.chunks[Chunk.id(x, y)]
-    }
 
     updateViewDistance(){
         console.log('updating view distance')
@@ -84,6 +79,10 @@ export default class World {
                 this.activeChunks.push(ID)
             }
         }
+    }
+
+    getChunk(x, y){
+        return this.chunks[Chunk.id(x, y)]
     }
 
     getChunkFromPos(pos){
@@ -138,15 +137,7 @@ export default class World {
         }
     }
 
-    checkVoxel(x, y, z){
-        let pos = new Vector3(x, y, z)
-        let block = this.getVoxelFromPos(pos)
-        //console.log(pos, block ? block : false)
-        if(block) return block.solid
-        return false
-    }
-
-    checkVoxelVec(pos){
+    checkVoxel(pos){
         let block = this.getVoxelFromPos(pos)
         //console.log(pos, block ? block : false)
         if(block) return block.solid
@@ -155,13 +146,11 @@ export default class World {
 
     getEntityAt(pos) {
         const chunk = this.getChunkFromPos(pos)
-        console.log(chunk)
         return chunk.getEntityAt(pos)
     }
 
     setEntityAt(pos, entity){
         const chunk = this.getChunkFromPos(pos)
-        console.log(pos, entity, 'set')
         return chunk.setEntityAt(pos, entity)
     }
 }

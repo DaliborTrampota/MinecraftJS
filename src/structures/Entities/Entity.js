@@ -150,15 +150,15 @@ export default class Entity {
             for(let z = feetPos.z - RADIUS; z <= feetPos.z + RADIUS; z++) {
                 for(let y = feetPos.y + 1 + RADIUS; y >= feetPos.y - RADIUS - 1; y--) {
                     let pos = new Vector3(x, y, z)
-                    if(!this.world.checkVoxelVec(pos)) continue
+                    if(!this.world.checkVoxel(pos)) continue
                     const bbs = AABB.fromBlock(this.world.getVoxelFromPos(pos), pos)
                     AABBs.push(...bbs)
                 }
             }
         }
 
-        //while(!this.world.checkVoxelVec(feetPos.add(new Vector3(0, -1, 0)))){}
-        //AABBs.push(...AABB.fromBlock(this.world.checkVoxelVec(feetPos), feetPos))
+        //while(!this.world.checkVoxel(feetPos.add(new Vector3(0, -1, 0)))){}
+        //AABBs.push(...AABB.fromBlock(this.world.checkVoxel(feetPos), feetPos))
 
         return AABBs        
     }    

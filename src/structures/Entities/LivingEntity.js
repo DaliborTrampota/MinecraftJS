@@ -153,15 +153,15 @@ export default class LivingEntity {
             for(let z = Math.floor(center.z - RADIUS - bb.depth/2); z <= Math.ceil(center.z + RADIUS + bb.depth/2); z++) {
                 for(let y = Math.floor(center.y - RADIUS - bb.height/2); y <= Math.ceil(center.y + RADIUS + bb.height/2) - 1; y++) {
                     let pos = new Vector3(x, y, z)
-                    if(!this.world.checkVoxelVec(pos)) continue
+                    if(!this.world.checkVoxel(pos)) continue
                     const bbs = AABB.fromBlock(this.world.getVoxelFromPos(pos), pos)
                     AABBs.push(...bbs)
                 }
             }
         }
 
-        //while(!this.world.checkVoxelVec(feetPos.add(new Vector3(0, -1, 0)))){}
-        //AABBs.push(...AABB.fromBlock(this.world.checkVoxelVec(feetPos), feetPos))
+        //while(!this.world.checkVoxel(feetPos.add(new Vector3(0, -1, 0)))){}
+        //AABBs.push(...AABB.fromBlock(this.world.checkVoxel(feetPos), feetPos))
 
         return AABBs        
     }

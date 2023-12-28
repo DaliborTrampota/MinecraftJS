@@ -149,7 +149,7 @@ export default class Player extends LivingEntity {
         
         if(button == MOUSE_BUTTON.WHEEL){
             if(this.inCreative)
-                this.pick()
+                this.pick() //TODO
             return
         }
 //check if UsableItem
@@ -163,6 +163,8 @@ export default class Player extends LivingEntity {
                 if(this.placeDelay > 0) return
                 return hitRes.block.interact(BlockInteractContext.from(context, hitRes))
             }
+
+            
             let stack = this.inventory.slot
             if(!stack) return false
 

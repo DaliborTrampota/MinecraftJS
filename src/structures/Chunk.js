@@ -165,6 +165,10 @@ export default class Chunk {
         return true
     }
 
+    setVoxel(pos, blockID){
+        this.data[pos.x][pos.y][pos.z] = blockID
+    }
+
     addVoxel(pos, blockID, blockData){
         pos.floor()
 
@@ -198,44 +202,41 @@ export default class Chunk {
         return this.blockEntities.get(pos)
     } 
 
-    setVoxel(pos, blockID){
-        this.data[pos.x][pos.y][pos.z] = blockID
-    }
 
-    spawnBlock(blockID){
-        if(blockID <= 0) return false //update to next stage?
-        const geometry = new BufferGeometry()
+    // spawnBlock(blockID){
+    //     if(blockID <= 0) return false //update to next stage?
+    //     const geometry = new BufferGeometry()
     
-        let blockData = this.register.getBlock(blockID)
-        let groupStart = 0
+    //     let blockData = this.register.getBlock(blockID)
+    //     let groupStart = 0
     
-        let verts = [], uvs = []
-        for(let side in UVs){
-            let textureIndex = blockData.textures.all ? this.register.textureMap.get(blockData.textures.all) : this.register.textureMap.get(blockData.textures[side])
-            let groupCount = 0;
-            for(let vert of triangles[side]){
-                verts.push(vertices[vert].x + 1)
-                verts.push(vertices[vert].y + 0)
-                verts.push(vertices[vert].z + 1)
-            }
-            uvs.push(...UVs[side])
-            groupCount += 6;
+    //     let verts = [], uvs = []
+    //     for(let side in UVs){
+    //         let textureIndex = blockData.textures.all ? this.register.textureMap.get(blockData.textures.all) : this.register.textureMap.get(blockData.textures[side])
+    //         let groupCount = 0;
+    //         for(let vert of triangles[side]){
+    //             verts.push(vertices[vert].x + 1)
+    //             verts.push(vertices[vert].y + 0)
+    //             verts.push(vertices[vert].z + 1)
+    //         }
+    //         uvs.push(...UVs[side])
+    //         groupCount += 6;
             
-            if(overlayBlockData) {
-                console.log(overlayBlockData.textures[side] || overlayBlockData.textures.all)
-                let overlayTextureIndex = this.register.textureMap.get(overlayBlockData.textures[side] || overlayBlockData.textures.all)
-                geometry.addGroup(groupStart, groupCount, overlayTextureIndex)
-            }
-            geometry.addGroup(groupStart, groupCount, textureIndex)
+    //         if(overlayBlockData) {
+    //             console.log(overlayBlockData.textures[side] || overlayBlockData.textures.all)
+    //             let overlayTextureIndex = this.register.textureMap.get(overlayBlockData.textures[side] || overlayBlockData.textures.all)
+    //             geometry.addGroup(groupStart, groupCount, overlayTextureIndex)
+    //         }
+    //         geometry.addGroup(groupStart, groupCount, textureIndex)
     
-            groupStart += groupCount;
-        }
+    //         groupStart += groupCount;
+    //     }
 
-        geometry.setAttribute('position', new BufferAttribute(new Float32Array(verts), 3))
-        geometry.setAttribute('uv', new BufferAttribute(new Float32Array(uvs), 2))
+    //     geometry.setAttribute('position', new BufferAttribute(new Float32Array(verts), 3))
+    //     geometry.setAttribute('uv', new BufferAttribute(new Float32Array(uvs), 2))
         
-        return new Mesh(geometry, this.register.textures)
-    }
+    //     return new Mesh(geometry, this.register.textures)
+    // }
 
     
     static equals(c1, c2){
