@@ -81,11 +81,13 @@ export default class TerrainBuilder {
 
                     for(let { dir, side } of sides) {
                         const rotatedSide = VoxelBuilder.rotateSide(side, blockState.angle, blockState.rotationAxis)
-                        if(!this.chunk.checkVoxel(pos.clone().add(dir), blockData, rotatedSide, false)) continue
+                        const shouldDrawFace = this.chunk.checkVoxel(pos.clone().add(dir), blockData, rotatedSide, false)
+                        if(!shouldDrawFace && !blockData.voxel) continue
+                        
 
                         const textureIndex = blockData.textures.all ?? blockData.textures[rotatedSide]
                         const drawCall = (drawCalls[textureIndex] ??= new DrawCall(textureIndex, blockData))
-                        const { verts, uvs } = VoxelBuilder.buildFace(pos, rotatedSide, blockState, blockData)
+                        const { verts, uvs } = VoxelBuilder.buildFace(pos, rotatedSide, blockState, blockData, !shouldDrawFace)
                         if (breaking) 
                             drawCall.breakingGroups.push({ offset: drawCall.vertices.length / 3, textureIndex: TextureManager.textureMap.get(`break_${breaking.progress}`) })
 
