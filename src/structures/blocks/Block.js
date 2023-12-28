@@ -80,11 +80,11 @@ export default class Block {
 
     get materials() {
         let textures = []
-        let tempTextures = this.textures
-        if(this.orientable.facing || this.orientable.rotatable) tempTextures = this.getTextures()
-        else if(this.orientable.side) tempTextures = this.getTextures(BlockState.pillarUp(this))
         if(this.textures.all) textures = this.textures.all
         else {
+            let tempTextures = this.textures
+            if(this.orientable.facing || this.orientable.rotatable) tempTextures = this.getTextures()
+            else if(this.orientable.side) tempTextures = this.getTextures(BlockState.pillarUp(this))
             textures = [
                 tempTextures.east,    //right
                 tempTextures.west,     //left
@@ -97,22 +97,21 @@ export default class Block {
         return Array.isArray(textures) ? textures.map(idx => TextureManager.textures[idx]): TextureManager.textures[textures]
     }
 
-    getTextures(blockState) {
+    getTextures() {
         if(!this.isOrientable) return this.textures
 
-        const { front, back, right, left, top, bottom } = blockState?.sides.rotated ?? { front: 'north', back: 'south', right: 'east', left: 'west', top: 'up', bottom: 'down'}
-
         const textures = {}
-            
-        textures[front] = this.textures.front ?? this.textures.side
-        textures[back] = this.textures.back ?? this.textures.side
-        textures[top] = this.textures.top ?? this.textures.side
-        textures[bottom] = this.textures.bottom ?? this.textures.side
-        textures[right] = this.textures.right ?? this.textures.side
-        textures[left] = this.textures.left ?? this.textures.side
+
+        textures.north = this.textures.front ?? this.textures.side
+        textures.south = this.textures.back ?? this.textures.side
+        textures.up = this.textures.top ?? this.textures.side
+        textures.down = this.textures.bottom ?? this.textures.side
+        textures.east = this.textures.right ?? this.textures.side
+        textures.west = this.textures.left ?? this.textures.side
 
         return textures
     }
+
     setHardness(h){
         this.hardness = h
         return this

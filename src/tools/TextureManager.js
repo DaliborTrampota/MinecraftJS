@@ -49,7 +49,7 @@ export default class TextureManager {
             
             const textureName = name.split('.')[0]
             const block = Blocks.get(textureName.split('_')[0])
-            const material = new MeshBasicMaterial({ map: texture, transparent: block?.opaque ?? textureName.startsWith('break_'), side: block?.material == Material.LIQUID ? DoubleSide : FrontSide })
+            const material = new MeshBasicMaterial({ map: texture, transparent: block?.opaque ?? textureName.startsWith('break_'), side: block?.material == Material.LIQUID ? DoubleSide : FrontSide, name: textureName })
 
             TextureManager.textures.push(material)
             TextureManager.textureMap.add(textureName)

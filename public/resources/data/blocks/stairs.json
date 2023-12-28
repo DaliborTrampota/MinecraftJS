@@ -1,7 +1,10 @@
 {
     "type": "rotatable",
     "textures": {
-        "all": "oak_planks"
+        "side": "oak_planks",
+        "right": "cobblestone",
+        "top": "sand",
+        "front": "dirt"
     },
     "elements": [
         {   "from": [ 0, 0, 0 ],

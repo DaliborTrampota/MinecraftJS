@@ -1,4 +1,4 @@
-import { Vector3, BufferGeometry, BufferAttribute, Mesh } from 'three';
+import { Vector3, BufferGeometry, BufferAttribute, Mesh, WireframeGeometry, LineSegments } from 'three';
 import { ChunkHeight, ChunkSize, sides, triangles, UVs, vertices } from "../tools/Constants.js"
 import TextureManager from "../tools/TextureManager.js";
 import VoxelBuilder from '../tools/VoxelBuilder.js';
@@ -33,6 +33,18 @@ export default class TerrainBuilder {
         
         this.createMeshData(true)
         this.createMesh(true)
+        
+        if(this.chunk.world.player.controller.debug.active) {
+            const wireframe = new WireframeGeometry(this.geometry)
+            wireframe.translate(this.mesh.position.x, 0, this.mesh.position.y)
+            const line = new LineSegments( wireframe );
+            line.material.depthTest = false;
+            line.material.opacity = 0.5;
+            line.material.transparent = true;
+            window.scene.add(line)
+
+            setTimeout(() => window.scene.remove(line), 5_000)
+        }
 
         return this.mesh
     }
@@ -55,16 +67,22 @@ export default class TerrainBuilder {
                     const breaking = this.chunk.breaking.find(o => o.pos.equals(pos))
                     if(breaking) breaking.textureIndex = TextureManager.textureMap.get(`break_${breaking.progress}`)
                     
+                    
                     const blockState = this.chunk.getBlockState(pos)
-                    // if(blockState) console.log(blockState.sides.map, blockState.side)
+                    if(blockData.voxel) console.log(blockData, blockState)
 
-                    //const mappedSides = blockState ? sides.map(s => ({ side: blockState.sides.map[s.side], dir: s.dir, oldSide: s.side })) : sides
                     sides:
                     for(let { side, dir } of sides) {
-                        //const newSide = blockState?.sides.map[side] ?? side
                         if(this.chunk.checkVoxel(pos.clone().add(dir), blockData, side, update)) continue sides
 
-                        const textureIndex = 'all' in blockData.textures ? blockData.textures.all : blockData.getTextures(blockState)[side]
+                        
+                        let textureSide = side
+                        if(blockData.isOrientable) {
+                            textureSide = VoxelBuilder.rotateSide(side, blockState.angle, new Vector3(0, 1, 0))
+                            console.log(side, textureSide, blockState.angle, TextureManager.textureMap.get(blockData.getTextures()[textureSide]))
+                        }
+
+                        const textureIndex = 'all' in blockData.textures ? blockData.textures.all : blockData.getTextures()[textureSide]
                         const key = `${textureIndex}_${blockID}`
 
                         if(!textureGroups.hasOwnProperty(key)) textureGroups[key] = []
@@ -84,6 +102,7 @@ export default class TerrainBuilder {
         for(let o of data) {
             let curGroupCount = 0
             let { vertices, uvs } = blockData.getFaceFor(o.side, o.blockState, true)
+            if(textureIndex == 14) console.log(blockData.getTextures(), vertices, uvs)
             
             for(let i = 0; i < vertices.length; i += 3) {
                 this.vertices.push(vertices[i    ] + o.pos.x)
@@ -93,7 +112,7 @@ export default class TerrainBuilder {
                 curGroupCount++
             }
             if(blockData.animation) uvs = uvs.map((u, i) => i % 2 ? u / blockData.animation.frames : u)
-            if(o.blockState && blockData.orientable.side && o.blockState.shouldRotateUVsFor(o.side, textureIndex)) uvs = VoxelBuilder.rotateUVs(uvs)
+            //if(o.blockState && blockData.orientable.side && o.blockState.shouldRotateUVsFor(o.side, textureIndex)) uvs = VoxelBuilder.rotateUVs(uvs)
             this.UVs.push(...uvs)
      
             if(o.breaking) breakingGroups.push({ 

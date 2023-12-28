@@ -8,6 +8,8 @@ export default class VoxelBuilder {
         let geometry = new BufferGeometry()
         let verts = []
         let uvs = []
+        let groupStart = 0
+
 
         const vertData = {
             up: [],
@@ -76,6 +78,9 @@ export default class VoxelBuilder {
 
                 verts.push(...tempVerts)
                 uvs.push(...sideUVs)
+                
+                geometry.addGroup(groupStart, i, Number(0))
+                groupStart += i
             }
         }
 
@@ -121,5 +126,12 @@ export default class VoxelBuilder {
         }
 
         return uvs.map(v => v + 0.5)
+    }
+
+    static rotateSide(side, angle, axis) {
+        let { dir } = sides.find(s => s.side == side)
+        let newDir = dir.clone().applyAxisAngle(axis, angle).round()
+        return sides.find(s => s.dir.equals(newDir)).side
+
     }
 }
