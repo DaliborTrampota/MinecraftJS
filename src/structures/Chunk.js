@@ -61,7 +61,7 @@ export default class Chunk {
     }
 
     /**
-    * returns true if a block is on the position and should render the face
+    * @returns true if should render the face
     */
     checkVoxel(pos, blockData, side, update){
         if(pos.y < 0 || pos.y >= ChunkHeight) return true
@@ -81,10 +81,10 @@ export default class Chunk {
         }
         if(block.voxel && !block.culling[side])
             return false*/
-        if(block.voxel) return false
-        if(block.material == Material.AIR) return false
-        if(!block.opaque && block.solid || block.renderSides) return true
-        return !block.renderSides && blockData.id === block.id
+        if(block.voxel) return true //TODO culling here?
+        if(block.material == Material.AIR) return true
+        if(block.transparent) return blockData.id != block.id
+        return false
     }
 
     unload(){

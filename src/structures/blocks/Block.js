@@ -1,8 +1,6 @@
-import { Vector3 } from 'three';
-import { triangles, UVs, vertices } from '../../tools/Constants.js';
+import { UVs, triangles, vertices } from "../../tools/Constants.js"
 import TextureManager from "../../tools/TextureManager.js"
 import VoxelBuilder from "../../tools/VoxelBuilder.js"
-import BlockState from './BlockState.js';
 
 export default class Block {
 
@@ -12,7 +10,7 @@ export default class Block {
         this.hardness = 0
         this.resistance = 0
 
-        this.opaque = false
+        this.transparent = false
         this.solid = true
 
         this.textures = {}
@@ -21,7 +19,6 @@ export default class Block {
 
         this.voxel = false
         this.elements = false
-        this.renderSides = true
         this.animation = false
 
         this.entityClass = false
@@ -34,84 +31,13 @@ export default class Block {
     }
 
     get isOrientable() {
-        return Object.keys(this.orientable).length
+        return this.orientable
     }
 
     get isInteractable() {
         return false
     }
     
-    getStateForPlacement(context) {
-        if(!this.isOrientable && !this.hasEntity) return false
-
-        const state = new BlockState(context.hitResult.position.floor(), context.block)
-        
-        if(this.orientable.side) {
-            state.direction = context.clickNormal
-        } else if(this.orientable.facing) {
-            state.direction = context.facingDir
-        } else if(this.orientable.rotatable) {
-            state.direction = context.facingDir
-
-            if(context.clickAngle > 0.5) {
-                const rotateAxis = context.facingDir.clone().applyAxisAngle(new Vector3(0, 1, 0), Math.PI / 2).round()
-                state.direction.applyAxisAngle(rotateAxis, -Math.PI/2).round()
-            }
-        }
-        
-        return state
-    }
-
-    getFaceFor(side, state, culled) {
-        const data = {
-            vertices: triangles[side].map(idx => vertices[idx].toArray()).flat(),
-            uvs: UVs[side],
-        }
-        return data
-    }
-
-    loadData(data) {
-        if(!data) return console.warn('Missing block data for', this.key)
-        this.rawTextures = data.textures
-        this.#setProperties(data)
-        this.#generateModel(data.elements)
-    }
-
-
-    get materials() {
-        let textures = []
-        if(this.textures.all) textures = this.textures.all
-        else {
-            let tempTextures = this.textures
-            if(this.orientable.facing || this.orientable.rotatable) tempTextures = this.getTextures()
-            else if(this.orientable.side) tempTextures = this.getTextures(BlockState.pillarUp(this))
-            textures = [
-                tempTextures.east,    //right
-                tempTextures.west,     //left
-                tempTextures.up,      //top
-                tempTextures.down,   //bottom
-                tempTextures.north,
-                tempTextures.south
-            ]
-        }
-        return Array.isArray(textures) ? textures.map(idx => TextureManager.textures[idx]): TextureManager.textures[textures]
-    }
-
-    getTextures() {
-        if(!this.isOrientable) return this.textures
-
-        const textures = {}
-
-        textures.north = this.textures.front ?? this.textures.side
-        textures.south = this.textures.back ?? this.textures.side
-        textures.up = this.textures.top ?? this.textures.side
-        textures.down = this.textures.bottom ?? this.textures.side
-        textures.east = this.textures.right ?? this.textures.side
-        textures.west = this.textures.left ?? this.textures.side
-
-        return textures
-    }
-
     setHardness(h){
         this.hardness = h
         return this
@@ -122,8 +48,8 @@ export default class Block {
         return this
     }
 
-    isOpaque() {
-        this.opaque = true
+    isTransparent() {
+        this.transparent = true
         return this
     }
 
@@ -133,17 +59,25 @@ export default class Block {
     }
 
     loadTextures() {
-        for(let side in this.rawTextures) {
-            this.textures[side] = TextureManager.textureMap.get(this.rawTextures[side])
+        if(this.rawTextures.all) this.textures.all = TextureManager.textureMap.get(this.rawTextures.all)
+        else {
+            this.textures.north = TextureManager.textureMap.get(this.rawTextures.front ?? this.rawTextures.side)
+            this.textures.south = TextureManager.textureMap.get(this.rawTextures.back ?? this.rawTextures.side)
+            this.textures.east = TextureManager.textureMap.get(this.rawTextures.left ?? this.rawTextures.side)
+            this.textures.west = TextureManager.textureMap.get(this.rawTextures.right ?? this.rawTextures.side)
+            this.textures.up = TextureManager.textureMap.get(this.rawTextures.top ?? this.rawTextures.side)
+            this.textures.down = TextureManager.textureMap.get(this.rawTextures.bottom ?? this.rawTextures.side)
         }
         delete this.rawTextures
+        this.#generateModel()
     }
 
-    #setProperties(data) {
-        this.renderSides = Boolean(data?.renderSides ?? true)
-        if(data.type == 'facing') this.orientable.facing = true
-        if(data.type == 'rotatable') this.orientable.rotatable = true
-        if(data.type == 'orientable') this.orientable.side = true
+    loadData(data) {
+        if(!data) return console.warn('Missing block data for', this.key)
+        this.rawTextures = data.textures
+        this.elements = data?.elements
+        this.orientable = data.rotation
+        
         // const DEG_TO_RAD = Math.PI / 180
         // if(data.variants) {
         //     for(let key in data.variants) {
@@ -159,16 +93,31 @@ export default class Block {
             this.animation = data.animation 
     }
 
-    #generateModel(elements){
-        if(elements){
-            const { geometry, vertices, UVs } = VoxelBuilder.build(elements)
+    #generateModel(){
+        if(this.elements){
+            const { geometry, vertices, UVs } = VoxelBuilder.build(this.elements, this.textures)
 
             this.geometry = geometry
             this.vertices = vertices
             this.UVs = UVs
-            this.elements = elements
 
             this.voxel = true
         }
+    }
+    
+    get materials() { // this is only used for photobooth?
+        let textures = this.textures.all ? this.textures.all : Object.values(this.textures)
+        return Array.isArray(textures) ? textures.map(idx => TextureManager.textures[idx]): TextureManager.textures[textures]
+    }
+
+    getFace(side, pos) {
+        let verts = [], uvs = []
+        for(let vert of triangles[side]){
+            verts.push(vertices[vert].x + pos.x)
+            verts.push(vertices[vert].y + pos.y)
+            verts.push(vertices[vert].z + pos.z)
+        }  
+        uvs.push(...UVs[side])
+        return { verts, uvs }
     }
 }

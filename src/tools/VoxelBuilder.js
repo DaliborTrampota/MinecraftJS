@@ -4,7 +4,7 @@ import { sides, triangles, vertices, UVs } from './Constants.js';
 
 export default class VoxelBuilder {
 
-    static build(elements){
+    static build(elements, textures){
         let geometry = new BufferGeometry()
         let verts = []
         let uvs = []
@@ -59,19 +59,19 @@ export default class VoxelBuilder {
                 }
 
                 if(face.cullface){
-                    if(vertData[side].at(-1)?.type == 'culled') vertData[side].at(-1).data.push(...tempVerts)
-                    else vertData[side].push({ type: 'culled', data: tempVerts })
+                    if(vertData[side].at(-1)?.cullface == face.cullface) vertData[side].at(-1).data.push(...tempVerts)
+                    else vertData[side].push({ cullface: face.cullface, data: tempVerts })
 
-                    if(uvData[side].at(-1)?.type == 'culled') uvData[side].at(-1).data.push(...sideUVs)
-                    else uvData[side].push({ type: 'culled', data: sideUVs })
+                    if(uvData[side].at(-1)?.cullface == face.cullface) uvData[side].at(-1).data.push(...sideUVs)
+                    else uvData[side].push({ cullface: face.cullface, data: sideUVs })
                     // vertData[face.cullface].culled.push(...tempVerts)
                     // uvData[face.cullface].culled.push(...sideUVs)
                 }else{
-                    if(vertData[side].at(-1)?.type == 'unculled') vertData[side].at(-1).data.push(...tempVerts)
-                    else vertData[side].push({ type: 'unculled', data: tempVerts})
+                    if(vertData[side].at(-1)?.cullface === false) vertData[side].at(-1).data.push(...tempVerts)
+                    else vertData[side].push({ cullface: false, data: tempVerts})
 
-                    if(uvData[side].at(-1)?.type == 'unculled') uvData[side].at(-1).data.push(...sideUVs)
-                    else uvData[side].push({ type: 'unculled', data: sideUVs })
+                    if(uvData[side].at(-1)?.cullface === false) uvData[side].at(-1).data.push(...sideUVs)
+                    else uvData[side].push({ cullface: false, data: sideUVs })
                     // vertData[side].unculled.push(...tempVerts)
                     // uvData[side].unculled.push(...sideUVs)
                 }
@@ -79,7 +79,7 @@ export default class VoxelBuilder {
                 verts.push(...tempVerts)
                 uvs.push(...sideUVs)
                 
-                geometry.addGroup(groupStart, i, Number(0))
+                geometry.addGroup(groupStart, i, Number(Object.values(textures).findIndex(idx => idx == textures[side]))) // we need to get texture index only from the textures (block.materials) this block is using, not all loaded textures like chunk mesh
                 groupStart += i
             }
         }
@@ -133,5 +133,19 @@ export default class VoxelBuilder {
         let newDir = dir.clone().applyAxisAngle(axis, angle).round()
         return sides.find(s => s.dir.equals(newDir)).side
 
+    }
+
+    static buildFace(pos, rotatedSide, blockState, blockData, culling = false) {
+        let { verts, uvs } = blockData.getFace(rotatedSide, pos, culling)
+        if(blockData.animation) uvs = uvs.map((u, i) => i % 2 ? u / blockData.animation.frames : u)      
+
+        if(rotatedSide == 'up' || rotatedSide == 'down'){
+            uvs = VoxelBuilder.rotateUVs(uvs)
+        }
+
+        return { 
+            verts,//: VoxelBuilder.rotateVertices(verts, -blockState.angle, blockState.rotationAxis),
+            uvs
+        }
     }
 }

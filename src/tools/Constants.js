@@ -29,11 +29,11 @@ const triangles = {
         0, 6, 7,
         0, 1, 6
     ],
-    east: [
+    west: [
         1, 2, 5,
         1, 5, 6
     ],
-    west: [
+    east: [
         0, 7, 4,
         0, 4, 3
     ]
@@ -76,7 +76,7 @@ const UVs = {
         0, 1,
         0, 0
     ],
-    east: [
+    west: [
         1, 0,
         1, 1,
         0, 1,
@@ -85,7 +85,7 @@ const UVs = {
         0, 1,
         0, 0
     ],
-    west: [
+    east: [
         0, 0,
         1, 0,
         1, 1,
@@ -104,8 +104,8 @@ const sides = [
     { side: 'south',dir: new Vector3( 0,  0, -1) },
     { side: 'up',   dir: new Vector3( 0,  1,  0) },
     { side: 'down', dir: new Vector3( 0, -1,  0) },
-    { side: 'east', dir: new Vector3( 1,  0,  0) },
-    { side: 'west', dir: new Vector3(-1,  0,  0) },
+    { side: 'east', dir: new Vector3(-1,  0,  0) },
+    { side: 'west', dir: new Vector3( 1,  0,  0) },
 ]
 
 const Directions = createEnum(['north', 'east', 'up', 'south', 'west', 'down'])
