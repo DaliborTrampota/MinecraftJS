@@ -9,8 +9,12 @@ async function test(req, res, next) {
     next()
 }
 
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    next();   
+})
 app.use('/src', test, express.static(__dirname + '/src'));
-app.use('/resources', express.static(__dirname + '/src/resources'))
+app.use('/resources', express.static(__dirname + '/public/resources'))
 app.use('/public', express.static(__dirname + '/public'))
 //app.use('/node_modules', express.static(__dirname + '/node_modules'))
 
@@ -32,7 +36,7 @@ app.get('/lootTables', (req, res) => {
 })
 
 app.get('/textures', (req, res) => {
-    res.send(fs.readdirSync('./src/resources/textures/blocks'))
+    res.send(fs.readdirSync('./public/resources/textures/blocks'))
 })
 
 app.get('/recipes', (req, res) => {
@@ -43,10 +47,10 @@ app.get('/recipes', (req, res) => {
 app.listen(8000, null, null, () => console.log("The local server is up and running!", `http://localhost:${8000}`));
 
 function getJsonFiles(path){
-    let files = fs.readdirSync(`./src/resources/${path}`)
+    let files = fs.readdirSync(`./public/resources/${path}`)
     let data = {}
     for(let file of files){
-        data[file.split('.')[0]] = require(`./src/resources/${path}/${file}`)
+        data[file.split('.')[0]] = require(`./public/resources/${path}/${file}`)
     }
     return data
 }

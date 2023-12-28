@@ -29,6 +29,7 @@ Array.prototype.findIndexFrom = function(start, callback, wrap = false) {
     return -1
 }
 
+const baseURL = 'http://localhost:8000'
 
 async function main() {
 
@@ -70,21 +71,21 @@ main()
 
 
 async function fetchData() {
-    window.textures = await fetch('/textures').then(res => res.json())
-    window.blockData = await fetch('/blockData').then(res => res.json())
-    window.itemData = await fetch('/itemData').then(res => res.json())
-    window.recipeData = await fetch('/recipes').then(res => res.json())
+    window.textures = await fetch(`${baseURL}/textures`).then(res => res.json())
+    window.blockData = await fetch(`${baseURL}/blockData`).then(res => res.json())
+    window.itemData = await fetch(`${baseURL}/itemData`).then(res => res.json())
+    window.recipeData = await fetch(`${baseURL}/recipes`).then(res => res.json())
     // let entityData = await fetch('/entities').then(res => res.json())
     // let biomeData = await fetch('/biomes').then(res => res.json())
     // let dimensionData = await fetch('/dimensions').then(res => res.json())
     // let structureData = await fetch('/structures').then(res => res.json())
-    window.lootTableData = await fetch('/lootTables').then(res => res.json())
+    window.lootTableData = await fetch(`${baseURL}/lootTables`).then(res => res.json())
 }
 
 async function loadImages() {
     const images = {
-        slot: await loadImage('/src/resources/images/gui/slot.png'),
-        progressArrow: await loadImage('/src/resources/images/gui/progressArrow.png'),
+        slot: await loadImage(`/resources/images/gui/slot.png`),
+        progressArrow: await loadImage(`/resources/images/gui/progressArrow.png`),
     }
 
     // await Promise.all(Object.values(images))
