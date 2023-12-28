@@ -1,4 +1,4 @@
-import { Vector3, Vector2, MeshBasicMaterial, Mesh, BoxGeometry, Box3  } from 'https://cdn.skypack.dev/three@0.141.0';
+import { Vector3, Vector2, MeshBasicMaterial, Mesh, BoxGeometry, Box3  } from 'three';
 import { BASE_PLAYER_SETTINGS, RIGHT, UP, FORWARD } from '../../tools/Constants.js'
 import { clamp, moveTowards } from '../../tools/Utils.js'
 

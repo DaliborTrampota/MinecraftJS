@@ -1,4 +1,4 @@
-import { Vector2 } from 'https://cdn.skypack.dev/three@0.141.0';
+import { Vector2 } from 'three';
 import { ChunkSize } from '../tools/Constants';
 
 export default class QuadTree {

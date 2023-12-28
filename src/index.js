@@ -1,4 +1,4 @@
-import { Scene, Clock, PerspectiveCamera, WebGLRenderer } from 'https://cdn.skypack.dev/three@0.141.0';
+import { Scene, Clock, PerspectiveCamera, WebGLRenderer } from 'three';
 import PhotoBooth from './tools/PhotoBooth.js';
 
 Array.prototype.view = function(start, end) {

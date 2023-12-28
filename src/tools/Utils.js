@@ -1,4 +1,4 @@
-import { BoxGeometry, SphereGeometry, Mesh, BoxHelper, MeshBasicMaterial, Vector3 } from 'https://cdn.skypack.dev/three@0.141.0';
+import { BoxGeometry, SphereGeometry, Mesh, BoxHelper, MeshBasicMaterial, Vector3 } from 'three';
 import { sides } from './Constants.js';
 
 function create3DArray(x, y, height){

@@ -1,4 +1,4 @@
-import { BoxGeometry, Mesh, OrthographicCamera, WebGLRenderer, Scene } from 'https://cdn.skypack.dev/three@0.141.0';
+import { BoxGeometry, Mesh, OrthographicCamera, WebGLRenderer, Scene } from 'three';
 
 const iconRenderer = new WebGLRenderer({ alpha: true, antialias: true });
 iconRenderer.setPixelRatio(1)

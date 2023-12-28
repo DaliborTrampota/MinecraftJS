@@ -1,4 +1,4 @@
-import { Vector2, Vector3, BufferGeometry, BufferAttribute, Mesh } from 'https://cdn.skypack.dev/three@0.141.0';
+import { Vector2, Vector3, BufferGeometry, BufferAttribute, Mesh } from 'three';
 import { ChunkHeight, ChunkSize, triangles, UVs, vertices, CrossCheck, Material, UP } from "../tools/Constants.js"
 import { PosMap, create3DArray, map } from "../tools/Utils.js"
 import ItemEntity from "./entities/ItemEntity.js";

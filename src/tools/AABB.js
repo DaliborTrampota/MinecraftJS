@@ -1,4 +1,4 @@
-import { Vector3, MathUtils } from 'https://cdn.skypack.dev/three@0.141.0'
+import { Vector3, MathUtils } from 'three'
 
 export default class AABB {
 

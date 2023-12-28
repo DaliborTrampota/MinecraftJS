@@ -1,4 +1,4 @@
-import { BufferGeometry, BufferAttribute, Vector3, Matrix4 } from 'https://cdn.skypack.dev/three@0.141.0';
+import { BufferGeometry, BufferAttribute, Vector3, Matrix4 } from 'three';
 import { sides, triangles, vertices, UVs } from './Constants.js';
 
 

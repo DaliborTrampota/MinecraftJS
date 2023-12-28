@@ -1,4 +1,4 @@
-import { Vector3, BufferGeometry, BufferAttribute, Mesh } from 'https://cdn.skypack.dev/three@0.141.0';
+import { Vector3, BufferGeometry, BufferAttribute, Mesh } from 'three';
 import { ChunkHeight, ChunkSize, sides, triangles, UVs, vertices } from "../tools/Constants.js"
 import TextureManager from "../tools/TextureManager.js";
 import VoxelBuilder from '../tools/VoxelBuilder.js';

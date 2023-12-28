@@ -1,8 +1,8 @@
 import { Vector3, Mesh, InstancedMesh, Scene, Clock, PerspectiveCamera,
     TextureLoader, WebGLRenderer, BufferAttribute, BufferGeometry, MeshBasicMaterial
-} from 'https://cdn.skypack.dev/three@0.141.0';
+} from 'three';
 
-import * as Three from 'https://cdn.skypack.dev/three@0.141.0'
+import * as Three from 'three'
 import { vertices, triangles, UVs } from './Constants.js';
 
 //NOTE water render DoubleSide
@@ -154,7 +154,7 @@ function addVoxel(pos){
 
 
 
-import { Vector3, Vector2, BufferGeometry, BufferAttribute, Mesh } from 'https://cdn.skypack.dev/three@0.141.0';
+import { Vector3, Vector2, BufferGeometry, BufferAttribute, Mesh } from 'three';
 
 export default class Block {
 

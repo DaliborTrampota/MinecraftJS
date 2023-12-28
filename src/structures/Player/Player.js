@@ -1,4 +1,4 @@
-import { Vector3, Vector2, Euler, Raycaster, MeshBasicMaterial, Mesh, BoxGeometry, Box3 } from 'https://cdn.skypack.dev/three@0.141.0';
+import { Vector3, Vector2, Euler, Raycaster, MeshBasicMaterial, Mesh, BoxGeometry, Box3 } from 'three';
 import { PI_2, GAMEMODE, BASE_PLAYER_SETTINGS, PLAYER_DIMENSIONS, RIGHT, UP, FORWARD, Material, CrossCheck, CornerCheck, MOUSE_BUTTON, sides } from '../../tools/Constants.js'
 import { clamp, dirToSide, moveTowards } from '../../tools/Utils.js'
 

@@ -1,4 +1,4 @@
-import { Vector3 } from 'https://cdn.skypack.dev/three@0.141.0';
+import { Vector3 } from 'three';
 import { createEnum } from './Utils.js';
 
 const PI_2 = Math.PI / 2;

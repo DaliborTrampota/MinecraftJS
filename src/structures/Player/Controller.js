@@ -1,6 +1,6 @@
 import { GAMEMODE } from "../../tools/Constants.js"
 import { clamp } from "../../tools/Utils.js"
-import { BoxHelper, AxesHelper } from 'https://cdn.skypack.dev/three@0.141.0';
+import { BoxHelper, AxesHelper } from 'three';
 
 
 export default class Controller {

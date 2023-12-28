@@ -1,4 +1,4 @@
-import { Vector3 } from 'https://cdn.skypack.dev/three@0.141.0';
+import { Vector3 } from 'three';
 import { ChunkHeight, ChunkSize, WORLD_SETTINGS } from "../tools/Constants.js";
 import Chunk from "./Chunk.js"
 

@@ -1,4 +1,4 @@
-import { Vector3, Vector2 } from 'https://cdn.skypack.dev/three@0.141.0';
+import { Vector3, Vector2 } from 'three';
 import BlockState from "../blocks/BlockState.js"
 import { Material, Section, UP } from "../../tools/Constants.js"
 import Context from "./Context.js"

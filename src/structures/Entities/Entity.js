@@ -1,4 +1,4 @@
-import { Vector3, Vector2, Euler, Raycaster } from 'https://cdn.skypack.dev/three@0.141.0';
+import { Vector3, Vector2, Euler, Raycaster } from 'three';
 import { PI_2, GAMEMODE, BASE_PLAYER_SETTINGS, RIGHT, UP, FORWARD, Material, CrossCheck, CornerCheck, MOUSE_BUTTON, sides } from '../../tools/Constants.js'
 import { clamp, moveTowards } from '../../tools/Utils.js'
 

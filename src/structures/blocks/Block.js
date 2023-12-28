@@ -1,4 +1,4 @@
-import { Vector3 } from 'https://cdn.skypack.dev/three@0.141.0';
+import { Vector3 } from 'three';
 import { triangles, UVs, vertices } from '../../tools/Constants.js';
 import TextureManager from "../../tools/TextureManager.js"
 import VoxelBuilder from "../../tools/VoxelBuilder.js"

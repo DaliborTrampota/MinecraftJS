@@ -1,4 +1,4 @@
-import { TextureLoader, MeshBasicMaterial, NearestFilter, DoubleSide, FrontSide, DefaultLoadingManager } from 'https://cdn.skypack.dev/three@0.141.0';
+import { TextureLoader, MeshBasicMaterial, NearestFilter, DoubleSide, FrontSide, DefaultLoadingManager } from 'three';
 import { TwoWayMap } from "./Utils.js";
 import { Material } from "./Constants.js";
 import Blocks from "../structures/registers/Blocks.js";
