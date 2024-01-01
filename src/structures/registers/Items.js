@@ -46,6 +46,7 @@ export default class Items extends AbstractRegister {
         this.SANDSTONE = this.registerBlock(Blocks.SANDSTONE, 'DEFAULT')
         this.END_STONE = this.registerBlock(Blocks.END_STONE, 'DEFAULT')
         this.FURNACE = this.registerBlock(Blocks.FURNACE, 'DEFAULT')
+        this.DISPENSER = this.registerBlock(Blocks.DISPENSER, 'DEFAULT')
         this.GLASS = this.registerBlock(Blocks.GLASS, 'DEFAULT')
         // this.WATER_STILL = this.registerBlock(Blocks.WATER_STILL, 'DEFAULT')
         this.STAIRS = this.registerBlock(Blocks.STAIRS, 'DEFAULT')

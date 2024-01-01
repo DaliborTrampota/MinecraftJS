@@ -124,7 +124,8 @@ export default class World {
         let z = Math.floor(pos.z / ChunkSize);
 
         try{
-            let chunk = this.chunks[Chunk.id(x, z)]
+            const chunk = this.chunks[Chunk.id(x, z)]
+            if(!chunk) return this.register.getBlock(this.getVoxel(pos))
 
             x = Math.floor(pos.x - (x * ChunkSize))
             z = Math.floor(pos.z - (z * ChunkSize))
@@ -152,5 +153,10 @@ export default class World {
     setEntityAt(pos, entity){
         const chunk = this.getChunkFromPos(pos)
         return chunk.setEntityAt(pos, entity)
+    }
+
+    getBlockState(pos){
+        const chunk = this.getChunkFromPos(pos)
+        return chunk.getBlockState(pos)
     }
 }

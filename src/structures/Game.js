@@ -55,6 +55,7 @@ export default class Game {
         this.player.inventory.addStack(Stack.create('vertical_slab', 64))
         this.player.inventory.addStack(Stack.create('slab', 64))
         this.player.inventory.addStack(Stack.create('furnace', 64))
+        this.player.inventory.addStack(Stack.create('dispenser', 64))
         this.player.inventory.addStack(Stack.create('oak_log', 64))
         this.player.inventory.addStack(Stack.create('oak_log', 64))
         this.player.inventory.addStack(Stack.create('sand', 64))

@@ -1,4 +1,4 @@
-import { BufferGeometry, BufferAttribute, Vector3, Matrix4 } from 'three';
+import { BufferGeometry, BufferAttribute, Vector3, Matrix4, Matrix3, Vector2 } from 'three';
 import { sides, triangles, vertices, UVs } from './Constants.js';
 
 
@@ -90,7 +90,8 @@ export default class VoxelBuilder {
         return { geometry, vertices: vertData, UVs: uvData }
     }
 
-    static rotateVertices(verts, angle, center = 0.5) {
+    static rotateVertices(verts, angle, rotationAxis = new Vector3(0, 1, 0), center = 0.5) {
+        if(angle == 0) return verts
         if(center) verts = verts.map(v => v - center)
 
         // const rotationAxis = direction.clone()
@@ -103,7 +104,7 @@ export default class VoxelBuilder {
         // }
 
         const matrix = new Matrix4()
-        matrix.makeRotationAxis(new Vector3(0, 1, 0), angle)
+        matrix.makeRotationAxis(rotationAxis, angle)
 
         for(let i = 0; i < verts.length; i += 3){
             const vert = new Vector3(verts[i], verts[i + 1], verts[i + 2])
@@ -116,13 +117,17 @@ export default class VoxelBuilder {
         return center ? verts.map(v => v + center) : verts
     }
 
-    static rotateUVs(uvs){
+    static rotateUVs(uvs, angle = 0){
         uvs = uvs.map(v => v - 0.5)
+        
+        const matrix = new Matrix3()
+        matrix.makeRotation(angle)
 
         for(let i = 0; i < uvs.length; i += 2){
-            let temp = uvs[i]
-            uvs[i] = -uvs[i + 1]
-            uvs[i + 1] = temp
+            const uv = new Vector2(uvs[i], uvs[i + 1])
+            uv.applyMatrix3(matrix)
+            uvs[i] = uv.x
+            uvs[i + 1] = uv.y
         }
 
         return uvs.map(v => v + 0.5)
@@ -135,16 +140,26 @@ export default class VoxelBuilder {
 
     }
 
-    static buildFace(pos, rotatedSide, blockState, blockData, culling = false) {
-        let { verts, uvs } = blockData.getFace(rotatedSide, pos, culling)
+    static buildFace(pos, side, blockState, blockData, culling = false) {
+        let { verts, uvs } = blockData.getFace(side, culling)
         if(blockData.animation) uvs = uvs.map((u, i) => i % 2 ? u / blockData.animation.frames : u)      
 
-        if(rotatedSide == 'up' || rotatedSide == 'down'){
-            uvs = VoxelBuilder.rotateUVs(uvs)
+        if(blockState && (side == 'up' || side == 'down')) {
+            uvs = VoxelBuilder.rotateUVs(uvs, blockState.rotation)
+        }
+
+        if(blockState && blockData.voxel) {
+            verts = VoxelBuilder.rotateVertices(verts, blockState.angle, blockState.rotationAxis)
+        }
+
+        for (let i = 0; i < verts.length; i += 3) {
+            verts[i    ] += pos.x
+            verts[i + 1] += pos.y
+            verts[i + 2] += pos.z
         }
 
         return { 
-            verts,//: VoxelBuilder.rotateVertices(verts, -blockState.angle, blockState.rotationAxis),
+            verts,
             uvs
         }
     }

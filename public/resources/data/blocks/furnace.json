@@ -1,5 +1,6 @@
 {
-    "type": "facing",
+    "rotation": "facing",
+
     "textures": {
         "top": "furnace_top",
         "bottom": "furnace_top",

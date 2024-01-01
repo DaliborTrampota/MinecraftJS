@@ -154,7 +154,8 @@ export default class LivingEntity {
                 for(let y = Math.floor(center.y - RADIUS - bb.height/2); y <= Math.ceil(center.y + RADIUS + bb.height/2) - 1; y++) {
                     let pos = new Vector3(x, y, z)
                     if(!this.world.checkVoxel(pos)) continue
-                    const bbs = AABB.fromBlock(this.world.getVoxelFromPos(pos), pos)
+                    const state = this.world.getBlockState(pos)
+                    const bbs = AABB.fromBlock(this.world.getVoxelFromPos(pos), pos, state)
                     AABBs.push(...bbs)
                 }
             }

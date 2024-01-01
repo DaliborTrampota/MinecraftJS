@@ -77,17 +77,18 @@ export default class TerrainBuilder {
                     const pos = new Vector3(i, j, k)
                     const breaking = this.chunk.breaking.find(o => o.pos.equals(pos))
 
-                    const blockState = { angle: 0, rotationAxis: new Vector3(0, 1, 0) }
+                    const blockState = this.chunk.getBlockState(pos)//{ angle: 0, rotationAxis: new Vector3(0, 1, 0) }
+                    if(blockState) console.log(blockState)
 
                     for(let { dir, side } of sides) {
-                        const rotatedSide = VoxelBuilder.rotateSide(side, blockState.angle, blockState.rotationAxis)
+                        const rotatedSide = blockState ? VoxelBuilder.rotateSide(side, -blockState.angle, blockState.rotationAxis) : side
                         const shouldDrawFace = this.chunk.checkVoxel(pos.clone().add(dir), blockData, rotatedSide, false)
                         if(!shouldDrawFace && !blockData.voxel) continue
                         
-
                         const textureIndex = blockData.textures.all ?? blockData.textures[rotatedSide]
+                        if(blockState) console.log(side, rotatedSide, textureIndex)
                         const drawCall = (drawCalls[textureIndex] ??= new DrawCall(textureIndex, blockData))
-                        const { verts, uvs } = VoxelBuilder.buildFace(pos, rotatedSide, blockState, blockData, !shouldDrawFace)
+                        const { verts, uvs } = VoxelBuilder.buildFace(pos, blockData.voxel ? rotatedSide : side, blockState, blockData, !shouldDrawFace)
                         if (breaking) 
                             drawCall.breakingGroups.push({ offset: drawCall.vertices.length / 3, textureIndex: TextureManager.textureMap.get(`break_${breaking.progress}`) })
 

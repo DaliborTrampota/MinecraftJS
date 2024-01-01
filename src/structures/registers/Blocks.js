@@ -44,6 +44,7 @@ export default class Blocks extends AbstractRegister {
         this.SANDSTONE = this.register(new Block('sandstone', Material.SOLID))
         this.END_STONE = this.register(new Block('end_stone', Material.SOLID))
         this.FURNACE = this.register(new FurnaceBlock('furnace', Material.SOLID))
+        this.DISPENSER = this.register(new FurnaceBlock('dispenser', Material.SOLID))
         this.GLASS = this.register(new Block('glass', Material.SOLID).isTransparent())
         this.WATER_STILL = this.register(new Block('water_still', Material.LIQUID).hasNoCollisions())
         this.STAIRS = this.register(new VoxelBlock('stairs', Material.SOLID))

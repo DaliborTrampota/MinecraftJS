@@ -1,6 +1,9 @@
+import { Vector3 } from "three"
 import { UVs, triangles, vertices } from "../../tools/Constants.js"
 import TextureManager from "../../tools/TextureManager.js"
 import VoxelBuilder from "../../tools/VoxelBuilder.js"
+import BlockState from "./BlockState.js"
+import { calc2DAngle } from "../../tools/Utils.js"
 
 export default class Block {
 
@@ -15,7 +18,7 @@ export default class Block {
 
         this.textures = {}
         this.variants = {}
-        this.orientable = {}
+        this.orientable = false
 
         this.voxel = false
         this.elements = false
@@ -110,14 +113,62 @@ export default class Block {
         return Array.isArray(textures) ? textures.map(idx => TextureManager.textures[idx]): TextureManager.textures[textures]
     }
 
-    getFace(side, pos) {
+    getFace(side) {
         let verts = [], uvs = []
-        for(let vert of triangles[side]){
-            verts.push(vertices[vert].x + pos.x)
-            verts.push(vertices[vert].y + pos.y)
-            verts.push(vertices[vert].z + pos.z)
+        for(let vert of triangles[side]) {
+            verts.push(vertices[vert].x)
+            verts.push(vertices[vert].y)
+            verts.push(vertices[vert].z)
         }  
         uvs.push(...UVs[side])
         return { verts, uvs }
+    }
+
+    getState(ctx) {
+        if (!this.isOrientable) return false
+        let direction, rotationAxis, rotation = 0
+        
+        switch (this.orientable) {
+            case 'facing': { // furnace
+                direction = ctx.player.facingNormal(true).negate()
+                rotationAxis = Vector3.Up
+                break
+            }
+
+            case 'cameraFacing': {
+                direction = ctx.player.facingNormal().negate()
+                rotation = calc2DAngle(Vector3.North, ctx.player.facingNormal(true).negate())
+                break
+            }
+
+            case 'free': {
+                // direction
+                break
+            }
+
+            case 'normal': { //logs
+                direction = ctx.hitResult.normal
+                break
+            }
+
+        }
+        
+        if (!rotationAxis) {
+            rotationAxis = Vector3.North.cross(direction)
+            if (rotationAxis.lengthSq() == 0) {
+                rotationAxis = Vector3.Up
+            } else {
+                rotationAxis.x = Math.abs(rotationAxis.x);
+                rotationAxis.y = Math.abs(rotationAxis.y);
+                rotationAxis.z = Math.abs(rotationAxis.z);
+            }
+        }
+        // console.log(direction, rotationAxis)
+
+        return new BlockState(ctx.hitResult.position.floor(), ctx.block, {
+            direction,
+            rotationAxis,
+            rotation,
+        })
     }
 }

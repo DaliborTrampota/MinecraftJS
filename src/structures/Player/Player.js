@@ -52,19 +52,6 @@ export default class Player extends LivingEntity {
         window.game.addUpdateSub(this)
     }
 
-    get facingNormal() {
-        const dir = this.camera.getWorldDirection(new Vector3())
-        dir.y = 0
-        dir.normalize()
-        if(Math.abs(dir.x) > Math.abs(dir.z)) {
-            const normal = new Vector3(1, 0, 0)
-            return dir.x > 0 ? normal : normal.negate()
-        } else {
-            const normal = new Vector3(0, 0, 1)
-            return dir.z > 0 ? normal : normal.negate()
-        }
-    }
-
     get eyePos(){
         return this.camera.getWorldPosition(new Vector3())
     }
@@ -74,7 +61,7 @@ export default class Player extends LivingEntity {
     }
 
     get range(){
-        return this.inCreative ? 10 : 5 //todo take in account gamemode, item in hand, etc
+        return this.inCreative ? 10 : 5 //TODO take in account gamemode, item in hand, etc
     }
 
     get inCreative(){
@@ -198,7 +185,8 @@ export default class Player extends LivingEntity {
 
     //TODO move to use context?
     destroy(){
-        const { block, position, normal, found } = this.getAimedBlock(this.range)
+        const context = new Context(this, this.inventory.slot)
+        const { block, position, normal, found } = context.getAimedBlock(this.range)
         if(!found) return false
 
         let chunk = window.game.world.getChunkFromPos(position)
@@ -240,38 +228,6 @@ export default class Player extends LivingEntity {
 
         if(intersects.length) return intersects[0]
         return false
-    }
-
-    getAimedBlock(range = 20, options = { ignoreLiquids: true, placeOnAir: false }){
-        options.ignoreLiquids ??= true
-        options.placeOnAir ??= false
-        
-        function getBlockAt(pos, world){
-            return world.getVoxelFromPos(pos.clone())
-        }
-
-        const dirLen = 0.05
-        let dir = this.camera.getWorldDirection(new Vector3()).setLength(dirLen)
-        
-        let position = this.camera.getWorldPosition(new Vector3())
-        let prevPos = new Vector3()
-        let block = getBlockAt(position, this.world)
-        let totalDistance = 0
-
-        while((options.ignoreLiquids && block.material == Material.LIQUID) || block.material == Material.AIR){
-            prevPos = position.clone()
-            block = getBlockAt(position.add(dir), this.world)
-            if(block.voxel) {
-                const bbs = AABB.fromBlock(block, position.clone().floor())
-                if(!bbs.some(bb => bb.contains(...position.toArray()))) block = { material: Material.AIR } 
-            }
-            totalDistance += dirLen
-            if(totalDistance >= range) break
-        }
-
-        if(block.material == Material.AIR && !options.placeOnAir) return { found: false }
-
-        return { block, position, normal: position.clone().floor().sub(prevPos.floor()), found: true }
     }
 
     pickupEntities(){
@@ -364,4 +320,26 @@ export default class Player extends LivingEntity {
         
         return model
     }
+
+    
+    facingNormal(ignoreY = false) {
+        const dir = this.camera.getWorldDirection(new Vector3())
+        if (ignoreY) dir.y = 0
+        
+        let axisVector = new Vector3(0, 0, 0);
+    
+        let maxAxis = 'x';
+        let maxValue = Math.abs(dir.x);
+        if (Math.abs(dir.y) > maxValue) {
+            maxAxis = 'y';
+            maxValue = Math.abs(dir.y);
+        }
+        if (Math.abs(dir.z) > maxValue) {
+            maxAxis = 'z';
+            maxValue = Math.abs(dir.z);
+        }
+    
+        axisVector[maxAxis] = dir[maxAxis] > 0 ? 1 : -1;
+        
+        return axisVector
 }

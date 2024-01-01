@@ -19,8 +19,12 @@ export default class Context {
         options.ignoreLiquids ??= true
         options.placeOnAir ??= false
         
-        function getBlockAt(pos, world){
+        const getBlockAt = (pos, world) => {
             return world.getVoxelFromPos(pos.clone())
+        }
+
+        const getState = (pos, world) => {
+            return world.getBlockState(pos)
         }
 
         const dirLen = 0.025
@@ -37,7 +41,8 @@ export default class Context {
             prevPos = position.clone()
             block = getBlockAt(position.add(dir), this.player.world)
             if(block.voxel) {
-                const bbs = AABB.fromBlock(block, position.clone().floor())
+                let state = getState(position, this.player.world)
+                const bbs = AABB.fromBlock(block, position.clone().floor(), state)
                 bb = bbs.find(box => box.contains(...position.toArray()))
                 if(!bb) block = { material: Material.AIR } 
             }

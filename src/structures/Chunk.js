@@ -4,6 +4,7 @@ import { PosMap, create3DArray, map } from "../tools/Utils.js"
 import ItemEntity from "./entities/ItemEntity.js";
 import LootTable from "./LootTable.js";
 import TerrainBuilder from "./TerrainBuilder.js";
+import VoxelBuilder from '../tools/VoxelBuilder.js';
 
 //import { SceneUtils } from 'https://cdn.jsdelivr.net/npm/three@0.141.0/examples/jsm/utils/SceneUtils.js';
 
@@ -63,26 +64,24 @@ export default class Chunk {
     /**
     * @returns true if should render the face
     */
-    checkVoxel(pos, blockData, side, update){
+    checkVoxel(pos, blockData, side){
         if(pos.y < 0 || pos.y >= ChunkHeight) return true
 
         let block;
         if(pos.x < 0 || pos.x >= ChunkSize || pos.z < 0 || pos.z >= ChunkSize) {//outside chunk
             pos.x += this.x * ChunkSize
             pos.z += this.y * ChunkSize
-
-            block = update ? this.world.getVoxelFromPos(pos) : this.register.getBlock(this.world.getVoxel(pos))
+            block = this.world.getVoxelFromPos(pos)
         }else {
             block = this.getVoxel(pos)
         }
 
-        /*if(blockData.voxel && !blockData.culling[side]){
-            return false
+        
+        if(block.voxel) {//TODO culling here?
+            return true
         }
-        if(block.voxel && !block.culling[side])
-            return false*/
-        if(block.voxel) return true //TODO culling here?
         if(block.material == Material.AIR) return true
+        if(block.material == Material.LIQUID) return blockData.id != block.id
         if(block.transparent) return blockData.id != block.id
         return false
     }
