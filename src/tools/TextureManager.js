@@ -1,4 +1,4 @@
-import { TextureLoader, MeshBasicMaterial, NearestFilter, DoubleSide, FrontSide, DefaultLoadingManager } from 'three';
+import { TextureLoader, MeshBasicMaterial, NearestFilter, DoubleSide, FrontSide, DefaultLoadingManager, SRGBColorSpace, LinearSRGBColorSpace, MeshStandardMaterial } from 'three';
 import { TwoWayMap } from "./Utils.js";
 import { Material } from "./Constants.js";
 import Blocks from "../structures/registers/Blocks.js";
@@ -21,6 +21,7 @@ export default class TextureManager {
 
             const texture = this.loader.load(`resources/textures/blocks/${name}`)
             texture.magFilter = NearestFilter
+            texture.colorSpace = LinearSRGBColorSpace
             //texture.anisotropy = 4
             
             const material = new MeshBasicMaterial({ map: texture, transparent: block?.transparent ?? textureName.startsWith('break_'), side: block?.material == Material.LIQUID ? DoubleSide : FrontSide })
@@ -45,6 +46,7 @@ export default class TextureManager {
         for(let name of window.textures){
             const texture = this.loader.load(`resources/textures/blocks/${name}`)
             texture.magFilter = NearestFilter
+            texture.colorSpace = SRGBColorSpace
             //texture.anisotropy = 4
             
             const textureName = name.split('.')[0]
@@ -61,7 +63,8 @@ export default class TextureManager {
                 transparent, 
                 depthWrite: !transparent, 
                 side: block?.material == Material.LIQUID ? DoubleSide : FrontSide, 
-                name: textureName })
+                name: textureName
+            })
 
             TextureManager.textures.push(material)
             TextureManager.textureMap.add(textureName)
