@@ -1,8 +1,10 @@
 import { Vector2, Vector3 } from 'three';
-import { ChunkHeight, ChunkSize, CrossCheck, Material } from "../tools/Constants.js"
+import { WORLD_SETTINGS, CrossCheck, Material } from "../tools/Constants.js"
 import ItemEntity from "./entities/ItemEntity.js";
 import LootTable from "./LootTable.js";
 import TerrainBuilder from "./TerrainBuilder.js";
+
+const { chunkSize, chunkHeight } = WORLD_SETTINGS
 
 export default class Chunk {
 
@@ -33,7 +35,7 @@ export default class Chunk {
     }
 
     Init(){
-        this.data = create3DArray(ChunkSize, ChunkHeight, ChunkSize);
+        this.data = create3DArray(chunkSize, chunkHeight, chunkSize);
         this.populate();
     }
 
@@ -43,11 +45,11 @@ export default class Chunk {
     }
 
     populate(){
-        //let height = Math.floor(this.world.noise.Get(i + this.x * ChunkSize, 0.0, k + this.y * ChunkSize)) + 20            
-        for(let i = 0; i < ChunkSize; ++i){
-            for(let j = 0; j < ChunkHeight; ++j){
-                for(let k = 0; k < ChunkSize; ++k){
-                    this.data[i][j][k] = this.world.getVoxel(new Vector3(i + this.x * ChunkSize, j, k + this.y * ChunkSize))
+        //let height = Math.floor(this.world.noise.Get(i + this.x * chunkSize, 0.0, k + this.y * chunkSize)) + 20            
+        for(let i = 0; i < chunkSize; ++i){
+            for(let j = 0; j < chunkHeight; ++j){
+                for(let k = 0; k < chunkSize; ++k){
+                    this.data[i][j][k] = this.world.getVoxel(new Vector3(i + this.x * chunkSize, j, k + this.y * chunkSize))
                 }
             }
         }
@@ -61,12 +63,12 @@ export default class Chunk {
     * @returns true if should render the face
     */
     checkVoxel(pos, blockData, side){
-        if(pos.y < 0 || pos.y >= ChunkHeight) return true
+        if(pos.y < 0 || pos.y >= chunkHeight) return true
 
         let block;
-        if(pos.x < 0 || pos.x >= ChunkSize || pos.z < 0 || pos.z >= ChunkSize) {//outside chunk
-            pos.x += this.x * ChunkSize
-            pos.z += this.y * ChunkSize
+        if(pos.x < 0 || pos.x >= chunkSize || pos.z < 0 || pos.z >= chunkSize) {//outside chunk
+            pos.x += this.x * chunkSize
+            pos.z += this.y * chunkSize
             block = this.world.getVoxelFromPos(pos)
         }else {
             block = this.getVoxel(pos)
@@ -98,7 +100,7 @@ export default class Chunk {
 
     rebuildNeighbourChunks(pos, worldPos){
         this.needsUpdate = true
-        if(pos.x == 0 || pos.x == ChunkSize - 1 || pos.z == 0 || pos.z == ChunkSize - 1){
+        if(pos.x == 0 || pos.x == chunkSize - 1 || pos.z == 0 || pos.z == chunkSize - 1){
             for(let dir of CrossCheck){
                 let chunk = this.world.getChunkFromPos(worldPos.clone().add(dir))
                 if(Chunk.equals(chunk, this)) continue

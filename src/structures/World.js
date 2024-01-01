@@ -1,4 +1,4 @@
-import { ChunkHeight, ChunkSize, WORLD_SETTINGS } from "../tools/Constants.js";
+import { WORLD_SETTINGS } from "../tools/Constants.js";
 import Chunk from "./Chunk.js"
 
 export default class World {
@@ -54,8 +54,8 @@ export default class World {
     }
 
     spawnPlayer(){
-        this.player.position.set(ChunkSize / 2, ChunkHeight - 60, ChunkSize / 2)
-        this.player.camera.lookAt(ChunkSize / 2, 0, ChunkSize / 2)
+        this.player.position.set(WORLD_SETTINGS.chunkSize / 2, WORLD_SETTINGS.chunkHeight - 60, WORLD_SETTINGS.chunkSize / 2)
+        this.player.camera.lookAt(WORLD_SETTINGS.chunkSize / 2, 0, WORLD_SETTINGS.chunkSize / 2)
     }
 
     updateViewDistance(){
@@ -86,8 +86,8 @@ export default class World {
     }
 
     getChunkFromPos(pos){
-        let x = Math.floor(pos.x / ChunkSize);
-        let y = Math.floor(pos.z / ChunkSize);
+        let x = Math.floor(pos.x / WORLD_SETTINGS.chunkSize);
+        let y = Math.floor(pos.z / WORLD_SETTINGS.chunkSize);
 
         return this.chunks[Chunk.id(x, y)]
     }
@@ -119,17 +119,16 @@ export default class World {
     }
 
     getVoxelFromPos(pos){
-        let x = Math.floor(pos.x / ChunkSize);
+        let x = Math.floor(pos.x / WORLD_SETTINGS.chunkSize);
         let y = Math.floor(pos.y);
-        let z = Math.floor(pos.z / ChunkSize);
+        let z = Math.floor(pos.z / WORLD_SETTINGS.chunkSize);
 
         try{
             const chunk = this.chunks[Chunk.id(x, z)]
             if(!chunk) return this.register.getBlock(this.getVoxel(pos))
 
-            x = Math.floor(pos.x - (x * ChunkSize))
-            z = Math.floor(pos.z - (z * ChunkSize))
-
+            x = Math.floor(pos.x - (x * WORLD_SETTINGS.chunkSize))
+            z = Math.floor(pos.z - (z * WORLD_SETTINGS.chunkSize))
             return this.register.getBlock(chunk.data[x][y][z])
         } catch(err) {
             //out of building area

@@ -1,5 +1,5 @@
 import { Vector3, BufferGeometry, BufferAttribute, Mesh, WireframeGeometry, LineSegments } from 'three';
-import { ChunkHeight, ChunkSize, sides, triangles, UVs, vertices } from "../tools/Constants.js"
+import { WORLD_SETTINGS, sides } from "../tools/Constants.js"
 import TextureManager from "../tools/TextureManager.js";
 import VoxelBuilder from '../tools/VoxelBuilder.js';
 
@@ -19,7 +19,7 @@ export default class TerrainBuilder {
         this.createMeshData()
         this.createMesh()
 
-        this.mesh.position.set(pos.x * ChunkSize, 0, pos.y * ChunkSize)
+        this.mesh.position.set(pos.x * WORLD_SETTINGS.chunkSize, 0, pos.y * WORLD_SETTINGS.chunkSize)
         this.mesh.visible = visible
 
         return this.mesh
@@ -64,10 +64,10 @@ export default class TerrainBuilder {
         }
 
 
-        for(let i = 0; i < ChunkSize; ++i){
-            for(let j = 0; j < ChunkHeight; ++j){
+        for(let i = 0; i < WORLD_SETTINGS.chunkSize; ++i){
+            for(let j = 0; j < WORLD_SETTINGS.chunkHeight; ++j){
                 next:
-                for(let k = 0; k < ChunkSize; ++k){
+                for(let k = 0; k < WORLD_SETTINGS.chunkSize; ++k){
                     const blockID = this.chunk.data[i][j][k]
                     if(!blockID) continue next
 

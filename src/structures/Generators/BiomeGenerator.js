@@ -1,5 +1,5 @@
 
-import { ChunkHeight } from '../../tools/Constants.js';
+import { WORLD_SETTINGS } from '../../tools/Constants.js';
 import NoiseGenerator from '../../tools/Noise.js'
 
 export default class BiomeGenerator {
@@ -42,7 +42,7 @@ export default class BiomeGenerator {
             persistence: 0.5,
             lacunarity: 2.0,
             exponentiation: 4,
-            height: ChunkHeight / 4,
+            height: WORLD_SETTINGS.chunkHeight / 4,
         })
     }
 

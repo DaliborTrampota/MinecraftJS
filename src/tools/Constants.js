@@ -2,6 +2,7 @@ import { Vector3 } from 'three';
 import { createEnum } from './Utils.js';
 
 const PI_2 = Math.PI / 2;
+
 const vertices = [
     new Vector3(0, 0, 0),
     new Vector3(1, 0, 0),
@@ -96,9 +97,6 @@ const UVs = {
     ]
 }
 
-const ChunkSize = 16
-const ChunkHeight = 128
-
 const sides = [
     { side: 'north',dir: new Vector3( 0,  0,  1) },
     { side: 'south',dir: new Vector3( 0,  0, -1) },
@@ -108,10 +106,6 @@ const sides = [
     { side: 'west', dir: new Vector3( 1,  0,  0) },
 ]
 
-const Directions = createEnum(['north', 'east', 'up', 'south', 'west', 'down'])
-const DirectionsY = createEnum(['north', 'east', 'south', 'west'])
-const DirectionsX = createEnum(['north', 'up', 'south', 'down'])
-const DirectionsZ = createEnum(['east', 'up', 'west', 'down'])
 
 const Half = createEnum(['Top', 'Bottom'])
 
@@ -165,7 +159,9 @@ const PLAYER_DIMENSIONS = {
 }
 
 const WORLD_SETTINGS = {
-    globalSeaLevel: 12
+    globalSeaLevel: 12,
+    chunkSize: 16,
+    chunkHeight: 128,
 }
 
 const GAME_SETTINGS = {
@@ -193,17 +189,10 @@ export {
     triangles,
     UVs,
 
-    ChunkSize,
-    ChunkHeight,
-
     CrossCheck,
     CornerCheck,
     Section,
     
-    Directions,
-    DirectionsX,
-    DirectionsY,
-    DirectionsZ,
     Half,
 
     GAMEMODE,

@@ -1,6 +1,6 @@
 
-import { Sphere, Vector3 } from 'three';
-import { BASE_PLAYER_SETTINGS, ChunkSize, CornerCheck, CrossCheck } from '../../tools/Constants.js';
+import { Vector3 } from 'three';
+import { BASE_PLAYER_SETTINGS, CornerCheck, CrossCheck } from '../../tools/Constants.js';
 import { moveTowards } from '../../tools/Utils.js';
 import Chunk from '../Chunk.js';
 import Stack from '../item/Stack.js';
