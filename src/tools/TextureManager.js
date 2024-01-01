@@ -48,13 +48,25 @@ export default class TextureManager {
             //texture.anisotropy = 4
             
             const textureName = name.split('.')[0]
-            const block = Blocks.get(textureName.split('_')[0])
-            const material = new MeshBasicMaterial({ map: texture, transparent: block?.transparent ?? textureName.startsWith('break_'), side: block?.material == Material.LIQUID ? DoubleSide : FrontSide, name: textureName })
+            let blockName = textureName
+            let block
+            do {
+                block = Blocks.get(blockName)
+                blockName = blockName.split('_').slice(0, -1).join('_')
+            } while(!block && blockName)
+
+            const transparent = block?.transparent ?? textureName.startsWith('break_')
+            const material = new MeshBasicMaterial({ 
+                map: texture, 
+                transparent, 
+                depthWrite: !transparent, 
+                side: block?.material == Material.LIQUID ? DoubleSide : FrontSide, 
+                name: textureName })
 
             TextureManager.textures.push(material)
             TextureManager.textureMap.add(textureName)
-
-            if(block?.animated){
+            
+            if(block?.animation) {
                 this.animatedTextures[TextureManager.textureMap.get(textureName)] = {
                     frame: 0,
                     end: block.animation.frames,
