@@ -1,7 +1,6 @@
 import { Vector3, Vector2 } from 'three';
-import { Material, Section, UP } from "../../tools/Constants.js"
+import { Material, Section } from "../../tools/Constants.js"
 import Context from "./Context.js"
-import BlockState from '../blocks/BlockState.js';
 
 
 export default class BlockPlaceContext extends Context {
@@ -32,7 +31,7 @@ export default class BlockPlaceContext extends Context {
             return false
         }
         
-        if(playerBlockPos.equals(this.hitResult.position) || playerBlockPos.sub(UP).equals(this.hitResult.position))
+        if(playerBlockPos.equals(this.hitResult.position) || playerBlockPos.sub(Vector3.UpC).equals(this.hitResult.position))
             return false//console.log('cant place')
         return true
     }

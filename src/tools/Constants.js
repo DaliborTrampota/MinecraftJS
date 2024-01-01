@@ -172,11 +172,6 @@ const GAME_SETTINGS = {
     maxItems: 64
 }
 
-const RIGHT = new Vector3(1, 0, 0)
-const UP = new Vector3(0, 1, 0)
-const FORWARD = new Vector3(0, 0, -1)
-const ZERO = new Vector3(0, 0, 0)
-
 const Material = {
     AIR: 0,
     SOLID: 1,
@@ -217,11 +212,6 @@ export {
     PLAYER_DIMENSIONS,
     WORLD_SETTINGS,
     GAME_SETTINGS,
-
-    RIGHT,
-    UP,
-    FORWARD,
-    ZERO,
-
+    
     Material,
 }

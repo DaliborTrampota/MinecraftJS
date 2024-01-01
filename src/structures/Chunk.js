@@ -1,12 +1,8 @@
-import { Vector2, Vector3, BufferGeometry, BufferAttribute, Mesh } from 'three';
-import { ChunkHeight, ChunkSize, triangles, UVs, vertices, CrossCheck, Material, UP } from "../tools/Constants.js"
-import { PosMap, create3DArray, map } from "../tools/Utils.js"
+import { Vector2, Vector3 } from 'three';
+import { ChunkHeight, ChunkSize, CrossCheck, Material } from "../tools/Constants.js"
 import ItemEntity from "./entities/ItemEntity.js";
 import LootTable from "./LootTable.js";
 import TerrainBuilder from "./TerrainBuilder.js";
-import VoxelBuilder from '../tools/VoxelBuilder.js';
-
-//import { SceneUtils } from 'https://cdn.jsdelivr.net/npm/three@0.141.0/examples/jsm/utils/SceneUtils.js';
 
 export default class Chunk {
 
@@ -153,7 +149,7 @@ export default class Chunk {
             let drops = table.roll()
             //console.log(table, drops)
             for(let stack of drops){//Todo sound particles
-                let entity = new ItemEntity(this.world, stack.item.getModel(worldPos.add(new Vector3(0.5, 0.5, 0.5))), stack, UP.clone().multiplyScalar(2))
+                let entity = new ItemEntity(this.world, stack.item.getModel(worldPos.add(new Vector3(0.5, 0.5, 0.5))), stack, Vector3.Up.multiplyScalar(2))
                 window.game.addUpdateSub(entity)
             }
         }

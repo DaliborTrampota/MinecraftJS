@@ -1,5 +1,5 @@
-import { Vector3, Vector2, Euler, Raycaster } from 'three';
-import { PI_2, GAMEMODE, BASE_PLAYER_SETTINGS, RIGHT, UP, FORWARD, Material, CrossCheck, CornerCheck, MOUSE_BUTTON, sides } from '../../tools/Constants.js'
+import { Vector3, Vector2 } from 'three';
+import { GAMEMODE, BASE_PLAYER_SETTINGS } from '../../tools/Constants.js'
 import { clamp, moveTowards } from '../../tools/Utils.js'
 
 import Chunk from '../Chunk.js';
@@ -124,11 +124,11 @@ export default class Entity {
         
         let dir = this.model.getWorldDirection(new Vector3())
         let rot = Math.atan2(dir.x, dir.z);
-        const worldDir = this.velocity.applyAxisAngle(UP, rot)
+        const worldDir = this.velocity.applyAxisAngle(Vector3.UpC, rot)
         this.grounded = false
         for(let i = 0; i < 3; i++)//fixes weird bug where the player would get stuck in a block
             this.collide(worldDir, delta)
-        this.velocity.applyAxisAngle(UP, -rot)
+        this.velocity.applyAxisAngle(Vector3.UpC, -rot)
     }
 
     getAABB() {
