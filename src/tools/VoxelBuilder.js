@@ -141,7 +141,7 @@ export default class VoxelBuilder {
     }
 
     static buildFace(pos, side, blockState, blockData, culling = false) {
-        let { verts, uvs } = blockData.getFace(side, culling)
+        let { verts, uvs, indices } = blockData.getFace(side, culling)
         if(blockData.animation) uvs = uvs.map((u, i) => i % 2 ? u / blockData.animation.frames : u)      
 
         if(blockState && (side == 'up' || side == 'down')) {
@@ -158,9 +158,14 @@ export default class VoxelBuilder {
             verts[i + 2] += pos.z
         }
 
+        if(!indices) {
+            indices = []
+            for(let i = 0; i < verts.length / 3; i++)
+                indices.push(i)
+            console.log('not idx')
+        }
         return { 
             verts,
-            uvs
         }
     }
 }

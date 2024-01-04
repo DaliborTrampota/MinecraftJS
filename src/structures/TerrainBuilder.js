@@ -10,6 +10,7 @@ export default class TerrainBuilder {
 
         this.vertices = []
         this.UVs = []
+        this.indices = []
         this.groupStart = 0
         this.geometry = new BufferGeometry();
         this.mesh
@@ -28,6 +29,7 @@ export default class TerrainBuilder {
     rebuild() {
         this.vertices = []
         this.UVs = []
+        this.indices = []
         this.geometry.clearGroups()
         this.groupStart = 0
         
@@ -59,6 +61,7 @@ export default class TerrainBuilder {
                 this.blockData = blockData
                 this.vertices = []
                 this.uvs = [],
+                this.indices = []
                 this.breakingGroups = []
             }
         }
@@ -88,10 +91,13 @@ export default class TerrainBuilder {
                         const textureIndex = blockData.textures.all ?? blockData.textures[rotatedSide]
                         if(blockState) console.log(side, rotatedSide, textureIndex)
                         const drawCall = (drawCalls[textureIndex] ??= new DrawCall(textureIndex, blockData))
-                        const { verts, uvs } = VoxelBuilder.buildFace(pos, blockData.voxel ? rotatedSide : side, blockState, blockData, !shouldDrawFace)
+                        const { verts, uvs, indices } = VoxelBuilder.buildFace(pos, blockData.voxel ? rotatedSide : side, blockState, blockData, !shouldDrawFace)
+                        const offset = drawCall.vertices.length / 3
                         if (breaking) 
-                            drawCall.breakingGroups.push({ offset: drawCall.vertices.length / 3, textureIndex: TextureManager.textureMap.get(`break_${breaking.progress}`) })
+                            drawCall.breakingGroups.push({ offset, textureIndex: TextureManager.textureMap.get(`break_${breaking.progress}`) })
+                        
 
+                        drawCall.indices.push(...indices.map(i => i + offset))
                         drawCall.vertices.push(...verts)
                         drawCall.uvs.push(...uvs)
                     }
@@ -105,12 +111,14 @@ export default class TerrainBuilder {
 
     processDrawCall(drawCall) {
         for(let { offset, textureIndex } of drawCall.breakingGroups)
-            this.geometry.addGroup(this.groupStart + offset, 6, textureIndex)
+            this.geometry.addGroup(this.groupStart + offset, 4, textureIndex)
             
+        let offset = this.vertices.length / 3
+        this.indices.push(...drawCall.indices.map(i => i + offset))
         this.vertices.push(...drawCall.vertices)
         this.UVs.push(...drawCall.uvs)
 
-        const groupSize = drawCall.vertices.length / 3
+        const groupSize = drawCall.indices.length
         this.geometry.addGroup(this.groupStart, groupSize, drawCall.textureIndex)
         this.groupStart += groupSize
     }
@@ -119,6 +127,7 @@ export default class TerrainBuilder {
     createMesh(update = false){
         this.geometry.setAttribute('position', new BufferAttribute(new Float32Array(this.vertices), 3))
         this.geometry.setAttribute('uv', new BufferAttribute(new Float32Array(this.UVs), 2))
+        this.geometry.setIndex(this.indices)
 
         if(update) return //console.log(this.geometry)
         

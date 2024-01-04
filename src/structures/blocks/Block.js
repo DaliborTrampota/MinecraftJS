@@ -115,13 +115,17 @@ export default class Block {
 
     getFace(side) {
         let verts = [], uvs = []
-        for(let vert of triangles[side]) {
+        const uniqueVerts = new Set(triangles[side])
+        for(let vert of uniqueVerts) {
             verts.push(vertices[vert].x)
             verts.push(vertices[vert].y)
             verts.push(vertices[vert].z)
         }  
         uvs.push(...UVs[side])
-        return { verts, uvs }
+        //change range of indices to 0..n: eg. [3, 7, 5, 6, 7] -> [0, 1, 2, 3, 1]
+        const uniqueValues = [...uniqueVerts];
+        const indices = triangles[side].map(value => uniqueValues.indexOf(value));
+        return { verts, uvs, indices }
     }
 
     getState(ctx) {

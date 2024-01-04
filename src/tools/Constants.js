@@ -40,61 +40,26 @@ const triangles = {
     ]
 }
 
+const faceUVs = [
+    0, 1,
+    0, 0,
+    1, 1,
+    1, 0,
+]
+const faceUVsFlipped = [
+    1, 0,
+    1, 1,
+    0, 0,
+    0, 1,
+
+]
 const UVs = {
-    north: [
-        1, 1,
-        0, 1,
-        0, 0,
-    
-        1, 1,
-        0, 0,
-        1, 0
-    ],
-    south: [
-        1, 0,
-        0, 1, 
-        0, 0,
-    
-        1, 0, 
-        1, 1, 
-        0, 1
-    ],
-    up: [
-        1, 1,
-        0, 1,
-        0, 0,
-    
-        1, 1,
-        0, 0,
-        1, 0
-    ],
-    down: [
-        1, 1,
-        0, 0,
-        1, 0,
-    
-        1, 1,
-        0, 1,
-        0, 0
-    ],
-    west: [
-        1, 0,
-        1, 1,
-        0, 1,
-    
-        1, 0,
-        0, 1,
-        0, 0
-    ],
-    east: [
-        0, 0,
-        1, 0,
-        1, 1,
-    
-        0, 0,
-        1, 1,
-        0, 1
-    ]
+    north: faceUVs,
+    south: faceUVsFlipped,
+    up: faceUVs,
+    down: faceUVsFlipped,
+    west: faceUVs,
+    east: faceUVs,
 }
 
 const sides = [
