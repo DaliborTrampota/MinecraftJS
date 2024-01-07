@@ -1,5 +1,6 @@
 import { Vector2, Vector3 } from 'three';
 import { WORLD_SETTINGS, CrossCheck, Material } from "../tools/Constants.js"
+import { PosMap, create3DArray, map } from "../tools/Utils.js"
 import ItemEntity from "./entities/ItemEntity.js";
 import LootTable from "./LootTable.js";
 import TerrainBuilder from "./TerrainBuilder.js";
@@ -74,7 +75,6 @@ export default class Chunk {
             block = this.getVoxel(pos)
         }
 
-        
         if(block.voxel) {//TODO culling here?
             return true
             //this works when the voxel model side is full square, doesnt work for example from side of stairs
@@ -83,12 +83,10 @@ export default class Chunk {
             // let rotatedSide = blockState ? VoxelBuilder.rotateSide(oppositeSide, blockState.angle, blockState.rotationAxis) : oppositeSide
             // return !block.vertices[rotatedSide].every(d => d.cullface)
         }
-        // if(block.voxel && !block.culling[side])
-        //     return false
-        // if(block.voxel) return false
-        if(block.material == Material.AIR) return false
-        if(!block.opaque && block.solid || block.renderSides) return true
-        return !block.renderSides && blockData.id === block.id
+        if(block.material == Material.AIR) return true
+        if(block.material == Material.LIQUID) return blockData.id != block.id
+        if(block.transparent) return blockData.id != block.id
+        return false
     }
 
     unload(){
@@ -130,7 +128,6 @@ export default class Chunk {
             this.breaking[idx].progress = Math.floor(map(this.breaking[idx].hitpoints, 0, 1000, 9, 0))
             
             if(this.breaking[idx].progress === 10){
-                this.breaking.splice(idx, 1)
                 return this.removeVoxel(worldPos, true)
             }
         } else {
@@ -151,6 +148,11 @@ export default class Chunk {
         
         let curBlock = this.getVoxel(pos)
         if(curBlock.material == Material.AIR) return false
+
+        
+        let idx = this.breaking.findIndex(o => o.pos.equals(pos))
+        if(idx != -1)
+            this.breaking.splice(idx, 1)
 
         if(drop){
             //todo get drop from loot table, returns itemStack[]

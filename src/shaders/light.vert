@@ -188,7 +188,7 @@ float turbulence( vec3 p ) {
 
 void main(){
     vUV = vec2(uv.x, uv.y + animFrame); 
-    vAO =  ao;
+    vAO = ao;
     vNormal = normal;
 
     vec3 newPosition = vec3(position);

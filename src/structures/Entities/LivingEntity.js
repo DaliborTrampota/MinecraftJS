@@ -24,7 +24,7 @@ export default class LivingEntity {
             LMB: false
         }
 
-        this.maxUpStep = 0.6
+        this.maxUpStep = 0.5
     }
 
     get world() {
@@ -93,7 +93,7 @@ export default class LivingEntity {
         if(result.time != 1) {
             const yDiff = result.bb.yMax - this.feetPos.y
             if(this.grounded && yDiff > 0 && yDiff <= this.maxUpStep) {
-                this.position.y += yDiff + 0.1
+                this.position.y += yDiff + 0.05
                 return
             //    this.grounded = true
             }

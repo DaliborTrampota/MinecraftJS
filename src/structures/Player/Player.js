@@ -47,7 +47,7 @@ export default class Player extends LivingEntity {
         document.addEventListener('mousedown', this.onMouseClick.bind(this));
         document.addEventListener('mouseup', this.onMouseRelease.bind(this));
 
-        this.maxUpStep = 0.6
+        this.maxUpStep = 0.5
 
         window.game.addUpdateSub(this)
     }
@@ -342,4 +342,13 @@ export default class Player extends LivingEntity {
         axisVector[maxAxis] = dir[maxAxis] > 0 ? 1 : -1;
         
         return axisVector
+        // dir.normalize()
+        // if(Math.abs(dir.x) > Math.abs(dir.z)) {
+        //     const normal = new Vector3(1, 0, 0)
+        //     return dir.x > 0 ? normal : normal.negate()
+        // } else {
+        //     const normal = new Vector3(0, 0, 1)
+        //     return dir.z > 0 ? normal : normal.negate()
+        // }
+    }
 }

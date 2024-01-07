@@ -22,7 +22,7 @@ export default class Entity {
             LMB: false
         }
 
-        this.maxUpStep = 0.6
+        this.maxUpStep = 0.5
     }
 
     get world() {
@@ -94,7 +94,7 @@ export default class Entity {
         if(result.time != 1) {
             const yDiff = result.bb.yMax - entityBB.yMin//this.feetPos.y
             if(this.grounded && yDiff > 0 && yDiff <= this.maxUpStep) {
-                this.position.y += yDiff + 0.1
+                this.position.y += yDiff + 0.05
                 return
             //    this.grounded = true
             }
@@ -150,7 +150,7 @@ export default class Entity {
             for(let z = feetPos.z - RADIUS; z <= feetPos.z + RADIUS; z++) {
                 for(let y = feetPos.y + 1 + RADIUS; y >= feetPos.y - RADIUS - 1; y--) {
                     let pos = new Vector3(x, y, z)
-                    if(!this.world.checkVoxel(pos)) continue
+                    if(!this.world.checkVoxel(pos)) continue // TODO
                     const bbs = AABB.fromBlock(this.world.getVoxelFromPos(pos), pos)
                     AABBs.push(...bbs)
                 }

@@ -1,4 +1,4 @@
-import { TextureLoader, MeshBasicMaterial, NearestFilter, DoubleSide, FrontSide, DefaultLoadingManager, SRGBColorSpace, LinearSRGBColorSpace, MeshStandardMaterial, Vector3, MeshNormalMaterial } from 'three';
+import { TextureLoader, MeshBasicMaterial, NearestFilter, DoubleSide, FrontSide, DefaultLoadingManager, SRGBColorSpace, LinearSRGBColorSpace, MeshStandardMaterial, Vector3, MeshNormalMaterial, ShaderMaterial } from 'three';
 import { TwoWayMap } from "./Utils.js";
 import { Material } from "./Constants.js";
 import Blocks from "../structures/registers/Blocks.js";

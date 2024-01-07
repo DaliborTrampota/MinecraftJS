@@ -87,6 +87,8 @@ export default class TerrainBuilder {
                     const pos = new Vector3(i, j, k)
                     const breaking = this.chunk.breaking.find(o => o.pos.equals(pos))
 
+                    const blockState = this.chunk.getBlockState(pos)
+
                     //const mappedSides = blockState ? sides.map(s => ({ side: blockState.sides.map[s.side], dir: s.dir, oldSide: s.side })) : sides
                     sides:
                     for(let { dir, side } of sides) {
@@ -124,9 +126,10 @@ export default class TerrainBuilder {
     processDrawCall(drawCall) {
         for(let { offset, textureIndex } of drawCall.breakingGroups)
             this.geometry.addGroup(this.groupStart + offset, 6, textureIndex)
-            
+        
         this.vertices.push(...drawCall.vertices)
         this.UVs.push(...drawCall.uvs)
+        this.ao.push(...drawCall.ao)
 
         const groupSize = drawCall.vertices.length / 3
         this.geometry.addGroup(this.groupStart, groupSize, drawCall.textureIndex)
