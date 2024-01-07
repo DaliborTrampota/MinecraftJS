@@ -44,10 +44,11 @@ export default class World {
         for(let i = start; i < end; ++i){
             for(let j = start; j < end; ++j){
                 let chunk = new Chunk(i, j, this)
+                this.chunks[chunk.id] = chunk
+
                 window.scene.add(chunk.generate())
                 chunk.load()
 
-                this.chunks[chunk.id] = chunk
                 this.activeChunks.push(chunk.id)
             }
         }
@@ -94,8 +95,9 @@ export default class World {
 
     getVoxel(pos){ //Terain Generation here
         let height = Math.floor(this.generator.getHeight(pos.x, pos.z))
+        let y = Math.floor(pos.y)
         
-        if(pos.y == height) {
+        if(y == height) {
             let biome = this.generator.getBiome(pos.x, pos.z)
             switch(biome.key){
                 case 'forest':
@@ -110,25 +112,27 @@ export default class World {
             if(biome > 2) return this.register.getBlockID('gravel')
             return this.register.getBlockID('grass_block')
         }
-        else if(pos.y < height && pos.y > height - 3) return this.register.getBlockID('dirt')
-        else if(pos.y < height) return this.register.getBlockID('stone')
+        else if(y < height && y > height - 3) return this.register.getBlockID('dirt')
+        else if(y < height) return this.register.getBlockID('stone')
         
-        else if(pos.y <= WORLD_SETTINGS.globalSeaLevel) return this.register.getBlockID('water_still')
+        else if(y <= WORLD_SETTINGS.globalSeaLevel) return this.register.getBlockID('water_still')
         else return this.register.getBlockID('air')
         
     }
 
     getVoxelFromPos(pos){
         let x = Math.floor(pos.x / WORLD_SETTINGS.chunkSize);
-        let y = Math.floor(pos.y);
+        let y = Math.floor(pos.y)
         let z = Math.floor(pos.z / WORLD_SETTINGS.chunkSize);
 
         try{
             const chunk = this.chunks[Chunk.id(x, z)]
-            if(!chunk) return this.register.getBlock(this.getVoxel(pos))
+            if(!chunk) 
+                return this.register.getBlock(this.getVoxel(pos))
 
             x = Math.floor(pos.x - (x * WORLD_SETTINGS.chunkSize))
             z = Math.floor(pos.z - (z * WORLD_SETTINGS.chunkSize))
+            
             return this.register.getBlock(chunk.data[x][y][z])
         } catch(err) {
             //out of building area

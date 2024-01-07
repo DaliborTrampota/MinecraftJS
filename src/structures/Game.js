@@ -34,7 +34,7 @@ export default class Game {
 
     async Init(){
         this.createSkybox()
-        window.scene.add(this.createLight())
+        //this.createLight()
 
         await this.textureManager.load()
         this.register.blocks.reloadTextures()
@@ -70,6 +70,15 @@ export default class Game {
             const delta = o.clock.getDelta();
             o.obj.Update(delta)
         }
+
+        let delta = window.clock.getDelta()
+        for(let t of TextureManager.textures) {
+            if (t.uniforms.displaceWater) {
+                t.uniforms.time.value += delta
+            }
+
+        }
+        // window.composer.render()
         this.renderer.render(window.scene, this.camera);
         //console.log(this.renderer.info.render.calls)
     }

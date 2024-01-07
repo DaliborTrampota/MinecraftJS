@@ -167,28 +167,28 @@ var createStartingMesh = function(){
   scene0.add( grid );
 	
 	let cube1 = new THREE.Mesh(
-		new THREE.BoxBufferGeometry( 2 , 4 , 8 ),
+		new THREE.BoxGeometry( 2 , 4 , 8 ),
 		new THREE.MeshLambertMaterial({ color: 0x3040f0 })
 	);
 	cube1.position.set( -7 , 2 , 0 );
   staticCollideMesh.push( cube1 );
   
   let cube2 = new THREE.Mesh(
-		new THREE.BoxBufferGeometry( 10 , 4 , 4 ),
+		new THREE.BoxGeometry( 10 , 4 , 4 ),
 		new THREE.MeshLambertMaterial({ color: 0x3040f0 })
 	);
 	cube2.position.set( 0 , 2 , -10 );
   staticCollideMesh.push( cube2 );
   
   let cube3 = new THREE.Mesh(
-		new THREE.BoxBufferGeometry( 4 , 4 , 4 ),
+		new THREE.BoxGeometry( 4 , 4 , 4 ),
 		new THREE.MeshLambertMaterial({ color: 0x3040f0 })
 	);
 	cube3.position.set( 13 , 2 , -4 );
   staticCollideMesh.push( cube3 );
   
   let sphere1 = new THREE.Mesh(
-		new THREE.SphereBufferGeometry( 2 , 8 , 8 ),
+		new THREE.SphereGeometry( 2 , 8 , 8 ),
 		new THREE.MeshPhongMaterial({ color: 0x3040f0, flatShading: true })
 	);
 	sphere1.position.set( 11 , 2 , 7 );

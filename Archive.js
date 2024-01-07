@@ -152,6 +152,64 @@ function addVoxel(pos){
 
 
 
+getAOForVertex(vertPos, pos, dir, side) {
+    //get blocks around the vertex   
+    let faceCenter = pos.clone().add(new Vector3(0.5, 0.5, 0.5)).add(dir) 
+    let vertDir = vertPos.clone().sub(faceCenter)
+
+    // if(pos.equals(new Vector3(7, 26, 8))) {
+    //     const o = {
+    //         faceCenter: faceCenter.toArray(),
+    //         vertDir: vertDir.toArray(),
+    //         vertPos: vertPos.toArray(),
+    //         pos: pos.toArray(),
+    //         dir: dir.toArray(),
+    //         side: side,
+    //     }
+    //     console.log(JSON.stringify(o))
+    // }
+    let colors = {
+        up: 0x00ff00, // green
+        down: 0x0000ff, // blue
+        north: 0xff0000, // red
+        south: 0xffff00, // yellow
+        west: 0x00ffff, // cyan
+        east: 0xff00ff, // magenta
+    }
+    vertPos.add(dir) // go up a block
+    // if(pos.equals(new Vector3(7, 26, 8))){
+    //     window.scene.add(new ArrowHelper(dir.clone().normalize(), faceCenter, 1, colors[side]))
+    //     window.scene.add(new ArrowHelper(vertDir.clone().normalize(), vertPos, vertDir.length(), colors[side]))
+    //     window.scene.add(new ArrowHelper(vertDir.clone().normalize(), vertPos.clone().sub(dir), vertDir.length(), colors[side]))
+    // }
+
+    
+    const getBlock = (pos) => {
+        return this.chunk.world.getVoxelFromPos(this.chunk.toWorldPosition(pos))
+    }
+    let corner = getBlock(vertPos.clone().add(vertDir))//.clone())
+    let blocksAtSides = []
+
+    let i = 0
+    for(let comp of vertDir.toArray()) {
+        if(comp != 0) {
+            const sidePos = vertPos.clone().add(Vector3.Zero.setComponent(i, -Math.sign(comp) * 0.5))
+            blocksAtSides.push(getBlock(sidePos).material != 0)
+            
+            // if(pos.equals(new Vector3(7, 26, 8))){
+            //     window.scene.add(new ArrowHelper(Vector3.Zero.setComponent(i, -Math.sign(comp)), vertPos, 0.25, colors[side]))
+            // }
+        }
+        i++
+        //console.log(comp)
+    }
+    let ao = this.vertexAOType(blocksAtSides[0], blocksAtSides[1], corner.material != 0) / 3
+    //if(pos.equals(new Vector3(7, 26, 8))) console.log(blocksAtSides, corner.material != 0, ao, side)
+    //console.log(blocksAtSides, ao)
+    return ao
+}
+
+
 
 
 import { Vector3, Vector2, BufferGeometry, BufferAttribute, Mesh } from 'three';

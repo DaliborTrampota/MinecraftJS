@@ -77,11 +77,18 @@ export default class Chunk {
         
         if(block.voxel) {//TODO culling here?
             return true
+            //this works when the voxel model side is full square, doesnt work for example from side of stairs
+            // let oppositeSide = getOppositeSide(side)
+            // let blockState = this.getBlockState(pos)
+            // let rotatedSide = blockState ? VoxelBuilder.rotateSide(oppositeSide, blockState.angle, blockState.rotationAxis) : oppositeSide
+            // return !block.vertices[rotatedSide].every(d => d.cullface)
         }
-        if(block.material == Material.AIR) return true
-        if(block.material == Material.LIQUID) return blockData.id != block.id
-        if(block.transparent) return blockData.id != block.id
-        return false
+        // if(block.voxel && !block.culling[side])
+        //     return false
+        // if(block.voxel) return false
+        if(block.material == Material.AIR) return false
+        if(!block.opaque && block.solid || block.renderSides) return true
+        return !block.renderSides && blockData.id === block.id
     }
 
     unload(){
@@ -246,6 +253,15 @@ export default class Chunk {
         
         return position
     }
+
+    toWorldPosition(pos) { 
+        pos.x += this.x * chunkSize
+        pos.z += this.y * chunkSize
+        pos.x = Math.floor(pos.x)
+        pos.z = Math.floor(pos.z)
+        
+        return pos
+    } 
 
     toString(){
         return `X: ${this.x} Y: ${this.y}`

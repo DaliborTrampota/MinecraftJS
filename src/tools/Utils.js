@@ -179,6 +179,15 @@ class PosMap extends Map {
     }
 }
 
+function getOppositeSide(side) {
+    if(side == 'north') return 'south'
+    if(side == 'south') return 'north'
+    if(side == 'east') return 'west'
+    if(side == 'west') return 'east'
+    if(side == 'up') return 'down'
+    if(side == 'down') return 'up'
+}
+
 function calc2DAngle(v1, v2) {
     if (v1.equals(v2)) return 0
     return Math.atan2(v1.x*v2.z - v1.z*v2.x, v1.dot(v2))
@@ -200,6 +209,7 @@ export {
     deltaAngle,
     map,
     dirToSide,
+    getOppositeSide,
     
     TwoWayMap,
     PosMap,

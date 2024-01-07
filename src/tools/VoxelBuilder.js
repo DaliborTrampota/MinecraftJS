@@ -86,6 +86,8 @@ export default class VoxelBuilder {
 
         geometry.setAttribute('position', new BufferAttribute(new Float32Array(verts), 3))
         geometry.setAttribute('uv', new BufferAttribute(new Float32Array(uvs), 2))
+        geometry.setAttribute('ao', new BufferAttribute(new Float32Array(verts.length / 3).fill(1), 1))
+        geometry.computeVertexNormals()
 
         return { geometry, vertices: vertData, UVs: uvData }
     }
@@ -144,14 +146,14 @@ export default class VoxelBuilder {
         let { verts, uvs } = blockData.getFace(side, culling)
         if(blockData.animation) uvs = uvs.map((u, i) => i % 2 ? u / blockData.animation.frames : u)      
 
-        if(blockState && (side == 'up' || side == 'down')) {
+        if(blockState && blockState.rotation && (side == 'up' || side == 'down')) {
             uvs = VoxelBuilder.rotateUVs(uvs, blockState.rotation)
         }
 
         if(blockState && blockData.voxel) {
             verts = VoxelBuilder.rotateVertices(verts, blockState.angle, blockState.rotationAxis)
         }
-
+        
         for (let i = 0; i < verts.length; i += 3) {
             verts[i    ] += pos.x
             verts[i + 1] += pos.y

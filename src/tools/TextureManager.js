@@ -1,4 +1,4 @@
-import { TextureLoader, MeshBasicMaterial, NearestFilter, DoubleSide, FrontSide, DefaultLoadingManager, SRGBColorSpace, LinearSRGBColorSpace, MeshStandardMaterial } from 'three';
+import { TextureLoader, MeshBasicMaterial, NearestFilter, DoubleSide, FrontSide, DefaultLoadingManager, SRGBColorSpace, LinearSRGBColorSpace, MeshStandardMaterial, Vector3, MeshNormalMaterial } from 'three';
 import { TwoWayMap } from "./Utils.js";
 import { Material } from "./Constants.js";
 import Blocks from "../structures/registers/Blocks.js";
@@ -43,6 +43,9 @@ export default class TextureManager {
     async load(){
         console.info('Loading textures...')
 
+        const lightFrag = await fetch("/src/shaders/light.frag").then(r => r.text())
+        const lightVert = await fetch("/src/shaders/light.vert").then(r => r.text())
+
         for(let name of window.textures){
             const texture = this.loader.load(`resources/textures/blocks/${name}`)
             texture.magFilter = NearestFilter
@@ -58,13 +61,32 @@ export default class TextureManager {
             } while(!block && blockName)
 
             const transparent = block?.transparent ?? textureName.startsWith('break_')
-            const material = new MeshBasicMaterial({ 
-                map: texture, 
+            // const material = new MeshNormalMaterial({ 
+            //     map: texture, 
+            //     transparent, 
+            //     depthWrite: !transparent, 
+            //     side: block?.material == Material.LIQUID ? DoubleSide : FrontSide, 
+            //     name: textureName,
+            //     wireframe: false
+            // })
+            const material = new ShaderMaterial({ 
                 transparent, 
                 depthWrite: !transparent, 
                 side: block?.material == Material.LIQUID ? DoubleSide : FrontSide, 
-                name: textureName
+                name: textureName,
+                uniforms: {
+                    texture1: { value: texture },
+                    lightDir: { value: new Vector3(0.5, -1, 1) },
+                    displaceWater: { value: block?.material == Material.LIQUID },
+                    time: { value: 0 },
+                    animFrame: { value: 0 },
+                    //resolution: { value: new Vector2(500, 600) },
+                },
+                vertexShader: lightVert,
+                fragmentShader: lightFrag,
             })
+            material.map = texture
+            
 
             TextureManager.textures.push(material)
             TextureManager.textureMap.add(textureName)
@@ -80,8 +102,7 @@ export default class TextureManager {
         }
         
         await new Promise((res) => this.loader.manager.onLoad = () => (res()))
-        console.log('Textures were loaded!')
-        //console.log(TextureManager.textureMap)
+        console.info('Textures were loaded!')
         this.animateTextures()
     }
 
@@ -90,7 +111,8 @@ export default class TextureManager {
         for(let idx in this.animatedTextures){
             setInterval(() => {
                 let data = this.animatedTextures[idx]
-                TextureManager.textures[idx].map.offset.set(0, data.frame * data.step)
+                //console.log(TextureManager.textures[idx])
+                TextureManager.textures[idx].uniforms['animFrame'].value = data.frame * data.step
 
                 data.frame++
                 if(data.frame == data.end)

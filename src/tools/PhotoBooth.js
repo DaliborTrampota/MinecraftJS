@@ -34,6 +34,8 @@ function buildCube(){
     }
     geometry.setAttribute('position', new BufferAttribute(new Float32Array(verts), 3))
     geometry.setAttribute('uv', new BufferAttribute(new Float32Array(uvs), 2))
+    geometry.setAttribute('ao', new BufferAttribute(new Float32Array(verts.length / 3).fill(1), 1))
+    geometry.computeVertexNormals()
 
     return geometry
 }

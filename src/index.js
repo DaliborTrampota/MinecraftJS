@@ -1,5 +1,6 @@
 import { Scene, Clock, PerspectiveCamera, WebGLRenderer } from 'three';
 import PhotoBooth from './tools/PhotoBooth.js';
+import './tools/Extensions.js'
 
 Array.prototype.view = function(start, end) {
     return new Proxy(this, {

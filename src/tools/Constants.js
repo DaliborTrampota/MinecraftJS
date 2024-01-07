@@ -15,86 +15,54 @@ const vertices = [
 ]
 const triangles = {
     north: [
-        5, 4, 7,
-        5, 7, 6
+        4, 7, 5,
+        6, 5, 7
     ],
     south: [
-        0, 2, 1,
-        0, 3, 2
+        0, 3, 1,
+        2, 1, 3
     ],
     up: [
-        2, 3, 4,
-        2, 4, 5
+        3, 4, 2,
+        5, 2, 4
     ],
     down: [
-        0, 6, 7,
-        0, 1, 6
+        7, 0, 6,
+        1, 6, 0
     ],
     west: [
-        1, 2, 5,
-        1, 5, 6
+        5, 6, 2,
+        1, 2, 6
     ],
     east: [
-        0, 7, 4,
-        0, 4, 3
+        3, 0, 4,
+        7, 4, 0
     ]
 }
 
+const faceUVs = [
+    0, 1,
+    0, 0,
+    1, 1,
+    1, 0,
+    1, 1,
+    0, 0
+]
+const faceUVsFlipped = [
+    1, 0,
+    1, 1,
+    0, 0,
+    0, 1,
+    0, 0,
+    1, 1
+]
 const UVs = {
-    north: [
-        1, 1,
-        0, 1,
-        0, 0,
-    
-        1, 1,
-        0, 0,
-        1, 0
-    ],
-    south: [
-        1, 0,
-        0, 1, 
-        0, 0,
-    
-        1, 0, 
-        1, 1, 
-        0, 1
-    ],
-    up: [
-        1, 1,
-        0, 1,
-        0, 0,
-    
-        1, 1,
-        0, 0,
-        1, 0
-    ],
-    down: [
-        1, 1,
-        0, 0,
-        1, 0,
-    
-        1, 1,
-        0, 1,
-        0, 0
-    ],
-    west: [
-        1, 0,
-        1, 1,
-        0, 1,
-    
-        1, 0,
-        0, 1,
-        0, 0
-    ],
-    east: [
-        0, 0,
-        1, 0,
-        1, 1,
-    
-        0, 0,
-        1, 1,
-        0, 1
-    ]
+    north: faceUVs,
+    south: faceUVsFlipped,
+    up: faceUVs,
+    down: faceUVsFlipped,
+    west: faceUVs,
+    east: faceUVs
 }
 
 const sides = [
@@ -162,10 +130,11 @@ const WORLD_SETTINGS = {
     globalSeaLevel: 12,
     chunkSize: 16,
     chunkHeight: 128,
+    ambientOcclusion: false,
 }
 
 const GAME_SETTINGS = {
-    maxItems: 64
+    maxItems: 64,
 }
 
 const Material = {
