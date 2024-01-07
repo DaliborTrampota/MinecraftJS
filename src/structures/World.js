@@ -1,5 +1,4 @@
-import { Vector3 } from 'https://cdn.skypack.dev/three@0.141.0';
-import { ChunkHeight, ChunkSize, WORLD_SETTINGS } from "../tools/Constants.js";
+import { WORLD_SETTINGS } from "../tools/Constants.js";
 import Chunk from "./Chunk.js"
 
 export default class World {
@@ -55,12 +54,8 @@ export default class World {
     }
 
     spawnPlayer(){
-        this.player.position.set(ChunkSize / 2, ChunkHeight - 60, ChunkSize / 2)
-        this.player.camera.lookAt(ChunkSize / 2, 0, ChunkSize / 2)
-    }
-    
-    getChunk(x, y){
-        return this.chunks[Chunk.id(x, y)]
+        this.player.position.set(WORLD_SETTINGS.chunkSize / 2, WORLD_SETTINGS.chunkHeight - 60, WORLD_SETTINGS.chunkSize / 2)
+        this.player.camera.lookAt(WORLD_SETTINGS.chunkSize / 2, 0, WORLD_SETTINGS.chunkSize / 2)
     }
 
     updateViewDistance(){
@@ -86,9 +81,13 @@ export default class World {
         }
     }
 
+    getChunk(x, y){
+        return this.chunks[Chunk.id(x, y)]
+    }
+
     getChunkFromPos(pos){
-        let x = Math.floor(pos.x / ChunkSize);
-        let y = Math.floor(pos.z / ChunkSize);
+        let x = Math.floor(pos.x / WORLD_SETTINGS.chunkSize);
+        let y = Math.floor(pos.z / WORLD_SETTINGS.chunkSize);
 
         return this.chunks[Chunk.id(x, y)]
     }
@@ -120,16 +119,16 @@ export default class World {
     }
 
     getVoxelFromPos(pos){
-        let x = Math.floor(pos.x / ChunkSize);
+        let x = Math.floor(pos.x / WORLD_SETTINGS.chunkSize);
         let y = Math.floor(pos.y);
-        let z = Math.floor(pos.z / ChunkSize);
+        let z = Math.floor(pos.z / WORLD_SETTINGS.chunkSize);
 
         try{
-            let chunk = this.chunks[Chunk.id(x, z)]
+            const chunk = this.chunks[Chunk.id(x, z)]
+            if(!chunk) return this.register.getBlock(this.getVoxel(pos))
 
-            x = Math.floor(pos.x - (x * ChunkSize))
-            z = Math.floor(pos.z - (z * ChunkSize))
-
+            x = Math.floor(pos.x - (x * WORLD_SETTINGS.chunkSize))
+            z = Math.floor(pos.z - (z * WORLD_SETTINGS.chunkSize))
             return this.register.getBlock(chunk.data[x][y][z])
         } catch(err) {
             //out of building area
@@ -138,15 +137,7 @@ export default class World {
         }
     }
 
-    checkVoxel(x, y, z){
-        let pos = new Vector3(x, y, z)
-        let block = this.getVoxelFromPos(pos)
-        //console.log(pos, block ? block : false)
-        if(block) return block.solid
-        return false
-    }
-
-    checkVoxelVec(pos){
+    checkVoxel(pos){
         let block = this.getVoxelFromPos(pos)
         //console.log(pos, block ? block : false)
         if(block) return block.solid
@@ -155,13 +146,16 @@ export default class World {
 
     getEntityAt(pos) {
         const chunk = this.getChunkFromPos(pos)
-        console.log(chunk)
         return chunk.getEntityAt(pos)
     }
 
     setEntityAt(pos, entity){
         const chunk = this.getChunkFromPos(pos)
-        console.log(pos, entity, 'set')
         return chunk.setEntityAt(pos, entity)
+    }
+
+    getBlockState(pos){
+        const chunk = this.getChunkFromPos(pos)
+        return chunk.getBlockState(pos)
     }
 }

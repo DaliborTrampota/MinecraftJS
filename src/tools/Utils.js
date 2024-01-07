@@ -1,4 +1,4 @@
-import { BoxGeometry, SphereGeometry, Mesh, BoxHelper, MeshBasicMaterial, Vector3 } from 'https://cdn.skypack.dev/three@0.141.0';
+import { BoxGeometry, SphereGeometry, Mesh, BoxHelper, MeshBasicMaterial, Vector3 } from 'three';
 import { sides } from './Constants.js';
 
 function create3DArray(x, y, height){
@@ -179,6 +179,11 @@ class PosMap extends Map {
     }
 }
 
+function calc2DAngle(v1, v2) {
+    if (v1.equals(v2)) return 0
+    return Math.atan2(v1.x*v2.z - v1.z*v2.x, v1.dot(v2))
+}
+
 export {
     create3DArray,
     create2DArray,
@@ -189,6 +194,7 @@ export {
     dispose,
     disposeTextures,
 
+    calc2DAngle,
     clamp,
     moveTowards,
     deltaAngle,

@@ -1,11 +1,10 @@
-import { Vector2, Vector3, BufferGeometry, BufferAttribute, Mesh } from 'https://cdn.skypack.dev/three@0.141.0';
-import { ChunkHeight, ChunkSize, triangles, UVs, vertices, CrossCheck, Material, UP } from "../tools/Constants.js"
-import { PosMap, create3DArray, map } from "../tools/Utils.js"
+import { Vector2, Vector3 } from 'three';
+import { WORLD_SETTINGS, CrossCheck, Material } from "../tools/Constants.js"
 import ItemEntity from "./entities/ItemEntity.js";
 import LootTable from "./LootTable.js";
 import TerrainBuilder from "./TerrainBuilder.js";
 
-//import { SceneUtils } from 'https://cdn.jsdelivr.net/npm/three@0.141.0/examples/jsm/utils/SceneUtils.js';
+const { chunkSize, chunkHeight } = WORLD_SETTINGS
 
 export default class Chunk {
 
@@ -36,7 +35,7 @@ export default class Chunk {
     }
 
     Init(){
-        this.data = create3DArray(ChunkSize, ChunkHeight, ChunkSize);
+        this.data = create3DArray(chunkSize, chunkHeight, chunkSize);
         this.populate();
     }
 
@@ -46,11 +45,11 @@ export default class Chunk {
     }
 
     populate(){
-        //let height = Math.floor(this.world.noise.Get(i + this.x * ChunkSize, 0.0, k + this.y * ChunkSize)) + 20            
-        for(let i = 0; i < ChunkSize; ++i){
-            for(let j = 0; j < ChunkHeight; ++j){
-                for(let k = 0; k < ChunkSize; ++k){
-                    this.data[i][j][k] = this.world.getVoxel(new Vector3(i + this.x * ChunkSize, j, k + this.y * ChunkSize))
+        //let height = Math.floor(this.world.noise.Get(i + this.x * chunkSize, 0.0, k + this.y * chunkSize)) + 20            
+        for(let i = 0; i < chunkSize; ++i){
+            for(let j = 0; j < chunkHeight; ++j){
+                for(let k = 0; k < chunkSize; ++k){
+                    this.data[i][j][k] = this.world.getVoxel(new Vector3(i + this.x * chunkSize, j, k + this.y * chunkSize))
                 }
             }
         }
@@ -61,30 +60,28 @@ export default class Chunk {
     }
 
     /**
-    * returns true if a block is on the position and should render the face
+    * @returns true if should render the face
     */
-    checkVoxel(pos, blockData, side, update){
-        if(pos.y < 0 || pos.y >= ChunkHeight) return true
+    checkVoxel(pos, blockData, side){
+        if(pos.y < 0 || pos.y >= chunkHeight) return true
 
         let block;
-        if(pos.x < 0 || pos.x >= ChunkSize || pos.z < 0 || pos.z >= ChunkSize) {//outside chunk
-            pos.x += this.x * ChunkSize
-            pos.z += this.y * ChunkSize
-
-            block = update ? this.world.getVoxelFromPos(pos) : this.register.getBlock(this.world.getVoxel(pos))
+        if(pos.x < 0 || pos.x >= chunkSize || pos.z < 0 || pos.z >= chunkSize) {//outside chunk
+            pos.x += this.x * chunkSize
+            pos.z += this.y * chunkSize
+            block = this.world.getVoxelFromPos(pos)
         }else {
             block = this.getVoxel(pos)
         }
 
-        /*if(blockData.voxel && !blockData.culling[side]){
-            return false
+        
+        if(block.voxel) {//TODO culling here?
+            return true
         }
-        if(block.voxel && !block.culling[side])
-            return false*/
-        if(block.voxel) return false
-        if(block.material == Material.AIR) return false
-        if(!block.opaque && block.solid || block.renderSides) return true
-        return !block.renderSides && blockData.id === block.id
+        if(block.material == Material.AIR) return true
+        if(block.material == Material.LIQUID) return blockData.id != block.id
+        if(block.transparent) return blockData.id != block.id
+        return false
     }
 
     unload(){
@@ -103,7 +100,7 @@ export default class Chunk {
 
     rebuildNeighbourChunks(pos, worldPos){
         this.needsUpdate = true
-        if(pos.x == 0 || pos.x == ChunkSize - 1 || pos.z == 0 || pos.z == ChunkSize - 1){
+        if(pos.x == 0 || pos.x == chunkSize - 1 || pos.z == 0 || pos.z == chunkSize - 1){
             for(let dir of CrossCheck){
                 let chunk = this.world.getChunkFromPos(worldPos.clone().add(dir))
                 if(Chunk.equals(chunk, this)) continue
@@ -154,7 +151,7 @@ export default class Chunk {
             let drops = table.roll()
             //console.log(table, drops)
             for(let stack of drops){//Todo sound particles
-                let entity = new ItemEntity(this.world, stack.item.getModel(worldPos.add(new Vector3(0.5, 0.5, 0.5))), stack, UP.clone().multiplyScalar(2))
+                let entity = new ItemEntity(this.world, stack.item.getModel(worldPos.add(new Vector3(0.5, 0.5, 0.5))), stack, Vector3.Up.multiplyScalar(2))
                 window.game.addUpdateSub(entity)
             }
         }
@@ -163,6 +160,10 @@ export default class Chunk {
         delete this.metadata[`${pos.x}_${pos.y}_${pos.z}`]
         this.rebuildNeighbourChunks(pos, worldPos)
         return true
+    }
+
+    setVoxel(pos, blockID){
+        this.data[pos.x][pos.y][pos.z] = blockID
     }
 
     addVoxel(pos, blockID, blockData){
@@ -198,44 +199,41 @@ export default class Chunk {
         return this.blockEntities.get(pos)
     } 
 
-    setVoxel(pos, blockID){
-        this.data[pos.x][pos.y][pos.z] = blockID
-    }
 
-    spawnBlock(blockID){
-        if(blockID <= 0) return false //update to next stage?
-        const geometry = new BufferGeometry()
+    // spawnBlock(blockID){
+    //     if(blockID <= 0) return false //update to next stage?
+    //     const geometry = new BufferGeometry()
     
-        let blockData = this.register.getBlock(blockID)
-        let groupStart = 0
+    //     let blockData = this.register.getBlock(blockID)
+    //     let groupStart = 0
     
-        let verts = [], uvs = []
-        for(let side in UVs){
-            let textureIndex = blockData.textures.all ? this.register.textureMap.get(blockData.textures.all) : this.register.textureMap.get(blockData.textures[side])
-            let groupCount = 0;
-            for(let vert of triangles[side]){
-                verts.push(vertices[vert].x + 1)
-                verts.push(vertices[vert].y + 0)
-                verts.push(vertices[vert].z + 1)
-            }
-            uvs.push(...UVs[side])
-            groupCount += 6;
+    //     let verts = [], uvs = []
+    //     for(let side in UVs){
+    //         let textureIndex = blockData.textures.all ? this.register.textureMap.get(blockData.textures.all) : this.register.textureMap.get(blockData.textures[side])
+    //         let groupCount = 0;
+    //         for(let vert of triangles[side]){
+    //             verts.push(vertices[vert].x + 1)
+    //             verts.push(vertices[vert].y + 0)
+    //             verts.push(vertices[vert].z + 1)
+    //         }
+    //         uvs.push(...UVs[side])
+    //         groupCount += 6;
             
-            if(overlayBlockData) {
-                console.log(overlayBlockData.textures[side] || overlayBlockData.textures.all)
-                let overlayTextureIndex = this.register.textureMap.get(overlayBlockData.textures[side] || overlayBlockData.textures.all)
-                geometry.addGroup(groupStart, groupCount, overlayTextureIndex)
-            }
-            geometry.addGroup(groupStart, groupCount, textureIndex)
+    //         if(overlayBlockData) {
+    //             console.log(overlayBlockData.textures[side] || overlayBlockData.textures.all)
+    //             let overlayTextureIndex = this.register.textureMap.get(overlayBlockData.textures[side] || overlayBlockData.textures.all)
+    //             geometry.addGroup(groupStart, groupCount, overlayTextureIndex)
+    //         }
+    //         geometry.addGroup(groupStart, groupCount, textureIndex)
     
-            groupStart += groupCount;
-        }
+    //         groupStart += groupCount;
+    //     }
 
-        geometry.setAttribute('position', new BufferAttribute(new Float32Array(verts), 3))
-        geometry.setAttribute('uv', new BufferAttribute(new Float32Array(uvs), 2))
+    //     geometry.setAttribute('position', new BufferAttribute(new Float32Array(verts), 3))
+    //     geometry.setAttribute('uv', new BufferAttribute(new Float32Array(uvs), 2))
         
-        return new Mesh(geometry, this.register.textures)
-    }
+    //     return new Mesh(geometry, this.register.textures)
+    // }
 
     
     static equals(c1, c2){

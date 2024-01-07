@@ -1,5 +1,5 @@
-import { Vector3, Vector2, MeshBasicMaterial, Mesh, BoxGeometry, Box3  } from 'https://cdn.skypack.dev/three@0.141.0';
-import { BASE_PLAYER_SETTINGS, RIGHT, UP, FORWARD } from '../../tools/Constants.js'
+import { Vector3, Vector2, MeshBasicMaterial, Mesh, BoxGeometry, Box3  } from 'three';
+import { BASE_PLAYER_SETTINGS } from '../../tools/Constants.js'
 import { clamp, moveTowards } from '../../tools/Utils.js'
 
 import Chunk from '../Chunk.js';
@@ -89,7 +89,7 @@ export default class LivingEntity {
             if(outcome.time < result.time)
                 result = outcome
         }
-        
+
         if(result.time != 1) {
             const yDiff = result.bb.yMax - this.feetPos.y
             if(this.grounded && yDiff > 0 && yDiff <= this.maxUpStep) {
@@ -125,11 +125,11 @@ export default class LivingEntity {
 
         let dir = this.model.getWorldDirection(new Vector3())
         let rot = Math.atan2(dir.x, dir.z);
-        const worldDir = this.velocity.applyAxisAngle(UP, rot)
+        const worldDir = this.velocity.applyAxisAngle(Vector3.UpC, rot)
         this.grounded = false
         for(let i = 0; i < 3; i++)//fixes weird bug where the player would get stuck in a block
             this.collide(worldDir, delta)
-        this.velocity.applyAxisAngle(UP, -rot)
+        this.velocity.applyAxisAngle(Vector3.UpC, -rot)
     }
 
     getAABB() {
@@ -153,15 +153,16 @@ export default class LivingEntity {
             for(let z = Math.floor(center.z - RADIUS - bb.depth/2); z <= Math.ceil(center.z + RADIUS + bb.depth/2); z++) {
                 for(let y = Math.floor(center.y - RADIUS - bb.height/2); y <= Math.ceil(center.y + RADIUS + bb.height/2) - 1; y++) {
                     let pos = new Vector3(x, y, z)
-                    if(!this.world.checkVoxelVec(pos)) continue
-                    const bbs = AABB.fromBlock(this.world.getVoxelFromPos(pos), pos)
+                    if(!this.world.checkVoxel(pos)) continue
+                    const state = this.world.getBlockState(pos)
+                    const bbs = AABB.fromBlock(this.world.getVoxelFromPos(pos), pos, state)
                     AABBs.push(...bbs)
                 }
             }
         }
 
-        //while(!this.world.checkVoxelVec(feetPos.add(new Vector3(0, -1, 0)))){}
-        //AABBs.push(...AABB.fromBlock(this.world.checkVoxelVec(feetPos), feetPos))
+        //while(!this.world.checkVoxel(feetPos.add(new Vector3(0, -1, 0)))){}
+        //AABBs.push(...AABB.fromBlock(this.world.checkVoxel(feetPos), feetPos))
 
         return AABBs        
     }

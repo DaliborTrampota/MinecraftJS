@@ -1,5 +1,6 @@
 {
-    "type": "orientable",
+    "rotation": "normal",
+    
     "textures": {
         "front": "oak_log_top",
         "back": "oak_log_top",

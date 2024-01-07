@@ -1,4 +1,5 @@
-import { Vector3, MathUtils } from 'https://cdn.skypack.dev/three@0.141.0'
+import { Vector3, MathUtils } from 'three'
+import VoxelBuilder from './VoxelBuilder'
 
 export default class AABB {
 
@@ -23,20 +24,24 @@ export default class AABB {
         return this.zMax - this.zMin
     }
 
-    static createVoxelAABBs(block, pos) {
+    static createVoxelAABBs(block, pos, state) {
         const AABBs = []
         for (let e of block.elements) {
-            AABBs.push(AABB.fromElement(e).move(pos))
+            AABBs.push(AABB.fromElement(e, state).move(pos))
         }
         return AABBs
     }
 
-    static fromElement(e) {
-        return new AABB(...e.from.map(v => v / 16), ...e.to.map(v => v / 16))
+    static fromElement(e, state) {
+        let from = e.from.map(v => v / 16)
+        let to = e.to.map(v => v / 16)
+        from = state ? VoxelBuilder.rotateVertices(from, state.angle, state.rotationAxis) : from
+        to = state ? VoxelBuilder.rotateVertices(to, state.angle, state.rotationAxis) : to
+        return new AABB(...from, ...to)
     }
 
-    static fromBlock(block, pos) {
-        if (block.voxel) return AABB.createVoxelAABBs(block, pos)
+    static fromBlock(block, pos, state) {
+        if (block.voxel) return AABB.createVoxelAABBs(block, pos, state)
         return [new AABB(0, 0, 0, 1, 1, 1).move(pos)]
     }
 
@@ -168,11 +173,19 @@ export default class AABB {
     }
 
 
+    /**
+     * Calculates the swept AABB collision between two bounding boxes.
+     * @param {AABB} objectBB - The bounding box of the moving object.
+     * @param {AABB} otherBB - The bounding box of the other object.
+     * @param {Vector3} velocity - The velocity of the moving object.
+     * @returns {Object} - An object containing the collision time, direction, and the other bounding box.
+     */
     static aabbSwept(objectBB, otherBB, velocity) {
         let xMin = velocity.x > 0 ? objectBB.xMin : objectBB.xMin + velocity.x
         let yMin = velocity.y > 0 ? objectBB.yMin : objectBB.yMin + velocity.y
         let zMin = velocity.z > 0 ? objectBB.zMin : objectBB.zMin + velocity.z
         
+        //broadphasing optimization
         if(!new AABB(
             xMin, yMin, zMin, 
             xMin + objectBB.width + Math.abs(velocity.x), 

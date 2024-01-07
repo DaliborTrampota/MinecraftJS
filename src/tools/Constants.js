@@ -1,7 +1,8 @@
-import { Vector3 } from 'https://cdn.skypack.dev/three@0.141.0';
+import { Vector3 } from 'three';
 import { createEnum } from './Utils.js';
 
 const PI_2 = Math.PI / 2;
+
 const vertices = [
     new Vector3(0, 0, 0),
     new Vector3(1, 0, 0),
@@ -29,11 +30,11 @@ const triangles = {
         0, 6, 7,
         0, 1, 6
     ],
-    east: [
+    west: [
         1, 2, 5,
         1, 5, 6
     ],
-    west: [
+    east: [
         0, 7, 4,
         0, 4, 3
     ]
@@ -76,7 +77,7 @@ const UVs = {
         0, 1,
         0, 0
     ],
-    east: [
+    west: [
         1, 0,
         1, 1,
         0, 1,
@@ -85,7 +86,7 @@ const UVs = {
         0, 1,
         0, 0
     ],
-    west: [
+    east: [
         0, 0,
         1, 0,
         1, 1,
@@ -96,22 +97,15 @@ const UVs = {
     ]
 }
 
-const ChunkSize = 16
-const ChunkHeight = 128
-
 const sides = [
     { side: 'north',dir: new Vector3( 0,  0,  1) },
     { side: 'south',dir: new Vector3( 0,  0, -1) },
     { side: 'up',   dir: new Vector3( 0,  1,  0) },
     { side: 'down', dir: new Vector3( 0, -1,  0) },
-    { side: 'east', dir: new Vector3( 1,  0,  0) },
-    { side: 'west', dir: new Vector3(-1,  0,  0) },
+    { side: 'east', dir: new Vector3(-1,  0,  0) },
+    { side: 'west', dir: new Vector3( 1,  0,  0) },
 ]
 
-const Directions = createEnum(['north', 'east', 'up', 'south', 'west', 'down'])
-const DirectionsY = createEnum(['north', 'east', 'south', 'west'])
-const DirectionsX = createEnum(['north', 'up', 'south', 'down'])
-const DirectionsZ = createEnum(['east', 'up', 'west', 'down'])
 
 const Half = createEnum(['Top', 'Bottom'])
 
@@ -165,17 +159,14 @@ const PLAYER_DIMENSIONS = {
 }
 
 const WORLD_SETTINGS = {
-    globalSeaLevel: 12
+    globalSeaLevel: 12,
+    chunkSize: 16,
+    chunkHeight: 128,
 }
 
 const GAME_SETTINGS = {
     maxItems: 64
 }
-
-const RIGHT = new Vector3(1, 0, 0)
-const UP = new Vector3(0, 1, 0)
-const FORWARD = new Vector3(0, 0, -1)
-const ZERO = new Vector3(0, 0, 0)
 
 const Material = {
     AIR: 0,
@@ -198,17 +189,10 @@ export {
     triangles,
     UVs,
 
-    ChunkSize,
-    ChunkHeight,
-
     CrossCheck,
     CornerCheck,
     Section,
     
-    Directions,
-    DirectionsX,
-    DirectionsY,
-    DirectionsZ,
     Half,
 
     GAMEMODE,
@@ -217,11 +201,6 @@ export {
     PLAYER_DIMENSIONS,
     WORLD_SETTINGS,
     GAME_SETTINGS,
-
-    RIGHT,
-    UP,
-    FORWARD,
-    ZERO,
-
+    
     Material,
 }

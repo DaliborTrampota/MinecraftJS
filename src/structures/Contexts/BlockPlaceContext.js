@@ -1,6 +1,5 @@
-import { Vector3, Vector2 } from 'https://cdn.skypack.dev/three@0.141.0';
-import BlockState from "../blocks/BlockState.js"
-import { Material, Section, UP } from "../../tools/Constants.js"
+import { Vector3, Vector2 } from 'three';
+import { Material, Section } from "../../tools/Constants.js"
 import Context from "./Context.js"
 
 
@@ -10,12 +9,12 @@ export default class BlockPlaceContext extends Context {
         super(player, stack)
         this.hitResult = hitRes ?? this.getAimedBlock(this.player.range)
 
-        this.facingDir = player.facingNormal.negate()
-        this.clickNormal = this.hitResult.normal
-        this.clickAngle = player.facingNormal.angleTo(player.camera.getWorldDirection(new Vector3()))
-        this.clickSection = BlockPlaceContext.getClickSection(this.hitResult.point, this.hitResult.normal)
+        //this.clickNormal = this.hitResult.normal
+        //this.clickAngle = player.facingNormal.angleTo(player.camera.getWorldDirection(new Vector3()))
+        //this.clickSection = BlockPlaceContext.getClickSection(this.hitResult.point, this.hitResult.normal)
 
-        if(this.hitResult.position.y < player.position.y + player.camera.position.y) this.clickAngle = -this.clickAngle
+        // if(this.hitResult.position.y < player.position.y + player.camera.position.y) 
+        //     this.clickAngle = -this.clickAngle
     }
 
     get block() {
@@ -32,7 +31,7 @@ export default class BlockPlaceContext extends Context {
             return false
         }
         
-        if(playerBlockPos.equals(this.hitResult.position) || playerBlockPos.sub(UP).equals(this.hitResult.position))
+        if(playerBlockPos.equals(this.hitResult.position) || playerBlockPos.sub(Vector3.UpC).equals(this.hitResult.position))
             return false//console.log('cant place')
         return true
     }
@@ -41,7 +40,8 @@ export default class BlockPlaceContext extends Context {
         if(!this.player.inCreative) this.stack.amount--
         this.player.setPlaceDelay()
 
-        const blockState = this.block.getStateForPlacement(this)
+
+        const blockState = this.block.getState(this)
         const chunk = this.player.world.getChunkFromPos(this.hitResult.position)
 
         if(this.block.hasEntity)

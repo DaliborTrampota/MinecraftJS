@@ -119,7 +119,7 @@ class InterfaceFactory {
 
 class Slot {
 
-    static EMPTY = '/src/resources/images/empty.png' // '/src/resources/textures/items/baked_potato.png' 
+    static EMPTY = '/resources/images/empty.png' // '/resources/textures/items/baked_potato.png' 
     static WIDTH = 48
     static HEIGHT = 48
 

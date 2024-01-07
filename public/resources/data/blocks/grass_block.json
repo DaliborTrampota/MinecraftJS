@@ -1,0 +1,11 @@
+{
+    "rotation": "cameraFacing",
+    "textures": {
+        "top": "grass_block_top",
+        "bottom": "dirt",
+        "left": "grass_block_side",
+        "right": "grass_block_side",
+        "front": "grass_block_side",
+        "back": "grass_block_side"
+    }
+}

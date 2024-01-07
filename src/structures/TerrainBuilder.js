@@ -1,5 +1,5 @@
-import { Vector3, BufferGeometry, BufferAttribute, Mesh } from 'https://cdn.skypack.dev/three@0.141.0';
-import { ChunkHeight, ChunkSize, sides, triangles, UVs, vertices } from "../tools/Constants.js"
+import { Vector3, BufferGeometry, BufferAttribute, Mesh, WireframeGeometry, LineSegments } from 'three';
+import { WORLD_SETTINGS, sides } from "../tools/Constants.js"
 import TextureManager from "../tools/TextureManager.js";
 import VoxelBuilder from '../tools/VoxelBuilder.js';
 
@@ -19,7 +19,7 @@ export default class TerrainBuilder {
         this.createMeshData()
         this.createMesh()
 
-        this.mesh.position.set(pos.x * ChunkSize, 0, pos.y * ChunkSize)
+        this.mesh.position.set(pos.x * WORLD_SETTINGS.chunkSize, 0, pos.y * WORLD_SETTINGS.chunkSize)
         this.mesh.visible = visible
 
         return this.mesh
@@ -33,82 +33,88 @@ export default class TerrainBuilder {
         
         this.createMeshData(true)
         this.createMesh(true)
+        
+        if(this.chunk.world.player.controller.debug.active) {
+            const wireframe = new WireframeGeometry(this.geometry)
+            wireframe.translate(this.mesh.position.x, 0, this.mesh.position.y)
+            const line = new LineSegments( wireframe );
+            line.material.depthTest = false;
+            line.material.opacity = 0.5;
+            line.material.transparent = true;
+            window.scene.add(line)
+
+            setTimeout(() => window.scene.remove(line), 5_000)
+        }
 
         return this.mesh
     }
 
 
     createMeshData(update = false){//TODO filter only visible faces, sort them by texute, create a larger groups for each texture
-        let textureGroups = {}
-        for(let i = 0; i < ChunkSize; ++i){
-            for(let j = 0; j < ChunkHeight; ++j){
-                next:
-                for(let k = 0; k < ChunkSize; ++k){
+        let drawCalls = {} 
 
+        class DrawCall {
+            constructor(textureIndex, blockData){
+                this.textureIndex = textureIndex
+                this.blockData = blockData
+                this.vertices = []
+                this.uvs = [],
+                this.breakingGroups = []
+            }
+        }
+
+
+        for(let i = 0; i < WORLD_SETTINGS.chunkSize; ++i){
+            for(let j = 0; j < WORLD_SETTINGS.chunkHeight; ++j){
+                next:
+                for(let k = 0; k < WORLD_SETTINGS.chunkSize; ++k){
                     const blockID = this.chunk.data[i][j][k]
                     if(!blockID) continue next
 
                     const blockData = this.chunk.register.getBlock(blockID)
-                    if(!blockData) console.log('createMesh no blockData', blockID, i, j, k)
+                    if(!blockData) console.warn('createMesh no blockData', blockID, i, j, k)
 
                     const pos = new Vector3(i, j, k)
                     const breaking = this.chunk.breaking.find(o => o.pos.equals(pos))
-                    if(breaking) breaking.textureIndex = TextureManager.textureMap.get(`break_${breaking.progress}`)
-                    
-                    const blockState = this.chunk.getBlockState(pos)
-                    // if(blockState) console.log(blockState.sides.map, blockState.side)
 
-                    //const mappedSides = blockState ? sides.map(s => ({ side: blockState.sides.map[s.side], dir: s.dir, oldSide: s.side })) : sides
-                    sides:
-                    for(let { side, dir } of sides) {
-                        //const newSide = blockState?.sides.map[side] ?? side
-                        if(this.chunk.checkVoxel(pos.clone().add(dir), blockData, side, update)) continue sides
+                    const blockState = this.chunk.getBlockState(pos)//{ angle: 0, rotationAxis: new Vector3(0, 1, 0) }
+                    if(blockState) console.log(blockState)
 
-                        const textureIndex = 'all' in blockData.textures ? blockData.textures.all : blockData.getTextures(blockState)[side]
-                        const key = `${textureIndex}_${blockID}`
+                    for(let { dir, side } of sides) {
+                        const rotatedSide = blockState ? VoxelBuilder.rotateSide(side, -blockState.angle, blockState.rotationAxis) : side
+                        const shouldDrawFace = this.chunk.checkVoxel(pos.clone().add(dir), blockData, rotatedSide, false)
+                        if(!shouldDrawFace && !blockData.voxel) continue
+                        
+                        const textureIndex = blockData.textures.all ?? blockData.textures[rotatedSide]
+                        if(blockState) console.log(side, rotatedSide, textureIndex)
+                        const drawCall = (drawCalls[textureIndex] ??= new DrawCall(textureIndex, blockData))
+                        const { verts, uvs } = VoxelBuilder.buildFace(pos, blockData.voxel ? rotatedSide : side, blockState, blockData, !shouldDrawFace)
+                        if (breaking) 
+                            drawCall.breakingGroups.push({ offset: drawCall.vertices.length / 3, textureIndex: TextureManager.textureMap.get(`break_${breaking.progress}`) })
 
-                        if(!textureGroups.hasOwnProperty(key)) textureGroups[key] = []
-                        textureGroups[key].push({ side, pos, breaking, blockState })
+                        drawCall.vertices.push(...verts)
+                        drawCall.uvs.push(...uvs)
                     }
                 }
             }
         }
-        for(let key in textureGroups) this.buildTexture(...key.split('_').map(Number), textureGroups[key])
-    }
-
-    buildTexture(textureIndex, blockID, data){
-        let groupCount = 0;
-        let breakingGroups = []
-        let blockData = this.chunk.register.getBlock(blockID)
-        
-        for(let o of data) {
-            let curGroupCount = 0
-            let { vertices, uvs } = blockData.getFaceFor(o.side, o.blockState, true)
-            
-            for(let i = 0; i < vertices.length; i += 3) {
-                this.vertices.push(vertices[i    ] + o.pos.x)
-                this.vertices.push(vertices[i + 1] + o.pos.y)
-                this.vertices.push(vertices[i + 2] + o.pos.z)
-                groupCount++
-                curGroupCount++
-            }
-            if(blockData.animation) uvs = uvs.map((u, i) => i % 2 ? u / blockData.animation.frames : u)
-            if(o.blockState && blockData.orientable.side && o.blockState.shouldRotateUVsFor(o.side, textureIndex)) uvs = VoxelBuilder.rotateUVs(uvs)
-            this.UVs.push(...uvs)
-     
-            if(o.breaking) breakingGroups.push({ 
-                start: this.groupStart + groupCount - curGroupCount, 
-                size: curGroupCount, 
-                texture: o.breaking.textureIndex
-            })
-            
+        for (let textureId in drawCalls) {
+            this.processDrawCall(drawCalls[textureId])
         }
-        
-        this.geometry.addGroup(this.groupStart, groupCount, Number(textureIndex))
-        for(let { start, size, texture } of breakingGroups) this.geometry.addGroup(start, size, texture)
-
-        this.groupStart += groupCount;
     }
+
+    processDrawCall(drawCall) {
+        for(let { offset, textureIndex } of drawCall.breakingGroups)
+            this.geometry.addGroup(this.groupStart + offset, 6, textureIndex)
+            
+        this.vertices.push(...drawCall.vertices)
+        this.UVs.push(...drawCall.uvs)
+
+        const groupSize = drawCall.vertices.length / 3
+        this.geometry.addGroup(this.groupStart, groupSize, drawCall.textureIndex)
+        this.groupStart += groupSize
+    }
+
     
     createMesh(update = false){
         this.geometry.setAttribute('position', new BufferAttribute(new Float32Array(this.vertices), 3))

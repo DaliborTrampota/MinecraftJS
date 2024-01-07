@@ -1,6 +1,6 @@
 export default class Interface {
 
-    static empty = '/src/resources/images/empty.png'
+    static empty = '/resources/images/empty.png'
     static GUI = document.getElementById('gui')
     
     constructor(){

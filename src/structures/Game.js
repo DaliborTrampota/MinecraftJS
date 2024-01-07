@@ -1,4 +1,4 @@
-import { Clock, DirectionalLight, DirectionalLightHelper, CubeTextureLoader } from 'https://cdn.skypack.dev/three@0.141.0';
+import { Clock, DirectionalLight, DirectionalLightHelper, CubeTextureLoader } from 'three';
 import Stats from 'https://cdn.jsdelivr.net/npm/three@0.141.0/examples/jsm/libs/stats.module.js';
 
 import RegisterManager from './registers/RegisterManager.js';
@@ -55,6 +55,7 @@ export default class Game {
         this.player.inventory.addStack(Stack.create('vertical_slab', 64))
         this.player.inventory.addStack(Stack.create('slab', 64))
         this.player.inventory.addStack(Stack.create('furnace', 64))
+        this.player.inventory.addStack(Stack.create('dispenser', 64))
         this.player.inventory.addStack(Stack.create('oak_log', 64))
         this.player.inventory.addStack(Stack.create('oak_log', 64))
         this.player.inventory.addStack(Stack.create('sand', 64))

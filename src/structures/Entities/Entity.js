@@ -1,5 +1,5 @@
-import { Vector3, Vector2, Euler, Raycaster } from 'https://cdn.skypack.dev/three@0.141.0';
-import { PI_2, GAMEMODE, BASE_PLAYER_SETTINGS, RIGHT, UP, FORWARD, Material, CrossCheck, CornerCheck, MOUSE_BUTTON, sides } from '../../tools/Constants.js'
+import { Vector3, Vector2 } from 'three';
+import { GAMEMODE, BASE_PLAYER_SETTINGS } from '../../tools/Constants.js'
 import { clamp, moveTowards } from '../../tools/Utils.js'
 
 import Chunk from '../Chunk.js';
@@ -124,11 +124,11 @@ export default class Entity {
         
         let dir = this.model.getWorldDirection(new Vector3())
         let rot = Math.atan2(dir.x, dir.z);
-        const worldDir = this.velocity.applyAxisAngle(UP, rot)
+        const worldDir = this.velocity.applyAxisAngle(Vector3.UpC, rot)
         this.grounded = false
         for(let i = 0; i < 3; i++)//fixes weird bug where the player would get stuck in a block
             this.collide(worldDir, delta)
-        this.velocity.applyAxisAngle(UP, -rot)
+        this.velocity.applyAxisAngle(Vector3.UpC, -rot)
     }
 
     getAABB() {
@@ -150,15 +150,15 @@ export default class Entity {
             for(let z = feetPos.z - RADIUS; z <= feetPos.z + RADIUS; z++) {
                 for(let y = feetPos.y + 1 + RADIUS; y >= feetPos.y - RADIUS - 1; y--) {
                     let pos = new Vector3(x, y, z)
-                    if(!this.world.checkVoxelVec(pos)) continue
+                    if(!this.world.checkVoxel(pos)) continue
                     const bbs = AABB.fromBlock(this.world.getVoxelFromPos(pos), pos)
                     AABBs.push(...bbs)
                 }
             }
         }
 
-        //while(!this.world.checkVoxelVec(feetPos.add(new Vector3(0, -1, 0)))){}
-        //AABBs.push(...AABB.fromBlock(this.world.checkVoxelVec(feetPos), feetPos))
+        //while(!this.world.checkVoxel(feetPos.add(new Vector3(0, -1, 0)))){}
+        //AABBs.push(...AABB.fromBlock(this.world.checkVoxel(feetPos), feetPos))
 
         return AABBs        
     }    
