@@ -1,4 +1,5 @@
 {
+    "geometry": "cube",
     "rotation": "cameraFacing",
     "textures": {
         "top": "grass_block_top",

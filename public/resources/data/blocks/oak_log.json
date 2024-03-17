@@ -1,9 +1,10 @@
 {
+    "geometry": "cube",
     "rotation": "normal",
     
     "textures": {
-        "front": "oak_log_top",
-        "back": "oak_log_top",
+        "bottom": "oak_log_top",
+        "top": "oak_log_top",
         "side": "oak_log"
     },
     "variants": {

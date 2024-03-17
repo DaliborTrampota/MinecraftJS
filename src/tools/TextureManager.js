@@ -1,43 +1,30 @@
-import { TextureLoader, MeshBasicMaterial, NearestFilter, DoubleSide, FrontSide, DefaultLoadingManager, SRGBColorSpace, LinearSRGBColorSpace, MeshStandardMaterial, Vector3, MeshNormalMaterial, ShaderMaterial } from 'three';
-import { TwoWayMap } from "./Utils.js";
-import { Material } from "./Constants.js";
-import Blocks from "../structures/registers/Blocks.js";
+import { TextureLoader, NearestFilter, DoubleSide, FrontSide, DefaultLoadingManager, SRGBColorSpace, Vector3, ShaderMaterial } from 'three';
+
 
 
 export default class TextureManager {
 
-    static textureMap = new TwoWayMap()
+    /**
+     * Holds UVs 
+     */
+    static textureMap = new Map()
+    static atlasMap = new Map()
     static textures = []
+    static offsets = new Map()
+    static animationMs = 0
 
     constructor(){
         this.loader = new TextureLoader(DefaultLoadingManager)
         this.animatedTextures = {}
     }
 
-    async loadBlock(textures, block) {
-        for(let name of textures) {
-            const textureName = name.split('.')[0]
-            if(TextureManager.textureMap.has(textureName)) continue
-
-            const texture = this.loader.load(`resources/textures/blocks/${name}`)
-            texture.magFilter = NearestFilter
-            texture.colorSpace = LinearSRGBColorSpace
-            //texture.anisotropy = 4
-            
-            const material = new MeshBasicMaterial({ map: texture, transparent: block?.transparent ?? textureName.startsWith('break_'), side: block?.material == Material.LIQUID ? DoubleSide : FrontSide })
-            
-            TextureManager.textures.push(material)
-            TextureManager.textureMap.add(textureName)
-
-            if(block?.animated){
-                this.animatedTextures[TextureManager.textureMap.get(textureName)] = {
-                    frame: 0,
-                    end: block.animation.frames,
-                    interval: block.animation.interval,
-                    step: 1 / block.animation.frames
-                }
-            }
+    static addAtlas(material, uvs, offsetX, offsetY) {
+        for(let name in uvs) {
+            TextureManager.textureMap.set(name, uvs[name])
+            TextureManager.atlasMap.set(name, TextureManager.textures.length)
         }
+        TextureManager.offsets.set(TextureManager.textures.length, { x: offsetX, y: offsetY })
+        TextureManager.textures.push(material)
     }
 
     async load(){
@@ -45,65 +32,41 @@ export default class TextureManager {
 
         const lightFrag = await fetch("/src/shaders/light.frag").then(r => r.text())
         const lightVert = await fetch("/src/shaders/light.vert").then(r => r.text())
+        const liquidVert = await fetch("/src/shaders/liquid.vert").then(r => r.text())
 
-        for(let name of window.textures){
-            const texture = this.loader.load(`resources/textures/blocks/${name}`)
-            texture.magFilter = NearestFilter
-            texture.colorSpace = SRGBColorSpace
-            //texture.anisotropy = 4
-            
-            const textureName = name.split('.')[0]
-            let blockName = textureName
-            let block
-            do {
-                block = Blocks.get(blockName)
-                blockName = blockName.split('_').slice(0, -1).join('_')
-            } while(!block && blockName)
-
-            const transparent = block?.transparent ?? textureName.startsWith('break_')
-            // const material = new MeshNormalMaterial({ 
-            //     map: texture, 
-            //     transparent, 
-            //     depthWrite: !transparent, 
-            //     side: block?.material == Material.LIQUID ? DoubleSide : FrontSide, 
-            //     name: textureName,
-            //     wireframe: false
-            // })
-            const material = new ShaderMaterial({ 
-                transparent, 
-                depthWrite: !transparent, 
-                side: block?.material == Material.LIQUID ? DoubleSide : FrontSide, 
-                name: textureName,
-                uniforms: {
-                    texture1: { value: texture },
-                    lightDir: { value: new Vector3(0.5, -1, 1) },
-                    displaceWater: { value: block?.material == Material.LIQUID },
-                    time: { value: 0 },
-                    animFrame: { value: 0 },
-                    //resolution: { value: new Vector2(500, 600) },
-                },
-                vertexShader: lightVert,
-                fragmentShader: lightFrag,
-            })
-            material.map = texture
-            
-
-            TextureManager.textures.push(material)
-            TextureManager.textureMap.add(textureName)
-            
-            if(block?.animation) {
-                this.animatedTextures[TextureManager.textureMap.get(textureName)] = {
-                    frame: 0,
-                    end: block.animation.frames,
-                    interval: block.animation.interval,
-                    step: 1 / block.animation.frames
-                }
-            }
-        }
+        const liquidAtlas = this.loader.load(window.textures.atlases.liquids)
+        const opaqueAtlas = this.loader.load(window.textures.atlases.opaque)
+        const transparentAtlas = this.loader.load(window.textures.atlases.transparent)
         
         await new Promise((res) => this.loader.manager.onLoad = () => (res()))
+
+        const liquidMaterial = this.createLiquidMaterial(liquidAtlas, liquidVert, lightFrag)
+        const opaqueMaterial = this.createOpaqueMaterial(opaqueAtlas, lightVert, lightFrag)
+        const transparentMaterial = this.createTransparentMaterial(transparentAtlas, lightVert, lightFrag)
+
+        const texelOffsetX = 1 / opaqueAtlas.image.width / 2
+        const texelOffsetY = 1 / opaqueAtlas.image.height / 2
+        console.log(texelOffsetX, texelOffsetY)
+
+        TextureManager.addAtlas(opaqueMaterial, window.textures.uvs.opaque, texelOffsetX, texelOffsetY)
+        TextureManager.addAtlas(transparentMaterial, window.textures.uvs.transparent)
+        TextureManager.addAtlas(liquidMaterial, window.textures.uvs.liquids)
+        
+        console.log(TextureManager.textureMap, TextureManager.atlasMap)
+
+            
+        //     if(block?.animation) {
+        //         this.animatedTextures[TextureManager.textureMap.get(textureName)] = {
+        //             frame: 0,
+        //             end: block.animation.frames,
+        //             interval: block.animation.interval,
+        //             step: 1 / block.animation.frames
+        //         }
+        //     }
+        // }
+        
         console.info('Textures were loaded!')
-        this.animateTextures()
+        //this.animateTextures()
     }
 
     //todo make one 100ms interval for all textures
@@ -121,5 +84,66 @@ export default class TextureManager {
             }, this.animatedTextures[idx].interval)
         }
     }
+
+    createLiquidMaterial(atlas, vertexShader, fragmentShader) {
+        atlas.magFilter = NearestFilter
+        atlas.colorSpace = SRGBColorSpace
+
+        return new ShaderMaterial({
+            transparent: true, 
+            side: DoubleSide, 
+            name: 'liquids',
+            uniforms: {
+                textureAtlas: { value: atlas },
+                lightDir: { value: new Vector3(0.5, -1, 1) },
+                time: { value: 0 },
+                animFrame: { value: 0 },
+                //resolution: { value: new Vector2(500, 600) },
+            },
+            vertexShader,
+            fragmentShader,
+        })
+    }
+
+    createOpaqueMaterial(atlas, vertexShader, fragmentShader) {
+        atlas.magFilter = NearestFilter
+        atlas.colorSpace = SRGBColorSpace
+
+        return new ShaderMaterial({
+            transparent: false, 
+            side: FrontSide, 
+            name: 'opaque',
+            uniforms: {
+                textureAtlas: { value: atlas },
+                lightDir: { value: new Vector3(0.5, -1, 1) },
+                //time: { value: 0 },
+                animFrame: { value: 0 },
+                //resolution: { value: new Vector2(500, 600) },
+            },
+            vertexShader,
+            fragmentShader,
+        })
+    }
+
+    createTransparentMaterial(atlas, vertexShader, fragmentShader) {
+        atlas.magFilter = NearestFilter
+        atlas.colorSpace = SRGBColorSpace
+
+        return new ShaderMaterial({
+            transparent: true, 
+            depthWrite: false,
+            side: FrontSide, 
+            name: 'transparent',
+            uniforms: {
+                textureAtlas: { value: atlas },
+                lightDir: { value: new Vector3(0.5, -1, 1) },
+                // time: { value: 0 },
+                animFrame: { value: 0 },
+            },
+            vertexShader,
+            fragmentShader,
+        })
+    }
+
 
 }

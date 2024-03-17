@@ -1,96 +1,10 @@
 import { BufferGeometry, BufferAttribute, Vector3, Matrix4, Matrix3, Vector2 } from 'three';
-import { sides, triangles, vertices, UVs } from './Constants.js';
+import { triangles, vertices, UVs } from './Constants.js';
+import Side from '../structures/Side.js';
+import TextureManager from './TextureManager.js';
 
 
 export default class VoxelBuilder {
-
-    static build(elements, textures){
-        let geometry = new BufferGeometry()
-        let verts = []
-        let uvs = []
-        let groupStart = 0
-
-
-        const vertData = {
-            up: [],
-            down: [],
-            north: [],
-            south: [],
-            east: [],
-            west: []
-        }
-        
-        const uvData = {
-            up: [],
-            down: [],
-            north: [],
-            south: [],
-            east: [],
-            west: []
-        }
-
-        for(let e of elements){
-            let from = e.from.map(v => v/16)
-            let to = e.to.map(v => v/16)
-
-            for(let { side } of sides){
-                let face = e.faces[side]
-                if(!face) continue
-
-                let uv = face.uv.map(v => v/16)
-
-                let i = 0
-                let sideUVs = []
-                let tempVerts = []
-
-                for(let vert of triangles[side]){
-                    tempVerts.push(vertices[vert].x * (to[0] - from[0]) + from[0])
-                    tempVerts.push(vertices[vert].y * (to[1] - from[1]) + from[1])
-                    tempVerts.push(vertices[vert].z * (to[2] - from[2]) + from[2])
-
-                    sideUVs.push(UVs[side][i * 2] * (uv[2] - uv[0]) + uv[0])
-                    sideUVs.push(UVs[side][i*2+1] * (uv[3] - uv[1]) + uv[1])
-
-                    i++
-                }        
-                
-                if(side == 'up' || side == 'down'){
-                    sideUVs = VoxelBuilder.rotateUVs(sideUVs)
-                }
-
-                if(face.cullface){
-                    if(vertData[side].at(-1)?.cullface == face.cullface) vertData[side].at(-1).data.push(...tempVerts)
-                    else vertData[side].push({ cullface: face.cullface, data: tempVerts })
-
-                    if(uvData[side].at(-1)?.cullface == face.cullface) uvData[side].at(-1).data.push(...sideUVs)
-                    else uvData[side].push({ cullface: face.cullface, data: sideUVs })
-                    // vertData[face.cullface].culled.push(...tempVerts)
-                    // uvData[face.cullface].culled.push(...sideUVs)
-                }else{
-                    if(vertData[side].at(-1)?.cullface === false) vertData[side].at(-1).data.push(...tempVerts)
-                    else vertData[side].push({ cullface: false, data: tempVerts})
-
-                    if(uvData[side].at(-1)?.cullface === false) uvData[side].at(-1).data.push(...sideUVs)
-                    else uvData[side].push({ cullface: false, data: sideUVs })
-                    // vertData[side].unculled.push(...tempVerts)
-                    // uvData[side].unculled.push(...sideUVs)
-                }
-
-                verts.push(...tempVerts)
-                uvs.push(...sideUVs)
-                
-                geometry.addGroup(groupStart, i, Number(Object.values(textures).findIndex(idx => idx == textures[side]))) // we need to get texture index only from the textures (block.materials) this block is using, not all loaded textures like chunk mesh
-                groupStart += i
-            }
-        }
-
-        geometry.setAttribute('position', new BufferAttribute(new Float32Array(verts), 3))
-        geometry.setAttribute('uv', new BufferAttribute(new Float32Array(uvs), 2))
-        geometry.setAttribute('ao', new BufferAttribute(new Float32Array(verts.length / 3).fill(1), 1))
-        geometry.computeVertexNormals()
-
-        return { geometry, vertices: vertData, UVs: uvData }
-    }
 
     static rotateVertices(verts, angle, rotationAxis = new Vector3(0, 1, 0), center = 0.5) {
         if(angle == 0) return verts
@@ -135,34 +49,172 @@ export default class VoxelBuilder {
         return uvs.map(v => v + 0.5)
     }
 
-    static rotateSide(side, angle, axis) {
-        let { dir } = sides.find(s => s.side == side)
-        let newDir = dir.clone().applyAxisAngle(axis, angle).round()
-        return sides.find(s => s.dir.equals(newDir)).side
-
-    }
-
-    static buildFace(pos, side, blockState, blockData, culling = false) {
-        let { verts, uvs } = blockData.getFace(side, culling)
-        if(blockData.animation) uvs = uvs.map((u, i) => i % 2 ? u / blockData.animation.frames : u)      
-
-        if(blockState && blockState.rotation && (side == 'up' || side == 'down')) {
-            uvs = VoxelBuilder.rotateUVs(uvs, blockState.rotation)
-        }
-
-        if(blockState && blockData.voxel) {
-            verts = VoxelBuilder.rotateVertices(verts, blockState.angle, blockState.rotationAxis)
-        }
+    static buildFace(side, rotatedSide, blockState, blockData, culling = false) {
+        let { verts, uvs, material } = blockData.getFace(rotatedSide, culling)
         
-        for (let i = 0; i < verts.length; i += 3) {
-            verts[i    ] += pos.x
-            verts[i + 1] += pos.y
-            verts[i + 2] += pos.z
+        if(blockState) {
+            verts = this.rotateVertices(verts, blockState.angle, blockState.rotationAxis)
         }
+        // if(blockData.animation) uvs = uvs.map((u, i) => i % 2 ? u / blockData.animation.frames : u)      
 
+        // if(blockState && blockState.rotation && (side == 'up' || side == 'down')) {
+        //     uvs = VoxelBuilder.rotateUVs(uvs, blockState.rotation)
+        // }
+
+        // if(blockState && blockData.voxel) {
+        //     verts = VoxelBuilder.rotateVertices(verts, blockState.angle, blockState.rotationAxis)
+        // }
         return { 
             verts,
-            uvs
+            uvs,
+            material
         }
+    }
+
+    static ROTATION_MAP = {
+        [Side.North]: new Matrix4(),
+        [Side.South]: new Matrix4().makeRotationAxis(Vector3.UpC, Math.PI),
+        [Side.West]: new Matrix4().makeRotationAxis(Vector3.UpC, -Math.PI / 2),
+        [Side.East]: new Matrix4().makeRotationAxis(Vector3.UpC, Math.PI / 2),
+        [Side.Up]: new Matrix4().makeRotationAxis(Vector3.NorthC, -Math.PI / 2),
+        [Side.Down]: new Matrix4().makeRotationAxis(Vector3.NorthC, Math.PI / 2),
+    }
+
+    static rotateFaceTo(side, verts) {
+        verts = verts.map(v => v - 0.5)
+        const matrix = side instanceof Matrix4 ? side : VoxelBuilder.ROTATION_MAP[side]
+        console.log(matrix)
+
+        for(let i = 0; i < verts.length; i += 3){
+            const vert = new Vector3(verts[i], verts[i + 1], verts[i + 2])
+            vert.applyMatrix4(matrix)
+            verts[i    ] = vert.x + 0.5
+            verts[i + 1] = vert.y + 0.5
+            verts[i + 2] = vert.z + 0.5
+        }
+
+        return verts
+    }
+
+    static rotateToTopHalf(verts, perpendicualrAxis, angle = Math.PI / 2) {
+        const matrix = new Matrix4().makeRotationAxis(perpendicualrAxis, angle)
+        return this.rotateFaceTo(matrix, verts)
+    }
+
+    static build(elements, animationData) {
+        const geometry = new BufferGeometry()
+        let verts = []
+        let uvs = []
+        let groupStart = 0
+        
+        const culled = {
+            verts: {},
+            uvs: {},
+            rawUVs: {},
+        }
+
+        const unculled = {
+            verts: {},
+            uvs: {},
+            rawUVs: {},
+        }
+        
+        const materials = new Set()
+        
+        for(let e of elements){
+            let from = e.from.map(v => v/16)
+            let to = e.to.map(v => v/16)
+            
+            for(let sideName in e.faces) {
+                const face = e.faces[sideName]
+                const side = Side.NameToSide(sideName)
+
+                let uv = face.uv ? face.uv.map(v => v/16) : VoxelBuilder.autoUVs(from, to, side)//[0, 0, 1, 1]
+                console.log(uv, face, sideName, from, to)
+
+                let i = 0
+                let tempVerts = [], tempUVs = [], tempRawUVs = []
+                const textureUVs = TextureManager.textureMap.get(face.texture)
+                const matID = TextureManager.atlasMap.get(face.texture)
+                let x=0,y=0//const { x, y } = TextureManager.offsets.get(matID)
+
+                for(let vert of triangles[side]){
+                    tempVerts.push(vertices[vert].x * (to[0] - from[0]) + from[0])
+                    tempVerts.push(vertices[vert].y * (to[1] - from[1]) + from[1])
+                    tempVerts.push(vertices[vert].z * (to[2] - from[2]) + from[2])
+
+                    const u = UVs[side][i * 2] * (uv[2] - uv[0]) + uv[0]
+                    const v = UVs[side][i*2+1] * (uv[3] - uv[1]) + uv[1]
+
+                    tempRawUVs.push(u, v)
+                    tempUVs.push(this.translateUV(u, textureUVs[0] + x, textureUVs[2] - x))
+                    tempUVs.push(this.translateUV(v, textureUVs[1] + y, textureUVs[3] - y, animationData))
+                    
+                    i++
+                }        
+
+                verts.push(...tempVerts)
+                uvs.push(...tempUVs)
+
+                if (face.cullface) {
+                    culled.verts[side] ??= []
+                    culled.uvs[side] ??= []
+                    culled.rawUVs[side] ??= []
+
+
+                    culled.verts[side].push(...tempVerts)
+                    culled.uvs[side].push(...tempUVs)
+                    culled.rawUVs[side].push(...tempRawUVs)
+                } else {
+                    unculled.verts[side] ??= []
+                    unculled.uvs[side] ??= []
+                    unculled.rawUVs[side] ??= []
+
+                    unculled.verts[side].push(...tempVerts)
+                    unculled.uvs[side].push(...tempUVs)
+                    unculled.rawUVs[side].push(...tempRawUVs)
+                }
+                
+                materials.add(matID)
+
+                geometry.addGroup(groupStart, i, matID) // we need to get texture index only from the textures (block.materials) this block is using, not all loaded textures like chunk mesh
+                groupStart += i
+            }
+        }
+
+        geometry.setAttribute('position', new BufferAttribute(new Float32Array(verts), 3))
+        geometry.setAttribute('uv', new BufferAttribute(new Float32Array(uvs), 2))
+        geometry.setAttribute('ao', new BufferAttribute(new Float32Array(verts.length / 3).fill(1), 1))
+        geometry.computeVertexNormals()
+
+        return { geometry, culled, unculled, materials }
+    }
+
+    static translateUV(uv, start, end, animationData) {
+        if(animationData && uv == 1) {
+            const range = end - start
+            return start + range / animationData.frames
+        }
+        return uv * (end - start) + start
+    }
+
+    static getUVs(uvs, [startX, startY, endX, endY]) {
+        let newUVs = []
+        for(let i = 0; i < uvs.length; i += 2) {
+            newUVs.push(this.translateUV(uvs[i], startX, endX))
+            newUVs.push(this.translateUV(uvs[i + 1], startY, endY))
+        }
+        return newUVs
+    }
+
+    static autoUVs(from, to, side) {
+        if(side == Side.North) return [from[0], from[1], to[0], to[1]]
+        if(side == Side.South) return [from[0], from[1], to[0], to[1]]
+        if(side == Side.West) return [from[2], from[1], to[2], to[1]]
+        if(side == Side.East) return [from[2], from[1], to[2], to[1]]
+        if(side == Side.Up) return [from[0], from[2], to[0], to[2]]
+        if(side == Side.Down) return [from[0], from[2], to[0], to[2]]
+
+        return [0, 0, 1, 1]
     }
 }

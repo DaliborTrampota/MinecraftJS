@@ -1,13 +1,16 @@
 import { Vector3, BufferGeometry, BufferAttribute, Mesh, WireframeGeometry, LineSegments } from 'three';
-import { WORLD_SETTINGS, sides } from "../tools/Constants.js"
+import { WORLD_SETTINGS } from "../tools/Constants.js"
 import TextureManager from "../tools/TextureManager.js";
 import VoxelBuilder from '../tools/VoxelBuilder.js';
+import Side from './Side.js';
 
 export default class TerrainBuilder {
 
     constructor(chunk) {
+        /**The chunk object.
+         * @type {import('./Chunk.js').default}
+         */
         this.chunk = chunk
-
         this.vertices = []
         this.UVs = []
         this.ao = []
@@ -40,40 +43,14 @@ export default class TerrainBuilder {
         
         this.createMeshData(true)
         this.createMesh(true)
-        
-        if(this.chunk.world.player.controller.debug.active) {
-            const wireframe = new WireframeGeometry(this.geometry)
-            wireframe.translate(this.mesh.position.x, 0, this.mesh.position.y)
-            const line = new LineSegments( wireframe );
-            line.material.depthTest = false;
-            line.material.opacity = 0.5;
-            line.material.transparent = true;
-            window.scene.add(line)
-
-            setTimeout(() => window.scene.remove(line), 5_000)
-        }
 
         return this.mesh
     }
 
 
     createMeshData(update = false){
-        let drawCalls = {} 
-
-        class DrawCall {
-            constructor(textureIndex, blockData){
-                this.textureIndex = textureIndex
-                this.blockData = blockData
-
-                this.vertices = []
-                this.uvs = []
-                this.ao = []
-
-                this.breakingGroups = []
-            }
-        }
-
-
+        const materialGroups = {}
+        
         for(let i = 0; i < WORLD_SETTINGS.chunkSize; ++i){
             for(let j = 0; j < WORLD_SETTINGS.chunkHeight; ++j){
                 next:
@@ -85,51 +62,73 @@ export default class TerrainBuilder {
                     if(!blockData) console.warn('createMesh no blockData', blockID, i, j, k)
 
                     const pos = new Vector3(i, j, k)
-                    const breaking = this.chunk.breaking.find(o => o.pos.equals(pos))
-
-                    const blockState = this.chunk.getBlockState(pos)
-
-                    //const mappedSides = blockState ? sides.map(s => ({ side: blockState.sides.map[s.side], dir: s.dir, oldSide: s.side })) : sides
-                    sides:
-                    for(let { dir, side } of sides) {
-                        const rotatedSide = blockState ? VoxelBuilder.rotateSide(side, -blockState.angle, blockState.rotationAxis) : side
-                        const shouldDrawFace = this.chunk.checkVoxel(pos.clone().add(dir), blockData, rotatedSide, false)
-                        if(!shouldDrawFace && !blockData.voxel) continue
-                        
-                        const textureIndex = blockData.textures.all ?? blockData.textures[rotatedSide]
-                        if(blockState) console.log(side, rotatedSide, textureIndex)
-
-
-                        const drawCall = (drawCalls[textureIndex] ??= new DrawCall(textureIndex, blockData))
-                        const { verts, uvs } = VoxelBuilder.buildFace(pos, blockData.voxel ? rotatedSide : side, blockState, blockData, !shouldDrawFace)
-                        if (breaking) 
-                            drawCall.breakingGroups.push({ offset: drawCall.vertices.length / 3, textureIndex: TextureManager.textureMap.get(`break_${breaking.progress}`) })
-
-                        if (blockData.voxel || !WORLD_SETTINGS.ambientOcclusion) {
-                            drawCall.ao.push(...new Array(verts.length / 3).fill(1))
-                        } else {
-                            drawCall.ao.push(...this.getAO(new Vector3(verts[0], verts[1], verts[2]), pos.clone(), dir.clone(), side))
-                        }
-
-                        drawCall.vertices.push(...verts)
-                        drawCall.uvs.push(...uvs)
-
-                    }
+                    this.buildBlock(pos, blockData, materialGroups)
+                    
                 }
             }
         }
-        for (let textureId in drawCalls) {
-            this.processDrawCall(drawCalls[textureId])
+        for (let materialID in materialGroups) {
+            this.processDrawCall(materialGroups[materialID])
+        }
+    }
+
+    buildBlock(pos, blockData, materialGroups) {
+        
+        const breaking = this.chunk.breaking.find(o => o.pos.equals(pos))
+        const blockState = this.chunk.getBlockState(pos)
+        const faceChecks = Side.faceCheck()
+
+        if(blockState) console.log(blockState)
+
+
+        for(let side of Side.All) {
+            const rotatedSide = blockState ? Side.rotate(side, -blockState.angle, blockState.rotationAxis) : side
+            
+            const shouldDrawFace = this.chunk.checkVoxel(faceChecks[side](pos.clone()), blockData, rotatedSide, false) // here probably want rotated side to get verts of the correct side
+            if(!shouldDrawFace && !blockData.voxel) continue
+            
+            const { verts, uvs, material } = VoxelBuilder.buildFace(side, rotatedSide, blockState, blockData, !shouldDrawFace)
+            
+            for (let i = 0; i < verts.length; i += 3) {
+                verts[i    ] += pos.x
+                verts[i + 1] += pos.y
+                verts[i + 2] += pos.z
+            }
+
+
+            const drawCall = (materialGroups[material] ??= new DrawCall(material))
+            if (breaking)  {
+                const breakID = TextureManager.atlasMap.get(`break_${breaking.progress}`)
+                const breakUVs = VoxelBuilder.getUVs(blockData.getFace(side, !shouldDrawFace, true).uvs, TextureManager.textureMap.get(`break_${breaking.progress}`))
+                const breakDrawCall = (materialGroups[breakID] ??= new DrawCall(breakID))
+                breakDrawCall.vertices.push(...verts)
+                breakDrawCall.uvs.push(...breakUVs)
+                breakDrawCall.ao.push(...new Array(verts.length / 3).fill(1))
+                //breakingArr.push({ offset: drawCall.vertices.length / 3, uvs: TextureManager.textureMap.get(`break_${breaking.progress}`) })
+                console.log(breakDrawCall)
+            }
+
+            if (blockData.voxel || !WORLD_SETTINGS.ambientOcclusion) {
+                drawCall.ao.push(...new Array(verts.length / 3).fill(1))
+            } else {
+                drawCall.ao.push(...this.getAO(new Vector3(verts[0], verts[1], verts[2]), pos.clone(), Side.getDirection(side), side))
+            }
+
+            drawCall.vertices.push(...verts)
+            drawCall.uvs.push(...uvs)
+
         }
     }
 
     processDrawCall(drawCall) {
-        for(let { offset, textureIndex } of drawCall.breakingGroups)
-            this.geometry.addGroup(this.groupStart + offset, 6, textureIndex)
+        // for(let { offset, textureIndex } of drawCall.breakingGroups){
+        //     console.log(textureIndex, offset, this.groupStart)
+        //     this.geometry.addGroup(this.groupStart + offset, 6, textureIndex)
+        // }
         
-        this.vertices.push(...drawCall.vertices)
-        this.UVs.push(...drawCall.uvs)
-        this.ao.push(...drawCall.ao)
+        this.vertices = this.vertices.concat(drawCall.vertices)
+        this.UVs = this.UVs.concat(drawCall.uvs)
+        this.ao = this.ao.concat(drawCall.ao)
 
         const groupSize = drawCall.vertices.length / 3
         this.geometry.addGroup(this.groupStart, groupSize, drawCall.textureIndex)
@@ -181,50 +180,47 @@ export default class TerrainBuilder {
         ]
         let v1, v2, v3, v4
 
-        if (side == 'up') {
+        if (side == Side.Up) {
             v1 = this.vertexAOType(blocks[2], blocks[3], corners[2])
             v2 = this.vertexAOType(blocks[2], blocks[1], corners[1])
             v3 = this.vertexAOType(blocks[0], blocks[3], corners[3])
             v4 = this.vertexAOType(blocks[0], blocks[1], corners[0])
         }
 
-        if (side == 'north') {
+        if (side == Side.North) {
             v1 = this.vertexAOType(blocks[2], blocks[1], corners[1])
             v2 = this.vertexAOType(blocks[2], blocks[3], corners[2])
             v3 = this.vertexAOType(blocks[0], blocks[1], corners[0])
             v4 = this.vertexAOType(blocks[0], blocks[3], corners[3])
         }
 
-        if (side == 'east') {
+        if (side == Side.East) {
             v1 = this.vertexAOType(blocks[0], blocks[3], corners[3])
             v2 = this.vertexAOType(blocks[2], blocks[3], corners[2])
             v3 = this.vertexAOType(blocks[0], blocks[1], corners[0])
             v4 = this.vertexAOType(blocks[2], blocks[1], corners[1])
         }
 
-        if (side == 'down') {
+        if (side == Side.Down) {
             v1 = this.vertexAOType(blocks[2], blocks[1], corners[1])
             v2 = this.vertexAOType(blocks[2], blocks[3], corners[2])
             v3 = this.vertexAOType(blocks[0], blocks[1], corners[0])
             v4 = this.vertexAOType(blocks[0], blocks[3], corners[3])
         }
 
-        if (side == 'south') {
+        if (side == Side.South) {
             v1 = this.vertexAOType(blocks[2], blocks[3], corners[2])
             v2 = this.vertexAOType(blocks[2], blocks[1], corners[1])
             v3 = this.vertexAOType(blocks[0], blocks[3], corners[3])
             v4 = this.vertexAOType(blocks[0], blocks[1], corners[0])
         }
 
-        if (side == 'west') {
+        if (side == Side.West) {
             v1 = this.vertexAOType(blocks[0], blocks[1], corners[0])
             v2 = this.vertexAOType(blocks[2], blocks[1], corners[1])
             v3 = this.vertexAOType(blocks[0], blocks[3], corners[3])
             v4 = this.vertexAOType(blocks[2], blocks[3], corners[2])
         }
-
-        if(pos.x == 5 &&pos.y == 26 &&pos.z ===10)console.log(blocks, corners, v1, v2, v3, v4, x, y, faceCenter, side, Vector3.Zero)
-        //if(this.chunk.x == 0 && this.chunk.y == 0) console.log(v1, v2, v3, v4, blocks, corners)
 
         return [
             v1, v2, v3, 
@@ -237,5 +233,19 @@ export default class TerrainBuilder {
         if((side1 || side2) && corner) return 0.6
         if(side1 || side2 || corner) return 0.75
         return 1
+    }
+
+}
+
+
+class DrawCall {
+    constructor(textureIndex){
+        this.textureIndex = textureIndex
+
+        this.vertices = []
+        this.uvs = []
+        this.ao = []
+
+        this.breakingGroups = []
     }
 }

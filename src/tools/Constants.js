@@ -1,5 +1,6 @@
 import { Vector3 } from 'three';
 import { createEnum } from './Utils.js';
+import Side from '../structures/Side.js';
 
 const PI_2 = Math.PI / 2;
 
@@ -14,27 +15,27 @@ const vertices = [
     new Vector3(0, 0, 1)
 ]
 const triangles = {
-    north: [
+    [Side.North]: [
         4, 7, 5,
         6, 5, 7
     ],
-    south: [
+    [Side.South]: [
         0, 3, 1,
         2, 1, 3
     ],
-    up: [
+    [Side.Up]: [
         3, 4, 2,
         5, 2, 4
     ],
-    down: [
+    [Side.Down]: [
         7, 0, 6,
         1, 6, 0
     ],
-    west: [
+    [Side.West]: [
         5, 6, 2,
         1, 2, 6
     ],
-    east: [
+    [Side.East]: [
         3, 0, 4,
         7, 4, 0
     ]
@@ -57,25 +58,19 @@ const faceUVsFlipped = [
     1, 1
 ]
 const UVs = {
-    north: faceUVs,
-    south: faceUVsFlipped,
-    up: faceUVs,
-    down: faceUVsFlipped,
-    west: faceUVs,
-    east: faceUVs
+    [Side.North]: faceUVs,
+    [Side.South]: faceUVsFlipped,
+    [Side.Up]: faceUVs,
+    [Side.Down]: faceUVsFlipped,
+    [Side.West]: faceUVs,
+    [Side.East]: faceUVs
 }
 
-const sides = [
-    { side: 'north',dir: new Vector3( 0,  0,  1) },
-    { side: 'south',dir: new Vector3( 0,  0, -1) },
-    { side: 'up',   dir: new Vector3( 0,  1,  0) },
-    { side: 'down', dir: new Vector3( 0, -1,  0) },
-    { side: 'east', dir: new Vector3(-1,  0,  0) },
-    { side: 'west', dir: new Vector3( 1,  0,  0) },
-]
+const Half = {
+    Top: 0,
+    Bottom: 1
+}
 
-
-const Half = createEnum(['Top', 'Bottom'])
 
 const CrossCheck = [ 
     new Vector3(1, 0, 0),
@@ -104,7 +99,7 @@ const MOUSE_BUTTON = {
 }
 
 const BASE_PLAYER_SETTINGS = {
-    viewDistance: 5,
+    viewDistance: 4,
     health: 100,
     acceleration: 60,
     jump: 1,
@@ -152,17 +147,18 @@ const Section = {
 }
 
 export {
-    sides,
     PI_2,
     vertices, 
     triangles,
     UVs,
 
+    Half,
+
     CrossCheck,
     CornerCheck,
     Section,
+    Material,
     
-    Half,
 
     GAMEMODE,
     MOUSE_BUTTON,
@@ -170,6 +166,4 @@ export {
     PLAYER_DIMENSIONS,
     WORLD_SETTINGS,
     GAME_SETTINGS,
-    
-    Material,
 }

@@ -1,5 +1,6 @@
 import { Vector3 } from 'three'
 import { Half } from '../../tools/Constants.js'
+import Side from '../Side.js'
 
 const ANGLE_TO_VECTOR = Vector3.North
 

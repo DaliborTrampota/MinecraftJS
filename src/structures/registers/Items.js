@@ -51,8 +51,10 @@ export default class Items extends AbstractRegister {
         // this.WATER_STILL = this.registerBlock(Blocks.WATER_STILL, 'DEFAULT')
         this.STAIRS = this.registerBlock(Blocks.STAIRS, 'DEFAULT')
         this.SLAB = this.registerBlock(Blocks.SLAB, 'DEFAULT')
-        this.VERTICAL_SLAB = this.registerBlock(Blocks.VERTICAL_SLAB, 'DEFAULT')
+        this.OAK_VERTICAL_SLAB = this.registerBlock(Blocks.OAK_VERTICAL_SLAB, 'DEFAULT')
         this.OAK_LOG = this.registerBlock(Blocks.OAK_LOG, 'DEFAULT')
+        this.TABLE = this.registerBlock(Blocks.TABLE, 'FURNITURE')
+        this.CHAIR = this.registerBlock(Blocks.CHAIR, 'FURNITURE')
     }
 
     generateIcons() {
