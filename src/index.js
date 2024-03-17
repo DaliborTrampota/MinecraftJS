@@ -39,6 +39,7 @@ async function main() {
     renderer.setSize( window.innerWidth, window.innerHeight );
     document.getElementById('target').appendChild(renderer.domElement);
     
+    window.maxAnisotropy = renderer.capabilities.getMaxAnisotropy()
     window.getBlockImage = PhotoBooth
     window.scene = new Scene();
     window.clock = new Clock();

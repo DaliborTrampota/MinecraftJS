@@ -1,4 +1,4 @@
-import { TextureLoader, NearestFilter, DoubleSide, FrontSide, DefaultLoadingManager, SRGBColorSpace, Vector3, ShaderMaterial } from 'three';
+import { TextureLoader, NearestFilter, DoubleSide, FrontSide, DefaultLoadingManager, SRGBColorSpace, Vector3, ShaderMaterial, NearestMipMapLinearFilter } from 'three';
 
 
 
@@ -87,6 +87,8 @@ export default class TextureManager {
 
     createLiquidMaterial(atlas, vertexShader, fragmentShader) {
         atlas.magFilter = NearestFilter
+        atlas.minFilter = NearestMipMapLinearFilter
+        //atlas.anisotropy = window.maxAnisotropy
         atlas.colorSpace = SRGBColorSpace
 
         return new ShaderMaterial({
@@ -107,6 +109,8 @@ export default class TextureManager {
 
     createOpaqueMaterial(atlas, vertexShader, fragmentShader) {
         atlas.magFilter = NearestFilter
+        atlas.minFilter = NearestMipMapLinearFilter
+        //atlas.anisotropy = window.maxAnisotropy
         atlas.colorSpace = SRGBColorSpace
 
         return new ShaderMaterial({
@@ -127,6 +131,7 @@ export default class TextureManager {
 
     createTransparentMaterial(atlas, vertexShader, fragmentShader) {
         atlas.magFilter = NearestFilter
+        atlas.minFilter = NearestMipMapLinearFilter
         atlas.colorSpace = SRGBColorSpace
 
         return new ShaderMaterial({
