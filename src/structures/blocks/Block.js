@@ -123,17 +123,17 @@ export default class Block {
 
     getState(ctx) {
         if (!this.isOrientable) return false
-        let direction, rotationAxis, rotation = 0
+        let facing, rotationAxis, rotation = 0
         
         switch (this.orientable) {
             case 'facing': { // furnace
-                direction = ctx.player.facingNormal(true).negate()
+                facing = ctx.player.facingNormal(true).negate()
                 rotationAxis = Vector3.Up
                 break
             }
 
             case 'cameraFacing': {
-                direction = ctx.player.facingNormal().negate()
+                facing = ctx.player.facingNormal().negate()
                 rotation = calc2DAngle(Vector3.North, ctx.player.facingNormal(true).negate())
                 break
             }
@@ -144,14 +144,14 @@ export default class Block {
             }
 
             case 'normal': { //logs
-                direction = ctx.hitResult.normal
+                facing = ctx.hitResult.normal
                 break
             }
 
         }
         
         if (!rotationAxis) {
-            rotationAxis = Vector3.North.cross(direction)
+            rotationAxis = Vector3.North.cross(facing)
             if (rotationAxis.lengthSq() == 0) {
                 rotationAxis = Vector3.Up
             } else {
@@ -161,9 +161,9 @@ export default class Block {
             }
         }
         // console.log(direction, rotationAxis)
-
+        console.log(facing, rotation)
         return new BlockState(ctx.hitResult.position.floor(), ctx.block, {
-            direction,
+            facing,
             rotationAxis,
             rotation,
         })

@@ -11,9 +11,12 @@ export default class BlockState {
         this.id = `${pos.x}_${pos.y}_${pos.z}`
         this.block = block
 
-        this.direction = meta.direction ?? Vector3.North
+        this.facing = meta.facing ?? Vector3.North
+
+        //this.rotation = meta.rotation ?? 0
+
+        //this.direction = meta.direction ?? Vector3.North
         this.rotationAxis = meta.rotationAxis ?? Vector3.Up // this is for orientation of the block (rotate to face the direction) not rotation. Rotation rotates around the direction axis 
-        this.rotation = meta.rotation ?? 0
         // this.half = meta.half ?? Half.Bottom //TODO slah block block state class
         //this.inventory = new MachineInterface(meta.inventory ?? []) 
 
@@ -22,8 +25,10 @@ export default class BlockState {
 
     get angle() {
         if(this.cache['angle']) return this.cache['angle']        
-        let angle = this.direction.angleTo(ANGLE_TO_VECTOR)
-        const cross = this.direction.clone().cross(ANGLE_TO_VECTOR)
+
+        
+        let angle = ANGLE_TO_VECTOR.angleTo(this.facing)
+        const cross = this.facing.clone().cross(ANGLE_TO_VECTOR)
         if(Math.max(...cross.toArray()) > 0) angle = -angle
         return this.cache['angle'] = angle
     }
@@ -31,5 +36,9 @@ export default class BlockState {
     setValue(prop, value) {
         this[prop] = value
         return this
+    }
+
+    rotated(side) {
+        return Side.rotate(side, -this.angle, this.rotationAxis) // negative angle because we want to get the side that would be rotated to the current side
     }
 }

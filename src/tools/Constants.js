@@ -31,11 +31,11 @@ const triangles = {
         7, 0, 6,
         1, 6, 0
     ],
-    [Side.West]: [
+    [Side.East]: [
         5, 6, 2,
         1, 2, 6
     ],
-    [Side.East]: [
+    [Side.West]: [
         3, 0, 4,
         7, 4, 0
     ]
