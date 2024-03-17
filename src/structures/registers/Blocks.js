@@ -33,6 +33,18 @@ export default class Blocks extends AbstractRegister {
     }
 
     static init() {
+        for(let name in window.blockData) {
+            let block = window.blockData[name]
+            while(block.geometry) {
+                let parentBlock = window.blockData[block.geometry]
+                block.parent = block.geometry
+                delete block.geometry
+                block = Object.assign({}, parentBlock, block)
+                window.blockData[name] = JSON.parse(JSON.stringify(block))
+            }
+        }
+
+
         this.AIR = this.register(new Block('air', Material.AIR).hasNoCollisions())
         this.DIRT = this.register(new Block('dirt', Material.SOLID))
         this.GRASS_BLOCK = this.register(new Block('grass_block', Material.SOLID))
@@ -49,8 +61,10 @@ export default class Blocks extends AbstractRegister {
         this.WATER_STILL = this.register(new Block('water_still', Material.LIQUID).hasNoCollisions().isTransparent())
         this.STAIRS = this.register(new VoxelBlock('stairs', Material.SOLID))
         this.SLAB = this.register(new VoxelBlock('slab', Material.SOLID))
-        this.VERTICAL_SLAB = this.register(new VoxelBlock('vertical_slab', Material.SOLID))
+        this.OAK_VERTICAL_SLAB = this.register(new VoxelBlock('oak_vertical_slab', Material.SOLID))
         this.OAK_LOG = this.register(new Block('oak_log', Material.SOLID))
+        this.TABLE = this.register(new VoxelBlock('table', Material.SOLID))
+        this.CHAIR = this.register(new VoxelBlock('chair', Material.SOLID))
     }
 
     static getByTexture(texture) {
@@ -64,10 +78,11 @@ export default class Blocks extends AbstractRegister {
         }
         return blocks
     }
-
-    reloadTextures() {
+    
+    generateModels() {
         for(let key of this.map.values()) {
-            Blocks[key.toUpperCase()].loadTextures()
+            const block = Blocks[key.toUpperCase()]
+            block.generateModel()
         }
     }
 }

@@ -1,5 +1,4 @@
 import { BoxGeometry, SphereGeometry, Mesh, BoxHelper, MeshBasicMaterial, Vector3 } from 'three';
-import { sides } from './Constants.js';
 
 function create3DArray(x, y, height){
     let arr = new Array(x)
@@ -149,10 +148,6 @@ function map(value, x1, y1, x2, y2){
     return (value - x1) * (y2 - x2) / (y1 - x1) + x2;
 }
 
-function dirToSide(normal){
-    return sides.find(side => side.dir.equals(normal)).side
-}
-
 class PosMap extends Map {
     constructor(data){
         super(data)
@@ -179,15 +174,6 @@ class PosMap extends Map {
     }
 }
 
-function getOppositeSide(side) {
-    if(side == 'north') return 'south'
-    if(side == 'south') return 'north'
-    if(side == 'east') return 'west'
-    if(side == 'west') return 'east'
-    if(side == 'up') return 'down'
-    if(side == 'down') return 'up'
-}
-
 function calc2DAngle(v1, v2) {
     if (v1.equals(v2)) return 0
     return Math.atan2(v1.x*v2.z - v1.z*v2.x, v1.dot(v2))
@@ -208,8 +194,6 @@ export {
     moveTowards,
     deltaAngle,
     map,
-    dirToSide,
-    getOppositeSide,
     
     TwoWayMap,
     PosMap,

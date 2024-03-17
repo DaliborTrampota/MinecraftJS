@@ -1,4 +1,4 @@
-import { Clock, DirectionalLight, DirectionalLightHelper, CubeTextureLoader } from 'three';
+import { Clock, DirectionalLight, DirectionalLightHelper, CubeTextureLoader, AmbientLight } from 'three';
 import Stats from 'https://cdn.jsdelivr.net/npm/three@0.141.0/examples/jsm/libs/stats.module.js';
 
 import RegisterManager from './registers/RegisterManager.js';
@@ -37,7 +37,7 @@ export default class Game {
         //this.createLight()
 
         await this.textureManager.load()
-        this.register.blocks.reloadTextures()
+        this.register.blocks.generateModels()
         this.register.items.generateIcons()
         
         console.log('Loaded blocks:', this.register.blocks.map.size, 'Loaded items:', this.register.items.map.size)
@@ -52,15 +52,19 @@ export default class Game {
         }
         this.player.inventory.addStack(Stack.create('stairs', 64))
         this.player.inventory.addStack(Stack.create('stone', 64))
-        this.player.inventory.addStack(Stack.create('vertical_slab', 64))
+        this.player.inventory.addStack(Stack.create('oak_vertical_slab', 64))
         this.player.inventory.addStack(Stack.create('slab', 64))
+        this.player.inventory.addStack(Stack.create('table', 64))
+        this.player.inventory.addStack(Stack.create('chair', 64))
         this.player.inventory.addStack(Stack.create('furnace', 64))
         this.player.inventory.addStack(Stack.create('dispenser', 64))
         this.player.inventory.addStack(Stack.create('oak_log', 64))
-        this.player.inventory.addStack(Stack.create('oak_log', 64))
+        this.player.inventory.addStack(Stack.create('grass_block', 64))
         this.player.inventory.addStack(Stack.create('sand', 64))
         this.player.inventory.addStack(Stack.create('sand', 64))
         this.player.inventory.addStack(Stack.create('sand', 64))
+        this.player.inventory.addStack(Stack.create('cobblestone', 64))
+        this.player.inventory.addStack(Stack.create('glass', 64))
 
     }
 
@@ -73,12 +77,17 @@ export default class Game {
 
         let delta = window.clock.getDelta()
         for(let t of TextureManager.textures) {
-            if (t.uniforms.displaceWater) {
+            // TextureManager.animationMs += delta
+            if (t.uniforms.time) {
                 t.uniforms.time.value += delta
             }
+            // if (t.uniforms.animFrame && TextureManager.animationMs > 100) {
+            //     t.uniforms.animFrame.value++
+            //     TextureManager.animationMs = 0
+            // }
 
         }
-        // window.composer.render()
+
         this.renderer.render(window.scene, this.camera);
         //console.log(this.renderer.info.render.calls)
     }
@@ -98,10 +107,16 @@ export default class Game {
     }
 
     createLight(){
-        const light = new DirectionalLight( 0xFFFFFF );
-        light.position.set(0, 10, 0)
-        const helper = new DirectionalLightHelper( light, 5 );
-        return helper;
+        const light = new DirectionalLight(0xFFFFFF, 7);
+        light.position.set(20, 50, 0)
+        // light.castShadow = true
+        window.scene.add(light)
+
+        const ambient = new AmbientLight(0xFFFFFF, 0.2)
+        //window.scene.add(ambient)
+
+        const helper = new DirectionalLightHelper( light, 3 );
+        window.scene.add(helper)
     }
 
     createSkybox(){

@@ -4,6 +4,7 @@ import TextureManager from "../../tools/TextureManager.js"
 import VoxelBuilder from "../../tools/VoxelBuilder.js"
 import BlockState from "./BlockState.js"
 import { calc2DAngle } from "../../tools/Utils.js"
+import Side from "../Side.js"
 
 export default class Block {
 
@@ -61,24 +62,23 @@ export default class Block {
         return this
     }
 
-    loadTextures() {
-        if(this.rawTextures.all) this.textures.all = TextureManager.textureMap.get(this.rawTextures.all)
-        else {
-            this.textures.north = TextureManager.textureMap.get(this.rawTextures.front ?? this.rawTextures.side)
-            this.textures.south = TextureManager.textureMap.get(this.rawTextures.back ?? this.rawTextures.side)
-            this.textures.east = TextureManager.textureMap.get(this.rawTextures.left ?? this.rawTextures.side)
-            this.textures.west = TextureManager.textureMap.get(this.rawTextures.right ?? this.rawTextures.side)
-            this.textures.up = TextureManager.textureMap.get(this.rawTextures.top ?? this.rawTextures.side)
-            this.textures.down = TextureManager.textureMap.get(this.rawTextures.bottom ?? this.rawTextures.side)
+    loadTextures(rawTextures) {
+        if(!this.elements) return
+        for(let e of this.elements) {
+            for(let face in e.faces) {
+                let textureSide = e.faces[face].texture
+                if(textureSide) {
+                    e.faces[face].texture = rawTextures[textureSide] ?? rawTextures['side'] ?? rawTextures['all']
+                }
+            }
         }
-        delete this.rawTextures
-        this.#generateModel()
     }
 
     loadData(data) {
         if(!data) return console.warn('Missing block data for', this.key)
-        this.rawTextures = data.textures
-        this.elements = data?.elements
+        this.voxel = data.elements && data.parent !== 'cube'
+        this.elements = data.elements
+        this.loadTextures(data.textures)
         this.orientable = data.rotation
         
         // const DEG_TO_RAD = Math.PI / 180
@@ -96,32 +96,29 @@ export default class Block {
             this.animation = data.animation 
     }
 
-    #generateModel(){
-        if(this.elements){
-            const { geometry, vertices, UVs } = VoxelBuilder.build(this.elements, this.textures)
+    generateModel(){
+        if(!this.elements) return console.warn('Missing block model/parent for', this.key)
+        const { geometry, culled, unculled, materials } = VoxelBuilder.build(this.elements, this.animation)
 
-            this.geometry = geometry
-            this.vertices = vertices
-            this.UVs = UVs
+        this.geometry = geometry
+        this.culled = culled
+        this.unculled = unculled,
+        this.textureID = materials.values().next().value
+    }
 
-            this.voxel = true
+    getFace(side, culling = false, rawUVs = false) {
+        let verts = this.unculled.verts[side] ?? []
+        let uvs = this.unculled[rawUVs ? 'rawUVs' : 'uvs'][side] ?? []
+        
+        if(!culling && this.culled.verts[side]) {
+            verts = verts.concat(this.culled.verts[side])
+            uvs = uvs.concat(this.culled[rawUVs ? 'rawUVs' : 'uvs'][side])
+        } else {
+            verts = [...verts]
+            uvs = [...uvs]
         }
-    }
-    
-    get materials() { // this is only used for photobooth?
-        let textures = this.textures.all ? this.textures.all : Object.values(this.textures)
-        return Array.isArray(textures) ? textures.map(idx => TextureManager.textures[idx]): TextureManager.textures[textures]
-    }
-
-    getFace(side) {
-        let verts = [], uvs = []
-        for(let vert of triangles[side]) {
-            verts.push(vertices[vert].x)
-            verts.push(vertices[vert].y)
-            verts.push(vertices[vert].z)
-        }  
-        uvs.push(...UVs[side])
-        return { verts, uvs }
+        
+        return { verts, uvs, material: this.textureID }
     }
 
     getState(ctx) {
