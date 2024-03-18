@@ -139,8 +139,7 @@ export default class VoxelBuilder {
                 let tempVerts = [], tempUVs = [], tempRawUVs = []
                 const textureUVs = TextureManager.textureMap.get(face.texture)
                 const matID = TextureManager.atlasMap.get(face.texture)
-                let x=0,y=0//const { x, y } = TextureManager.offsets.get(matID)
-
+                
                 for(let vert of triangles[side]){
                     tempVerts.push(vertices[vert].x * (to[0] - from[0]) + from[0])
                     tempVerts.push(vertices[vert].y * (to[1] - from[1]) + from[1])
@@ -150,8 +149,8 @@ export default class VoxelBuilder {
                     const v = UVs[side][i*2+1] * (uv[3] - uv[1]) + uv[1]
 
                     tempRawUVs.push(u, v)
-                    tempUVs.push(this.translateUV(u, textureUVs[0] + x, textureUVs[2] - x))
-                    tempUVs.push(this.translateUV(v, textureUVs[1] + y, textureUVs[3] - y, animationData))
+                    tempUVs.push(this.translateUV(u, textureUVs[0], textureUVs[2]))
+                    tempUVs.push(this.translateUV(v, textureUVs[1], textureUVs[3], animationData))
                     
                     i++
                 }        

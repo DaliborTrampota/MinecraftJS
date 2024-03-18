@@ -10,7 +10,6 @@ export default class TextureManager {
     static textureMap = new Map()
     static atlasMap = new Map()
     static textures = []
-    static offsets = new Map()
     static animationMs = 0
 
     constructor(){
@@ -18,12 +17,11 @@ export default class TextureManager {
         this.animatedTextures = {}
     }
 
-    static addAtlas(material, uvs, offsetX, offsetY) {
+    static addAtlas(material, uvs) {
         for(let name in uvs) {
             TextureManager.textureMap.set(name, uvs[name])
             TextureManager.atlasMap.set(name, TextureManager.textures.length)
         }
-        TextureManager.offsets.set(TextureManager.textures.length, { x: offsetX, y: offsetY })
         TextureManager.textures.push(material)
     }
 
@@ -44,16 +42,9 @@ export default class TextureManager {
         const opaqueMaterial = this.createOpaqueMaterial(opaqueAtlas, lightVert, lightFrag)
         const transparentMaterial = this.createTransparentMaterial(transparentAtlas, lightVert, lightFrag)
 
-        const texelOffsetX = 1 / opaqueAtlas.image.width / 2
-        const texelOffsetY = 1 / opaqueAtlas.image.height / 2
-        console.log(texelOffsetX, texelOffsetY)
-
-        TextureManager.addAtlas(opaqueMaterial, window.textures.uvs.opaque, texelOffsetX, texelOffsetY)
+        TextureManager.addAtlas(opaqueMaterial, window.textures.uvs.opaque)
         TextureManager.addAtlas(transparentMaterial, window.textures.uvs.transparent)
         TextureManager.addAtlas(liquidMaterial, window.textures.uvs.liquids)
-        
-        console.log(TextureManager.textureMap, TextureManager.atlasMap)
-
             
         //     if(block?.animation) {
         //         this.animatedTextures[TextureManager.textureMap.get(textureName)] = {
