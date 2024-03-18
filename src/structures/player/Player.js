@@ -1,4 +1,4 @@
-import { Vector3, Vector2, Euler, Raycaster, MeshBasicMaterial, Mesh, BoxGeometry, Box3 } from 'three';
+import { Vector3, Vector2, Euler, Raycaster, MeshBasicMaterial, Mesh, BoxGeometry, Box3, Group } from 'three';
 import { PI_2, GAMEMODE, BASE_PLAYER_SETTINGS, PLAYER_DIMENSIONS, CrossCheck, CornerCheck, MOUSE_BUTTON } from '../../tools/Constants.js'
 import { clamp, moveTowards } from '../../tools/Utils.js'
 
@@ -24,8 +24,8 @@ export default class Player extends LivingEntity {
     constructor(camera){
         super()
         this.camera = camera
-        this.camera.parent = this.model
         this.camera.position.set(0, -PLAYER_DIMENSIONS.cameraOffset, 0)
+        this.model.add(camera)
 
         this.locked = false
         this.viewDistance = BASE_PLAYER_SETTINGS.viewDistance
@@ -250,6 +250,17 @@ export default class Player extends LivingEntity {
         }
     }
 
+    updateHandModel(stack) {
+        const prevModel = this.camera.getObjectByName("block")
+        if(prevModel)
+            this.camera.remove(prevModel)
+        
+        const itemModel = stack.item.getModel(new Vector3(0.52, -0.42, -0.6))
+        itemModel.scale.set(0.2, 0.2, 0.2)
+        itemModel.rotation.set(0, -Math.PI/2, 0)
+        this.camera.add(itemModel)
+    }
+
     getCollisionAABB() {
         return AABB.fromVectors(this.feetPos.add(new Vector3(-0.3, 0, -0.3)), this.feetPos.add(new Vector3(0.3, 1.8, 0.3)))
     }
@@ -303,14 +314,11 @@ export default class Player extends LivingEntity {
         this.camera.quaternion.setFromEuler(camRot);
     }
 
-    
-
     createModel(){
         const geometry = new BoxGeometry(PLAYER_DIMENSIONS.width * 2, PLAYER_DIMENSIONS.height, PLAYER_DIMENSIONS.depth * 2)
         const material = new MeshBasicMaterial( { color: 0x00ff00, opacity: 0.3, transparent: true } );
         const model = new Mesh( geometry, material )
         model.geometry.translate(0, -1, 0)
-        //window.scene.add(model)
 
         model.bb = new Box3().setFromObject(model)
 

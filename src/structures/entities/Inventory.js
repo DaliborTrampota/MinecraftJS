@@ -32,9 +32,9 @@ export default class Inventory {
         if(index >= this.hotbar.length) index = 0
         else if(index < 0) index = this.hotbar.length - 1
 
-        this.interface.selectHotbar(index)
-
+        const oldIdx = this.selectedSlot
         this.selectedSlot = index
+        this.interface.selectHotbar(index, oldIdx)
     }
 
     addStack(stack) {

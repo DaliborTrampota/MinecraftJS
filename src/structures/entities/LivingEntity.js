@@ -25,6 +25,8 @@ export default class LivingEntity {
         }
 
         this.maxUpStep = 0.5
+
+        window.scene.add(this.model)
     }
 
     get world() {

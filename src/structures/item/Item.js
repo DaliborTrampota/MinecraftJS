@@ -12,6 +12,14 @@ export default class Item {
         this.damage = 0
     }
 
+    getModel() {
+        console.warn("implement item models")
+    }
+
+    createImage() {
+        console.warn("implement item images")
+    }
+ 
     setStack(amount){
         this.stack = amount
         return this

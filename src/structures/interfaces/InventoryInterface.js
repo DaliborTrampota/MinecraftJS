@@ -27,12 +27,14 @@ export default class InventoryInterface extends Interface {
         return this.player.inventory
     }
 
-    selectHotbar(index) {
-        let curSlot = this.htmlHotbarSlots[this.inv.selectedSlot]
+    selectHotbar(index, oldIdx) {
+        let curSlot = this.htmlHotbarSlots[oldIdx]
         let newSlot = this.htmlHotbarSlots[index]
 
         curSlot.html.id = ""
         newSlot.html.id = "selected"
+        
+        this.player.updateHandModel(this.inv.slot)
     }
 
     open(entity) {

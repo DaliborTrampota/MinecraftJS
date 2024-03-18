@@ -15,11 +15,11 @@ export default class Block {
         this.solid = true
 
         this.textures = {}
-        this.variants = {}
         this.orientable = false
 
         this.voxel = false
         this.elements = false
+        this.geometry = false
         this.animation = false
 
         this.entityClass = false
@@ -78,17 +78,6 @@ export default class Block {
         this.loadTextures(data.textures)
         this.orientable = data.rotation
         
-        // const DEG_TO_RAD = Math.PI / 180
-        // if(data.variants) {
-        //     for(let key in data.variants) {
-        //         let [prop, value] = key.split('=')
-        //         if(prop == 'axis') {
-        //             this.variants[prop] ??= {}
-        //             this.variants[prop][value] = new Vector3((data.variants[key].x ?? 0) * DEG_TO_RAD, (data.variants[key].y ?? 0) * DEG_TO_RAD, (data.variants[key].z ?? 0) * DEG_TO_RAD)
-        //         }
-        //     }
-        // }
-
         if(data?.animation) 
             this.animation = data.animation 
     }

@@ -1,5 +1,6 @@
 import { BoxGeometry, Mesh, Group } from 'three';
 import Item from "./Item.js"
+import TextureManager from '../../tools/TextureManager.js';
 
 
 export default class BlockItem extends Item {
@@ -19,7 +20,8 @@ export default class BlockItem extends Item {
 
     getModel(position){
         let itemModel = new Group()
-        itemModel.add(new Mesh(BlockItem.geometry, this.block.materials))
+        itemModel.name = 'block'
+        itemModel.add(new Mesh(this.block.geometry, TextureManager.textures))
         itemModel.position.copy(position)
         return itemModel
     }

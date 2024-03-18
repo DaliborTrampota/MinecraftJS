@@ -24,8 +24,8 @@ export default function PhotoBooth(blockItem, ICON_SIZE = 256){
     //if(blockItem.name == 'stairs')
     //    return animate(iconScene, iconBlock)
     iconBlock.removeFromParent()
-    blockItem.block.geometry.dispose()
-    delete blockItem.block.geometry
+    //blockItem.block.geometry.dispose()
+    //delete blockItem.block.geometry
 
     return iconRenderer.domElement.toDataURL('image/png', 1);
 }
