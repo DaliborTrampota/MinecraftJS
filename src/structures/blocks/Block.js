@@ -129,7 +129,7 @@ export default class Block {
                 break
             }
 
-            case 'cameraFacing': {
+            case 'cameraFacing': { // dispenser
                 facing = ctx.player.facingNormal(true).negate()
                 let facingY = ctx.player.facingNormal().negate()
                 if(facingY.y) {
@@ -138,7 +138,7 @@ export default class Block {
                 break
             }
 
-            case 'free': {
+            case 'free': { //what? i dont remember anymore what this is supposed to be
                 // direction
                 break
             }
