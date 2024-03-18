@@ -179,6 +179,13 @@ function calc2DAngle(v1, v2) {
     return Math.atan2(v1.x*v2.z - v1.z*v2.x, v1.dot(v2))
 }
 
+function angleToAxis(axis, v) {
+    let angle = axis.angleTo(v)
+    const cross = v.clone().cross(axis)
+    if(Math.max(...cross.toArray()) > 0) return -angle
+    return angle
+}
+
 export {
     create3DArray,
     create2DArray,
@@ -194,6 +201,7 @@ export {
     moveTowards,
     deltaAngle,
     map,
+    angleToAxis,
     
     TwoWayMap,
     PosMap,

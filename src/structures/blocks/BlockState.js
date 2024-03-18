@@ -1,6 +1,7 @@
 import { Vector3 } from 'three'
 import { Half } from '../../tools/Constants.js'
 import Side from '../Side.js'
+import { angleToAxis } from '../../tools/Utils.js'
 
 
 export default class BlockState {
@@ -14,12 +15,10 @@ export default class BlockState {
         this.block = block
 
         this.facing = meta.facing ?? Vector3.North
+        //this.half = meta.half ?? Half.Bottom //TODO slah block block state class
+        //this.rotation = meta.rotation ?? 0 // only if facing up or down
 
-        //this.rotation = meta.rotation ?? 0
-
-        //this.direction = meta.direction ?? Vector3.North
         this.rotationAxis = meta.rotationAxis ?? this.calculateRotationAxis() // this is for orientation of the block (rotate to face the direction) not rotation. Rotation rotates around the direction axis 
-        // this.half = meta.half ?? Half.Bottom //TODO slah block block state class
         //this.inventory = new MachineInterface(meta.inventory ?? []) 
 
         this.cache = {}
@@ -28,12 +27,7 @@ export default class BlockState {
     get angle() {
         if(this.cache['angle']) return this.cache['angle']        
 
-        const angleToVec = this.angleToAxis
-        let angle = angleToVec.angleTo(this.facing)
-        const cross = this.facing.clone().cross(angleToVec)
-        if(Math.max(...cross.toArray()) > 0) angle = -angle
-        console.log(angle)
-        return this.cache['angle'] = angle
+        return this.cache['angle'] = angleToAxis(this.angleToAxis, this.facing)
     }
 
     get angleToAxis() {

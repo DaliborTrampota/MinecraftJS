@@ -1,10 +1,7 @@
 import { Vector3 } from "three"
-import { UVs, triangles, vertices } from "../../tools/Constants.js"
-import TextureManager from "../../tools/TextureManager.js"
 import VoxelBuilder from "../../tools/VoxelBuilder.js"
 import BlockState from "./BlockState.js"
-import { calc2DAngle } from "../../tools/Utils.js"
-import Side from "../Side.js"
+import { angleToAxis } from "../../tools/Utils.js"
 
 export default class Block {
 
@@ -133,8 +130,11 @@ export default class Block {
             }
 
             case 'cameraFacing': {
-                facing = ctx.player.facingNormal().negate()
-                rotation = calc2DAngle(Vector3.North, ctx.player.facingNormal(true).negate())
+                facing = ctx.player.facingNormal(true).negate()
+                let facingY = ctx.player.facingNormal().negate()
+                if(facingY.y) {
+                    rotation = angleToAxis(facingY, facing)
+                }
                 break
             }
 

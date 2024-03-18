@@ -53,6 +53,10 @@ export default class VoxelBuilder {
         
         if(blockState) {
             verts = this.rotateVertices(verts, blockState.angle, blockState.rotationAxis)
+
+            if(blockState.rotation) {
+                verts = this.rotateVertices(verts, blockState.rotation, new Vector3().crossVectors(Vector3.Up, facing))
+            }
         }
         // if(blockData.animation) uvs = uvs.map((u, i) => i % 2 ? u / blockData.animation.frames : u)      
 
