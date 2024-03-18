@@ -3,7 +3,11 @@
     "rotation": "cameraFacing",
 
     "textures": {
-        "front": "furnace_front_on",
-        "side": "arrow"
+        "front": "N",
+        "back": "S",
+        "top": "U",
+        "bottom": "D",
+        "right": "E",
+        "left": "W"
     }
 }

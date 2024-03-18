@@ -1,4 +1,5 @@
 {
+    "rotation": "facing",
     "textures": {
         "top": "oak_planks",
         "side": "cobblestone",

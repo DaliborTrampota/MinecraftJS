@@ -1,10 +1,7 @@
 import { Vector3 } from "three"
-import { UVs, triangles, vertices } from "../../tools/Constants.js"
-import TextureManager from "../../tools/TextureManager.js"
 import VoxelBuilder from "../../tools/VoxelBuilder.js"
 import BlockState from "./BlockState.js"
-import { calc2DAngle } from "../../tools/Utils.js"
-import Side from "../Side.js"
+import { angleToAxis } from "../../tools/Utils.js"
 
 export default class Block {
 
@@ -123,47 +120,40 @@ export default class Block {
 
     getState(ctx) {
         if (!this.isOrientable) return false
-        let direction, rotationAxis, rotation = 0
+        let facing, rotationAxis, rotation = 0
         
         switch (this.orientable) {
             case 'facing': { // furnace
-                direction = ctx.player.facingNormal(true).negate()
+                facing = ctx.player.facingNormal(true).negate()
                 rotationAxis = Vector3.Up
                 break
             }
 
-            case 'cameraFacing': {
-                direction = ctx.player.facingNormal().negate()
-                rotation = calc2DAngle(Vector3.North, ctx.player.facingNormal(true).negate())
+            case 'cameraFacing': { // dispenser
+                facing = ctx.player.facingNormal(true).negate()
+                let facingY = ctx.player.facingNormal().negate()
+                if(facingY.y) {
+                    rotation = angleToAxis(facingY, facing)
+                }
                 break
             }
 
-            case 'free': {
+            case 'free': { //what? i dont remember anymore what this is supposed to be
                 // direction
                 break
             }
 
             case 'normal': { //logs
-                direction = ctx.hitResult.normal
+                facing = ctx.hitResult.normal
                 break
             }
 
         }
         
-        if (!rotationAxis) {
-            rotationAxis = Vector3.North.cross(direction)
-            if (rotationAxis.lengthSq() == 0) {
-                rotationAxis = Vector3.Up
-            } else {
-                rotationAxis.x = Math.abs(rotationAxis.x);
-                rotationAxis.y = Math.abs(rotationAxis.y);
-                rotationAxis.z = Math.abs(rotationAxis.z);
-            }
-        }
         // console.log(direction, rotationAxis)
-
+        console.log(facing, rotation)
         return new BlockState(ctx.hitResult.position.floor(), ctx.block, {
-            direction,
+            facing,
             rotationAxis,
             rotation,
         })

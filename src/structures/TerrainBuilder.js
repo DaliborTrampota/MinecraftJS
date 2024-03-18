@@ -82,12 +82,13 @@ export default class TerrainBuilder {
 
 
         for(let side of Side.All) {
-            const rotatedSide = blockState ? Side.rotate(side, -blockState.angle, blockState.rotationAxis) : side
+            const rotatedSide = blockState ? blockState.rotated(side) : side
             
             const shouldDrawFace = this.chunk.checkVoxel(faceChecks[side](pos.clone()), blockData, rotatedSide, false) // here probably want rotated side to get verts of the correct side
+            if(blockState) console.log(side, rotatedSide, shouldDrawFace, blockState.block.key)
             if(!shouldDrawFace && !blockData.voxel) continue
             
-            const { verts, uvs, material } = VoxelBuilder.buildFace(side, rotatedSide, blockState, blockData, !shouldDrawFace)
+            const { verts, uvs, material } = VoxelBuilder.buildFace(rotatedSide, blockState, blockData, !shouldDrawFace)
             
             for (let i = 0; i < verts.length; i += 3) {
                 verts[i    ] += pos.x

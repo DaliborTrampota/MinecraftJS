@@ -18,7 +18,6 @@ export default class VoxelBuilder {
         //     rotationAxis.x = -rotationAxis.z
         //     rotationAxis.z = 0
         // }
-
         const matrix = new Matrix4()
         matrix.makeRotationAxis(rotationAxis, angle)
 
@@ -49,11 +48,15 @@ export default class VoxelBuilder {
         return uvs.map(v => v + 0.5)
     }
 
-    static buildFace(side, rotatedSide, blockState, blockData, culling = false) {
-        let { verts, uvs, material } = blockData.getFace(rotatedSide, culling)
+    static buildFace(side, blockState, blockData, culling = false) {
+        let { verts, uvs, material } = blockData.getFace(side, culling)
         
         if(blockState) {
             verts = this.rotateVertices(verts, blockState.angle, blockState.rotationAxis)
+
+            if(blockState.rotation) {
+                verts = this.rotateVertices(verts, blockState.rotation, new Vector3().crossVectors(Vector3.Up, facing))
+            }
         }
         // if(blockData.animation) uvs = uvs.map((u, i) => i % 2 ? u / blockData.animation.frames : u)      
 
