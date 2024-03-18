@@ -150,16 +150,6 @@ export default class Block {
 
         }
         
-        if (!rotationAxis) {
-            rotationAxis = Vector3.North.cross(facing)
-            if (rotationAxis.lengthSq() == 0) {
-                rotationAxis = Vector3.Up
-            } else {
-                rotationAxis.x = Math.abs(rotationAxis.x);
-                rotationAxis.y = Math.abs(rotationAxis.y);
-                rotationAxis.z = Math.abs(rotationAxis.z);
-            }
-        }
         // console.log(direction, rotationAxis)
         console.log(facing, rotation)
         return new BlockState(ctx.hitResult.position.floor(), ctx.block, {

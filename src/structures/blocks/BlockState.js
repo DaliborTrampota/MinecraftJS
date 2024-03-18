@@ -2,9 +2,11 @@ import { Vector3 } from 'three'
 import { Half } from '../../tools/Constants.js'
 import Side from '../Side.js'
 
-const ANGLE_TO_VECTOR = Vector3.North
 
 export default class BlockState {
+
+    static ANGLE_TO = Vector3.North
+    static COLUMN_ANGLE_TO = Vector3.Up
 
     constructor(pos, block, meta = {}) {
         this.pos = pos
@@ -16,7 +18,7 @@ export default class BlockState {
         //this.rotation = meta.rotation ?? 0
 
         //this.direction = meta.direction ?? Vector3.North
-        this.rotationAxis = meta.rotationAxis ?? Vector3.Up // this is for orientation of the block (rotate to face the direction) not rotation. Rotation rotates around the direction axis 
+        this.rotationAxis = meta.rotationAxis ?? this.calculateRotationAxis() // this is for orientation of the block (rotate to face the direction) not rotation. Rotation rotates around the direction axis 
         // this.half = meta.half ?? Half.Bottom //TODO slah block block state class
         //this.inventory = new MachineInterface(meta.inventory ?? []) 
 
@@ -26,12 +28,18 @@ export default class BlockState {
     get angle() {
         if(this.cache['angle']) return this.cache['angle']        
 
-        
-        let angle = ANGLE_TO_VECTOR.angleTo(this.facing)
-        const cross = this.facing.clone().cross(ANGLE_TO_VECTOR)
+        const angleToVec = this.angleToAxis
+        let angle = angleToVec.angleTo(this.facing)
+        const cross = this.facing.clone().cross(angleToVec)
         if(Math.max(...cross.toArray()) > 0) angle = -angle
+        console.log(angle)
         return this.cache['angle'] = angle
     }
+
+    get angleToAxis() {
+        return this.block.orientable == 'normal' ? BlockState.COLUMN_ANGLE_TO : BlockState.ANGLE_TO
+    }
+
 
     setValue(prop, value) {
         this[prop] = value
@@ -40,5 +48,17 @@ export default class BlockState {
 
     rotated(side) {
         return Side.rotate(side, -this.angle, this.rotationAxis) // negative angle because we want to get the side that would be rotated to the current side
+    }
+
+    calculateRotationAxis() {
+        let axis = new Vector3().crossVectors(this.angleToAxis, this.facing)
+        if (axis.lengthSq() == 0) {
+            axis = Vector3.Up
+        } else {
+            axis.x = Math.abs(axis.x);
+            axis.y = Math.abs(axis.y);
+            axis.z = Math.abs(axis.z);
+        }
+        return axis
     }
 }
