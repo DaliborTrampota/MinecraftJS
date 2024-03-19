@@ -42,11 +42,13 @@ app.get('/textures', (req, res) => {
             opaque: './resources/textures/atlases/opaque.png',
             transparent: './resources/textures/atlases/transparent.png',
             liquids: './resources/textures/atlases/liquids.png',
+            entities: './resources/textures/atlases/entities.png',
         },
         uvs: {
             opaque: require('./public/resources/textures/atlases/opaque_uvs.json'),
             transparent: require('./public/resources/textures/atlases/transparent_uvs.json'),
             liquids: require('./public/resources/textures/atlases/liquids_uvs.json'),
+            entities: require('./public/resources/textures/atlases/entities_uvs.json'),
         },
     })
 })
@@ -54,6 +56,12 @@ app.get('/textures', (req, res) => {
 app.get('/recipes', (req, res) => {
     let itemData = getJsonFiles('recipes')
     res.send(itemData)
+})
+
+
+app.get('/entities', (req, res) => {
+    let entitiesData = getJsonFiles('data/entities')
+    res.send(entitiesData)
 })
 
 app.listen(8000, null, null, () => console.log("The local server is up and running!", `http://localhost:${8000}`));
@@ -76,9 +84,11 @@ async function createTextureAtlas(dirPath, atlasName, maxWidth = 512) {
     
     const atlases = {
         opaque: [],
-        transparent: [],
-        liquids: []
+        transparent: []
     }
+
+    if(atlasName && !atlases[atlasName])
+    atlases[atlasName] = []
 
     let images = files.map(file => loadImage(`${dirPath}/${file}`))
     images = await Promise.all(images).then(images => images.sort((a, b) => b.width * b.height - a.width * a.height))
@@ -139,6 +149,7 @@ async function main() {
     console.time('Creating texture atlases')
     await createTextureAtlas('./public/resources/textures/blocks')
     await createTextureAtlas('./public/resources/textures/liquids', 'liquids')
+    await createTextureAtlas('./public/resources/textures/entities', 'entities', 512)
     console.timeEnd('Creating texture atlases')
 }
 main()

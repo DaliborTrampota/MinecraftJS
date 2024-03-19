@@ -22,7 +22,7 @@ const Y_WIDTH = WIDTH * 0.75
 export default class Player extends LivingEntity {
 
     constructor(camera){
-        super()
+        super(Player.createModel())
         this.camera = camera
         this.camera.position.set(0, -PLAYER_DIMENSIONS.cameraOffset, 0)
         this.model.add(camera)
@@ -48,8 +48,6 @@ export default class Player extends LivingEntity {
         document.addEventListener('mouseup', this.onMouseRelease.bind(this));
 
         this.maxUpStep = 0.5
-
-        window.game.addUpdateSub(this)
     }
 
     get eyePos(){
@@ -314,13 +312,11 @@ export default class Player extends LivingEntity {
         this.camera.quaternion.setFromEuler(camRot);
     }
 
-    createModel(){
+    static createModel(){
         const geometry = new BoxGeometry(PLAYER_DIMENSIONS.width * 2, PLAYER_DIMENSIONS.height, PLAYER_DIMENSIONS.depth * 2)
         const material = new MeshBasicMaterial( { color: 0x00ff00, opacity: 0.3, transparent: true } );
         const model = new Mesh( geometry, material )
         model.geometry.translate(0, -1, 0)
-
-        model.bb = new Box3().setFromObject(model)
 
         model.h = geometry.parameters.height
         model.w = geometry.parameters.width

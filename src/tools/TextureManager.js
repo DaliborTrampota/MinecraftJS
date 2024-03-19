@@ -35,16 +35,19 @@ export default class TextureManager {
         const liquidAtlas = this.loader.load(window.textures.atlases.liquids)
         const opaqueAtlas = this.loader.load(window.textures.atlases.opaque)
         const transparentAtlas = this.loader.load(window.textures.atlases.transparent)
+        const entityAtlas = this.loader.load(window.textures.atlases.entities)
         
         await new Promise((res) => this.loader.manager.onLoad = () => (res()))
 
         const liquidMaterial = this.createLiquidMaterial(liquidAtlas, liquidVert, lightFrag)
         const opaqueMaterial = this.createOpaqueMaterial(opaqueAtlas, lightVert, lightFrag)
         const transparentMaterial = this.createTransparentMaterial(transparentAtlas, lightVert, lightFrag)
+        const entityMaterial = this.createOpaqueMaterial(entityAtlas, lightVert, lightFrag)
 
         TextureManager.addAtlas(opaqueMaterial, window.textures.uvs.opaque)
         TextureManager.addAtlas(transparentMaterial, window.textures.uvs.transparent)
         TextureManager.addAtlas(liquidMaterial, window.textures.uvs.liquids)
+        TextureManager.addAtlas(entityMaterial, window.textures.uvs.entities)
             
         //     if(block?.animation) {
         //         this.animatedTextures[TextureManager.textureMap.get(textureName)] = {

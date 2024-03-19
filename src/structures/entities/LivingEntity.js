@@ -8,8 +8,10 @@ import AABB from '../../tools/AABB.js';
 
 export default class LivingEntity {
 
-    constructor(){
-        this.model = this.createModel()
+    constructor(model){
+        this.model = model
+        this.loadModel(model)
+
 
         this.health = 100
 
@@ -27,6 +29,7 @@ export default class LivingEntity {
         this.maxUpStep = 0.5
 
         window.scene.add(this.model)
+        window.game.addUpdateSub(this)
     }
 
     get world() {
@@ -120,7 +123,8 @@ export default class LivingEntity {
         
         // const curSpeed = (this.controller.sprint ? BASE_PLAYER_SETTINGS.sprintMultiplier : 1) * BASE_PLAYER_SETTINGS.speed
         // let moveDir = new Vector3(this.controller.horizontal, 0, -this.controller.vertical).normalize().multiplyScalar(curSpeed)
-
+        let moveDir = Vector3.Zero
+        
         const Y = this.velocity.y
         this.velocity = moveTowards(this.velocity.clone(), moveDir.clone(), BASE_PLAYER_SETTINGS.acceleration * delta)
         this.velocity.y = clamp(Y, -80, 20)//todo implement drag
@@ -169,18 +173,12 @@ export default class LivingEntity {
         return AABBs        
     }
 
-    createModel(){
-        const geometry = new BoxGeometry(0.4, 0.9, 1.8)
-        const material = new MeshBasicMaterial( { color: 0x00ff00, opacity: 0.3, transparent: true } );
-        const model = new Mesh( geometry, material )
-        //model.geometry.translate(0, -1, 0)
-        window.scene.add(model)
-
+    loadModel(model){
         model.bb = new Box3().setFromObject(model)
 
-        model.h = geometry.parameters.height
-        model.w = geometry.parameters.width
-        model.d = geometry.parameters.depth
+        // model.h = geometry.parameters.height
+        // model.w = geometry.parameters.width
+        // model.d = geometry.parameters.depth
         
         return model
     }

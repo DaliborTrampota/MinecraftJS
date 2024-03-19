@@ -2,6 +2,7 @@ import Blocks from './Blocks.js';
 import Items from './Items.js';
 import Biomes from './Biomes.js';
 import Recipes from './Recipes.js';
+import Entities from './Entities.js';
 
 export default class RegisterManager {
 
@@ -10,6 +11,7 @@ export default class RegisterManager {
     constructor(){
         this.blocks = Blocks.new()
         this.items = Items.new()
+        this.entities = Entities.new()
         this.biomes = Biomes.new()
 
         this.recipes = Recipes.new()

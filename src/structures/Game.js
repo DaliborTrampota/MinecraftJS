@@ -8,6 +8,9 @@ import World from './World.js';
 
 import Player from './player/Player.js';
 import Stack from './item/Stack.js';
+import LivingEntity from './entities/LivingEntity.js';
+import Entities from './registers/Entities.js';
+import { WORLD_SETTINGS } from '../tools/Constants.js';
 
 export default class Game {
 
@@ -40,10 +43,18 @@ export default class Game {
         this.register.blocks.generateModels()
         this.register.items.generateIcons()
         
-        console.log('Loaded blocks:', this.register.blocks.map.size, 'Loaded items:', this.register.items.map.size)
+        console.log('Loaded blocks:', this.register.blocks.map.size)
+        console.log('Loaded items:', this.register.items.map.size)
+        console.log('Loaded entities:', this.register.entities.map.size)
+        console.log('Loaded biomes:', this.register.biomes.map.size)
+        console.log('Loaded recipes:', this.register.recipes.map.size)
         
         this.player = new Player(this.camera, this)
         this.world = new World(new BiomeGenerator(this.register), this.register, this.player)
+
+        console.log(Entities.COW.model)
+        const cow = new LivingEntity(Entities.COW.model)
+        cow.position.set(WORLD_SETTINGS.chunkSize / 2, 30, WORLD_SETTINGS.chunkSize / 2)
 
         window.clock.start()
         

@@ -77,7 +77,7 @@ async function fetchData() {
     window.blockData = await fetch(`${baseURL}/blockData`).then(res => res.json())
     window.itemData = await fetch(`${baseURL}/itemData`).then(res => res.json())
     window.recipeData = await fetch(`${baseURL}/recipes`).then(res => res.json())
-    // let entityData = await fetch('/entities').then(res => res.json())
+    window.entityData = await fetch(`${baseURL}/entities`).then(res => res.json())
     // let biomeData = await fetch('/biomes').then(res => res.json())
     // let dimensionData = await fetch('/dimensions').then(res => res.json())
     // let structureData = await fetch('/structures').then(res => res.json())
