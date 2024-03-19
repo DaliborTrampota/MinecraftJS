@@ -42,6 +42,7 @@ export default class Game {
         await this.textureManager.load()
         this.register.blocks.generateModels()
         this.register.items.generateIcons()
+        this.register.entities.generateModels()
         
         console.log('Loaded blocks:', this.register.blocks.map.size)
         console.log('Loaded items:', this.register.items.map.size)

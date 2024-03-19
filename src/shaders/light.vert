@@ -11,7 +11,8 @@ varying vec3 vNormal;
 
 void main(){
     vUV = vec2(uv.x, uv.y + animFrame); 
-    vAO = ao;
+    if (ao == 0.0) vAO = 1.0;
+    else vAO = ao;
     vNormal = normal;
 
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);

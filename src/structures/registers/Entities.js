@@ -30,4 +30,12 @@ export default class Entities extends AbstractRegister {
     static init() {
         this.COW = this.register(new MobBuilder('cow'))
     }
+
+    
+    generateModels() {
+        for(let key of this.map.values()) {
+            const entity = Entities[key.toUpperCase()]
+            entity.generateModel()
+        }
+    }
 }
