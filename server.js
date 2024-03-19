@@ -71,6 +71,8 @@ function getJsonFiles(path){
 
 async function createTextureAtlas(dirPath, atlasName, maxWidth = 512) {
     const files = fs.readdirSync(dirPath)
+    if(!fs.existsSync(`./public/resources/textures/atlases`)) 
+        fs.mkdirSync(`./public/resources/textures/atlases`)
     
     const atlases = {
         opaque: [],
