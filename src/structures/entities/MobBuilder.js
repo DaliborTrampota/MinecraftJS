@@ -24,7 +24,7 @@ export default class MobBuilder {
 
         let modelUVs = TextureManager.textureMap.get(this.key)
         let w = 64
-        let h = 32
+        let h = 60
 
         for(let b of this.bones) {
             const group = new Group()
@@ -34,8 +34,12 @@ export default class MobBuilder {
                 const pos = cube.origin.map((v, i) => (v + cube.size[i] / 2) / 16) // cube geometry is centered around 0 0 0 
                 const size = cube.size.map(v => v / 16)
                 const geometry = new BoxGeometry(size[0], size[1], size[2])
-
-                const uvs = this.#unpackUVs(...cube.size, ...cube.uv, w, h).flat()
+                
+                const uvs = this.#unpackUVs(
+                    ...cube.size, 
+                    cube.uv[0] + modelUVs[0] * w,
+                    cube.uv[1] + modelUVs[1] * h, 
+                    w, h).flat()
                 // const w = uvs.filter((v, i) => i % 2 == 0).reduce((a, b) => Math.max(a, b))
                 // const h = uvs.filter((v, i) => i % 2 == 1).reduce((a, b) => Math.max(a, b))
                 console.log(uvs)
@@ -54,17 +58,24 @@ export default class MobBuilder {
 
     #unpackUVs(x, y, z, u, v, w, h) {
         return [
-            this.#genFaceUVs(0, x, x, x + y, u, v, w, h), //north
-            this.#genFaceUVs(x + z, x, x + z + x, x + y, u, v, w, h), //south
-            this.#genFaceUVs(x, 0, x + z, x, u, v, w, h), //up
-            this.#genFaceUVs(x + z, 0, x + z + z, x, u, v, w, h), //down
-            this.#genFaceUVs(x, x, x + z, x + y, u, v, w, h), //east
-            this.#genFaceUVs(x + z + x, x, x + z + x + z, x + y, u, v, w, h), //west
+            //this is not flipped y
+        //   this.#genFaceUVs(z + x, z, z + x + z, z + y, u, v, w, h), //east
+        //   this.#genFaceUVs(0, z, z, z + y, u, v, w, h), //west
+        //   this.#genFaceUVs(z, 0, z + x, z, u, v, w, h), //up
+        //   this.#genFaceUVs(z + x, 0, z + x + z, z, u, v, w, h), //down
+        //   this.#genFaceUVs(z, z, z + x, z + y, u, v, w, h), //north
+        //   this.#genFaceUVs(z + x + z, z, z + x + z + x, z + y, u, v, w, h), //south
+          
+            this.#genFaceUVs(z + x, 0, z + x + z, y, u, v, w, h), //east
+            this.#genFaceUVs(0, 0, z, y, u, v, w, h), //west
+            this.#genFaceUVs(z, y, z + x, y + z, u, v, w, h), //up
+            this.#genFaceUVs(z + x, y, z + x + z, y + z, u, v, w, h), //down
+            this.#genFaceUVs(z, 0, z + x, y, u, v, w, h), //north
+            this.#genFaceUVs(z + x + z, 0, z + x + z + x, y, u, v, w, h), //south
         ]
     }
 
     #genFaceUVs(x1, y1, x2, y2, u, v, w, h) {
-        console.log(x1 + u, y1 + v, x2 + u, y2 + v , w, h)
         return [(x1 + u) / w, (y2 + v) / h, (x2 + u) / w, (y2 + v) / h, (x1 + u) / w, (y1 + v) / h, (x2 + u) / w, (y1 + v) / h]
     }
 }

@@ -53,8 +53,7 @@ export default class Game {
         this.player = new Player(this.camera, this)
         this.world = new World(new BiomeGenerator(this.register), this.register, this.player)
 
-        console.log(Entities.COW.model)
-        const cow = new LivingEntity(Entities.COW.model)
+        const cow = new LivingEntity(Entities.SLIME.model)
         cow.position.set(WORLD_SETTINGS.chunkSize / 2, 30, WORLD_SETTINGS.chunkSize / 2)
 
         window.clock.start()

@@ -29,6 +29,7 @@ export default class Entities extends AbstractRegister {
 
     static init() {
         this.COW = this.register(new MobBuilder('cow'))
+        this.SLIME = this.register(new MobBuilder('slime'))
     }
 
     

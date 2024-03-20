@@ -17,5 +17,6 @@ void main() {
     //float light = 1.0;
 
     vec3 aoCol = vec3(1.0, 1.0, 1.0) * vAO;
-    gl_FragColor = vec4(col.xyz * light * aoCol, col.a);
+    gl_FragColor = vec4(col.xyz * light * aoCol, col.a); 
+    //gl_FragColor = vec4(vUV.x, 0.0, vUV.y, 1.0);
 }
