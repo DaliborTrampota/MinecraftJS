@@ -96,13 +96,13 @@ export default class Player extends LivingEntity {
         }
         
         const curSpeed = (this.controller.sprint ? BASE_PLAYER_SETTINGS.sprintMultiplier : 1) * BASE_PLAYER_SETTINGS.speed
-        let moveDir = new Vector3(this.controller.horizontal, 0, -this.controller.vertical).normalize().multiplyScalar(curSpeed)
+        this.moveDirection.set(this.controller.horizontal, 0, -this.controller.vertical).normalize()
 
         this.eyePos //has to be called otherwise the game freezes? figure out why TODO
 
         //if(!this.controller.flying){
         const Y = this.velocity.y
-        this.velocity = moveTowards(this.velocity.clone(), moveDir.clone(), BASE_PLAYER_SETTINGS.acceleration * delta)
+        this.velocity = moveTowards(this.velocity.clone(), this.moveDirection.clone().multiplyScalar(curSpeed), this.grounded ? BASE_PLAYER_SETTINGS.acceleration * delta : BASE_PLAYER_SETTINGS.airDrag * delta)
         this.velocity.y = clamp(Y, -80, 20)//todo implement drag
         //}
         if(this.gamemode != GAMEMODE.SPECTATOR){

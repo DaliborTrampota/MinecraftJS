@@ -18,6 +18,7 @@ export default class LivingEntity {
         this.velocity = new Vector3(0, 0, 0)
         this.chunkCoords = new Vector2(0, 0)
         this.vertTarget = 0
+        this.moveDirection = new Vector3(0, 0, 0)
 
         this.grounded = false
         this.holding = {
@@ -33,7 +34,6 @@ export default class LivingEntity {
     }
 
     get world() {
-        return window.game.world
     }
 
     get chunk() {
@@ -121,12 +121,8 @@ export default class LivingEntity {
             this.velocity.y += delta * this.world.gravity * 1.5
         }
         
-        // const curSpeed = (this.controller.sprint ? BASE_PLAYER_SETTINGS.sprintMultiplier : 1) * BASE_PLAYER_SETTINGS.speed
-        // let moveDir = new Vector3(this.controller.horizontal, 0, -this.controller.vertical).normalize().multiplyScalar(curSpeed)
-        let moveDir = Vector3.Zero
-        
         const Y = this.velocity.y
-        this.velocity = moveTowards(this.velocity.clone(), moveDir.clone(), BASE_PLAYER_SETTINGS.acceleration * delta)
+        this.velocity = moveTowards(this.velocity.clone(), this.moveDirection.clone(), this.grounded ? BASE_PLAYER_SETTINGS.acceleration * delta : BASE_PLAYER_SETTINGS.airDrag * delta)
         this.velocity.y = clamp(Y, -80, 20)//todo implement drag
 
         let dir = this.model.getWorldDirection(new Vector3())
