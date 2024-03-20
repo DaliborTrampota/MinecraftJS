@@ -87,6 +87,9 @@ export default class Player extends LivingEntity {
         }
     }
 
+    curChunkChanged() {
+        window.game.world.updateViewDistance()
+    }
     
     calculateVelocity(delta){
         if(!this.controller.flying && !this.grounded){

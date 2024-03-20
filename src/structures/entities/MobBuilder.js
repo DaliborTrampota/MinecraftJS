@@ -8,9 +8,15 @@ export default class MobBuilder {
     constructor(key) {
         this.key = key
         this.model = false
-        this.bones = false
+        this.aiClass = false
 
+        this.bones = false
         this.loadData(window.entityData[key])
+    }
+
+    setAI(ai) {
+        this.aiClass = ai
+        return this
     }
 
     loadData(data) {
@@ -42,7 +48,6 @@ export default class MobBuilder {
                     w, h).flat()
                 // const w = uvs.filter((v, i) => i % 2 == 0).reduce((a, b) => Math.max(a, b))
                 // const h = uvs.filter((v, i) => i % 2 == 1).reduce((a, b) => Math.max(a, b))
-                console.log(uvs)
 
                 //let max = Object.values(uvs).flat().reduce((a, b) => Math.max(a, b))
                 geometry.setAttribute('uv', new BufferAttribute(new Float32Array(uvs), 2))

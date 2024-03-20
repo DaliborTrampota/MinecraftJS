@@ -34,6 +34,7 @@ export default class LivingEntity {
     }
 
     get world() {
+        return window.game.world //todo get the actual world
     }
 
     get chunk() {
@@ -69,10 +70,11 @@ export default class LivingEntity {
 
         if(this.chunkCoords.x != curChunkPos.x || this.chunkCoords.y != curChunkPos.y){
             this.chunkCoords = curChunkPos;
-            //window.game.world.updateViewDistance()
+            this.curChunkChanged()
         }
     }
 
+    curChunkChanged(){}
     /**
      * 1. get all blocks around the player done
      * 2. generate aabbs  done

@@ -8,9 +8,9 @@ import World from './World.js';
 
 import Player from './player/Player.js';
 import Stack from './item/Stack.js';
-import LivingEntity from './entities/LivingEntity.js';
 import Entities from './registers/Entities.js';
 import { WORLD_SETTINGS } from '../tools/Constants.js';
+import MobEntity from './entities/MobEntity.js';
 
 export default class Game {
 
@@ -53,7 +53,7 @@ export default class Game {
         this.player = new Player(this.camera, this)
         this.world = new World(new BiomeGenerator(this.register), this.register, this.player)
 
-        const cow = new LivingEntity(Entities.SLIME.model)
+        const cow = new MobEntity(Entities.SLIME)
         cow.position.set(WORLD_SETTINGS.chunkSize / 2, 30, WORLD_SETTINGS.chunkSize / 2)
 
         window.clock.start()
