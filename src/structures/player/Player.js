@@ -37,6 +37,7 @@ export default class Player extends LivingEntity {
         this.controller = new Controller(this)
 
         this.placeDelay = 0
+        this.useDelay = 0
 
         this.holding = {
             clickStack: [],
@@ -71,7 +72,11 @@ export default class Player extends LivingEntity {
     }
 
     setPlaceDelay(){
-        this.placeDelay = BASE_PLAYER_SETTINGS.placeDelay
+        this.useDelay = BASE_PLAYER_SETTINGS.placeDelay
+    }
+
+    setUseDelay(delay) {
+        this.useDelay = delay
     }
 
     Update(delta){
@@ -82,9 +87,9 @@ export default class Player extends LivingEntity {
         if(this.holding.LMB || this.holding.clickStack[0] == MOUSE_BUTTON.LMB){
             this.interact(MOUSE_BUTTON.LMB)
         }else if(this.holding.RMB || this.holding.clickStack[0] == MOUSE_BUTTON.RMB){
-            this.placeDelay -= delta * 1000
             this.interact(MOUSE_BUTTON.RMB)
         }
+        this.useDelay -= delta * 1000
     }
 
     curChunkChanged() {
@@ -148,7 +153,7 @@ export default class Player extends LivingEntity {
             
             if(hitRes.block.isInteractable) {
                 this.holding.RMB = false
-                if(this.placeDelay > 0) return
+                if(this.useDelay > 0) return
                 return hitRes.block.interact(BlockInteractContext.from(context, hitRes))
             }
 
@@ -156,13 +161,15 @@ export default class Player extends LivingEntity {
             let stack = this.inventory.slot
             if(!stack) return false
 
-            if(this.placeDelay > 0) return
+            if(this.useDelay > 0) return
 
             if(stack.item instanceof BlockItem){
                 let blockPlaceContext = new BlockPlaceContext(this, stack)
                 return stack.item.use(blockPlaceContext)
             }else{
                 stack.item.use(context)
+                if(stack.item.useOneAtATime) this.holding.RMB = false
+                else this.setUseDelay(175)
             }
         }
 

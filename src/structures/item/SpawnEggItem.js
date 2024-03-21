@@ -8,6 +8,7 @@ export default class SpawnEggItem extends Item {
         super(key)
 
         this.entity = entity
+        this.useOneAtATime = true
     }
 
 
