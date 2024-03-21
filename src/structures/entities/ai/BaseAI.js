@@ -32,7 +32,7 @@ export default class BaseAI {
     startAction() {
         this.actionCountdown = 3
 
-        this.mob.moveDirection.set(Math.random() * 2 - 1, 0, Math.random() * 2 - 1).normalize()
+        //this.mob.moveDirection.set(Math.random() * 2 - 1, 0, Math.random() * 2 - 1).normalize()
 
     }
 
@@ -41,7 +41,7 @@ export default class BaseAI {
     }
 
     doAction() {
-        this.mob.velocity = new Vector3(Math.random() * 30 - 10, 8, Math.random() * 20 - 10)
+        //this.mob.velocity = new Vector3(Math.random() * 30 - 10, 8, Math.random() * 20 - 10)
     }
 
     get world() {

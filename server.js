@@ -150,7 +150,7 @@ async function main() {
     console.time('Creating texture atlases')
     await createTextureAtlas('./public/resources/textures/blocks')
     await createTextureAtlas('./public/resources/textures/liquids', 'liquids')
-    await createTextureAtlas('./public/resources/textures/entities', 'entities', 64)
+    await createTextureAtlas('./public/resources/textures/entities', 'entities')
     console.timeEnd('Creating texture atlases')
 }
 main()

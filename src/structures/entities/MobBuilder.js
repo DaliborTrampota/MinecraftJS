@@ -1,6 +1,5 @@
 import { BoxGeometry, BufferAttribute, Group, Mesh, MeshBasicMaterial, MeshStandardMaterial } from "three"
 import TextureManager from "../../tools/TextureManager"
-import Side from "../Side"
 
 
 export default class MobBuilder {
@@ -24,9 +23,11 @@ export default class MobBuilder {
     }
 
     generateGeometry(bones) {
-        let modelUVs = TextureManager.textureMap.get(this.key)
-        let w = 64
-        let h = 60
+        const modelUVs = TextureManager.textureMap.get(this.key)
+
+        const atlas = TextureManager.textures[3]
+        const w = atlas.uniforms.textureAtlas.value.image.width
+        const h = atlas.uniforms.textureAtlas.value.image.height
 
         for(let b of bones) {
             let i = 0
@@ -35,16 +36,13 @@ export default class MobBuilder {
                 const size = cube.size.map(v => v / 16)
                 const geometry = new BoxGeometry(1, 1, 1)//size[0], size[1], size[2])
                 //geometry.translate(0, size[1] / 2, 0)
-                //console.log(cube)
+
                 const uvs = this.#unpackUVs(
                     ...cube.size, 
                     cube.uv[0] + modelUVs[0] * w,
                     cube.uv[1] + modelUVs[1] * h, 
                     w, h).flat()
-                // const w = uvs.filter((v, i) => i % 2 == 0).reduce((a, b) => Math.max(a, b))
-                // const h = uvs.filter((v, i) => i % 2 == 1).reduce((a, b) => Math.max(a, b))
-
-                //let max = Object.values(uvs).flat().reduce((a, b) => Math.max(a, b))
+                    
                 geometry.setAttribute('uv', new BufferAttribute(new Float32Array(uvs), 2))
                 geometry.name = `${b.name}_${i}`
                 this.geometries.push({ geometry, pos, size })
@@ -80,7 +78,7 @@ export default class MobBuilder {
             this.#genFaceUVs(z + x, 0, z + x + z, y, u, v, w, h), //east
             this.#genFaceUVs(0, 0, z, y, u, v, w, h), //west
             this.#genFaceUVs(z, y, z + x, y + z, u, v, w, h), //up
-            this.#genFaceUVs(z + x, y, z + x + z, y + z, u, v, w, h), //down
+            this.#genFaceUVs(z + x, y, z + x + x, y + z, u, v, w, h), //down
             this.#genFaceUVs(z, 0, z + x, y, u, v, w, h), //north
             this.#genFaceUVs(z + x + z, 0, z + x + z + x, y, u, v, w, h), //south
         ]

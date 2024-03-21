@@ -61,6 +61,7 @@ export default class Game {
         this.player.inventory.addStack(Stack.create('oak_vertical_slab', 64))
         this.player.inventory.addStack(Stack.create('slab', 64))
         this.player.inventory.addStack(Stack.create('slime_spawn_egg', 64))
+        this.player.inventory.addStack(Stack.create('cow_spawn_egg', 64))
         this.player.inventory.addStack(Stack.create('table', 64))
         this.player.inventory.addStack(Stack.create('chair', 64))
         this.player.inventory.addStack(Stack.create('furnace', 64))

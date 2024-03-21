@@ -30,7 +30,7 @@ export default class Entities extends AbstractRegister {
     }
 
     static init() {
-        this.COW = this.register(new MobBuilder('cow'))
+        this.COW = this.register(new MobBuilder('cow').setAI(BaseAI))
         this.SLIME = this.register(new MobBuilder('slime').setAI(SlimeAI))
     }
 }

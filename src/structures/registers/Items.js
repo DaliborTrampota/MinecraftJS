@@ -58,7 +58,8 @@ export default class Items extends AbstractRegister {
         this.TABLE = this.registerBlock(Blocks.TABLE, 'FURNITURE')
         this.CHAIR = this.registerBlock(Blocks.CHAIR, 'FURNITURE')
 
-        this.SLIME_SPAWN_EGG = this.register(new SpawnEggItem('slime_spawn_egg', Entities.SLIME))
+        this.COW_SPAWN_EGG = this.register(new SpawnEggItem('slime_spawn_egg', Entities.COW))
+        this.SLIME_SPAWN_EGG = this.register(new SpawnEggItem('cow_spawn_egg', Entities.SLIME))
     }
 
     generateIcons() {
