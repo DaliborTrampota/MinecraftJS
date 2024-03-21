@@ -1,9 +1,9 @@
 import { Vector2, Vector3 } from 'three';
-import { WORLD_SETTINGS, CrossCheck, Material } from "../tools/Constants.js"
-import { PosMap, create3DArray, map } from "../tools/Utils.js"
-import ItemEntity from "./entities/ItemEntity.js";
-import LootTable from "./LootTable.js";
-import TerrainBuilder from "./TerrainBuilder.js";
+import { WORLD_SETTINGS, CrossCheck, Material } from "../../tools/Constants.js"
+import { PosMap, create3DArray, map } from "../../tools/Utils.js"
+import ItemEntity from "../entities/ItemEntity.js";
+import LootTable from "../LootTable.js";
+import TerrainBuilder from "../TerrainBuilder.js";
 
 const { chunkSize, chunkHeight } = WORLD_SETTINGS
 

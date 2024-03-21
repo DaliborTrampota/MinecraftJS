@@ -2,7 +2,7 @@ import { Vector3, Vector2 } from 'three';
 import { GAMEMODE, BASE_PLAYER_SETTINGS } from '../../tools/Constants.js'
 import { clamp, moveTowards } from '../../tools/Utils.js'
 
-import Chunk from '../Chunk.js';
+import Chunk from '../level/Chunk.js';
 import AABB from '../../tools/AABB.js';
 
 

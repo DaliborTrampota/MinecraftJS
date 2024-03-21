@@ -4,7 +4,7 @@ import Stats from 'https://cdn.jsdelivr.net/npm/three@0.141.0/examples/jsm/libs/
 import RegisterManager from './registers/RegisterManager.js';
 import TextureManager from '../tools/TextureManager.js';
 import BiomeGenerator from './generators/BiomeGenerator.js';
-import World from './World.js';
+import World from './level/World.js';
 
 import Player from './player/Player.js';
 import Stack from './item/Stack.js';

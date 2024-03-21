@@ -65,7 +65,6 @@ export default class AbstractRecipe {
 
 
     static fromJSON(key, json) {
-        console.log(key, json)
         let inputs = json.input.map(line => line.split('').map(x => json.ingredients[x] ?? null))
 
         if(json.shapeless) inputs = inputs.flat()

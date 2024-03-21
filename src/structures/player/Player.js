@@ -7,7 +7,7 @@ import LivingEntity from '../entities/LivingEntity.js';
 
 import Controller from './Controller.js';
 import Inventory from '../entities/Inventory.js';
-import Chunk from '../Chunk.js';
+import Chunk from '../level/Chunk.js';
 import BlockPlaceContext from '../contexts/BlockPlaceContext.js';
 import BlockItem from '../item/BlockItem.js';
 import Stack from '../item/Stack.js';
@@ -113,7 +113,7 @@ export default class Player extends LivingEntity {
             let rot = Math.atan2(dir.x, dir.z);
             const worldDir = this.velocity.applyAxisAngle(Vector3.UpC, rot)
             this.grounded = false
-            for(let i = 0; i < 3; i++)//fixes weird bug where the player would get stuck in a block
+            for(let i = 0; i < 3; ++i)
                 this.collide(worldDir, delta)
 
             this.velocity.applyAxisAngle(Vector3.UpC, -rot)
