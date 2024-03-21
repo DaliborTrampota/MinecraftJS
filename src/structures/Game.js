@@ -1,5 +1,5 @@
 import { Clock, DirectionalLight, DirectionalLightHelper, CubeTextureLoader, AmbientLight } from 'three';
-import Stats from 'https://cdn.jsdelivr.net/npm/three@0.141.0/examples/jsm/libs/stats.module.js';
+import Stats from 'three/examples/jsm/libs/stats.module.js'
 
 import RegisterManager from './registers/RegisterManager.js';
 import TextureManager from '../tools/TextureManager.js';

@@ -140,30 +140,42 @@ body {
     transform: translateX(-50%);
     border: 1px solid transparent;
     gap: 2px;
+    width: 50%;
+    aspect-ratio: calc(10.5/1);
 }
 
 .hotbar-slot {
-    width: 64px;
-    height: 64px;
+    aspect-ratio: 1/1;
+    max-width: 64px;
     padding: 5px;
     border: 2px solid #404040;
     border-radius: 5px;
     display: flex;
     flex-direction: column;
     background-color: lightblue;
+    position: relative;
 }
 
 .hotbar-slot img {
     z-index: 50;
-    width: 48px;
-    height: 48px;
-    margin: auto;
+    aspect-ratio: 1/1;
+    max-width: 48px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
 }
 
 .hotbar-slot span:first-child {
     z-index: 100;
-    font-size: large;
+    font-size: small;
     position: absolute;
+}
+
+@media screen and (max-width: 1000px){
+    .hotbar-slot span:last-child {
+        font-size: medium;
+    }
 }
 
 .hotbar-slot span:last-child {
