@@ -303,9 +303,8 @@ export default class Player extends LivingEntity {
 
     onMouseMove(e){
         if(!this.controller.locked) return;
-        const movementX = e.movementX || e.mozMovementX || e.webkitMovementX || 0;
-        const movementY = e.movementY || e.mozMovementY || e.webkitMovementY || 0;
-
+        const movementX = clamp(e.movementX || e.mozMovementX || e.webkitMovementX || 0, -50, 50);
+        const movementY = clamp(e.movementY || e.mozMovementY || e.webkitMovementY || 0, -50, 50);
         let camRot = new Euler(0, 0, 0, 'YXZ')
         let modelRot =new Euler(0, 0, 0, 'YXZ')
 
