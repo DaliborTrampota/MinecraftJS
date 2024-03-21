@@ -8,9 +8,6 @@ import World from './level/World.js';
 
 import Player from './player/Player.js';
 import Stack from './item/Stack.js';
-import Entities from './registers/Entities.js';
-import { WORLD_SETTINGS } from '../tools/Constants.js';
-import MobEntity from './entities/MobEntity.js';
 
 export default class Game {
 
@@ -21,7 +18,7 @@ export default class Game {
         this.camera = camera;
 
         this.textureManager = new TextureManager()
-        this.register = new RegisterManager()
+        this.register
 
         this.player
         this.world
@@ -40,9 +37,10 @@ export default class Game {
         //this.createLight()
 
         await this.textureManager.load()
+        this.register = new RegisterManager()
+        
         this.register.blocks.generateModels()
         this.register.items.generateIcons()
-        this.register.entities.generateModels()
         
         console.log('Loaded blocks:', this.register.blocks.map.size)
         console.log('Loaded items:', this.register.items.map.size)
@@ -53,9 +51,6 @@ export default class Game {
         this.player = new Player(this.camera, this)
         this.world = new World(new BiomeGenerator(this.register), this.register, this.player)
 
-        const cow = new MobEntity(Entities.SLIME)
-        cow.position.set(WORLD_SETTINGS.chunkSize / 2, 30, WORLD_SETTINGS.chunkSize / 2)
-
         window.clock.start()
         
         for(let key of this.register.items.map.keys()) {
@@ -65,6 +60,7 @@ export default class Game {
         this.player.inventory.addStack(Stack.create('stone', 64))
         this.player.inventory.addStack(Stack.create('oak_vertical_slab', 64))
         this.player.inventory.addStack(Stack.create('slab', 64))
+        this.player.inventory.addStack(Stack.create('slime_spawn_egg', 64))
         this.player.inventory.addStack(Stack.create('table', 64))
         this.player.inventory.addStack(Stack.create('chair', 64))
         this.player.inventory.addStack(Stack.create('furnace', 64))

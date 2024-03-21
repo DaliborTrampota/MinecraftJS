@@ -2,6 +2,8 @@ import AbstractRegister from "./AbstractRegister.js";
 import Blocks from "./Blocks.js";
 import Item from "../item/Item.js";
 import BlockItem from "../item/BlockItem.js";
+import SpawnEggItem from "../item/SpawnEggItem.js";
+import Entities from "./Entities.js";
 
 export default class Items extends AbstractRegister {
 
@@ -55,6 +57,8 @@ export default class Items extends AbstractRegister {
         this.OAK_LOG = this.registerBlock(Blocks.OAK_LOG, 'DEFAULT')
         this.TABLE = this.registerBlock(Blocks.TABLE, 'FURNITURE')
         this.CHAIR = this.registerBlock(Blocks.CHAIR, 'FURNITURE')
+
+        this.SLIME_SPAWN_EGG = this.register(new SpawnEggItem('slime_spawn_egg', Entities.SLIME))
     }
 
     generateIcons() {

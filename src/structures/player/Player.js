@@ -162,7 +162,7 @@ export default class Player extends LivingEntity {
                 let blockPlaceContext = new BlockPlaceContext(this, stack)
                 return stack.item.use(blockPlaceContext)
             }else{
-                console.warn('action not implemented for item', stack.item)
+                stack.item.use(context)
             }
         }
 
