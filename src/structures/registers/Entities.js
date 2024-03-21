@@ -33,12 +33,4 @@ export default class Entities extends AbstractRegister {
         this.COW = this.register(new MobBuilder('cow'))
         this.SLIME = this.register(new MobBuilder('slime').setAI(SlimeAI))
     }
-
-    
-    generateModels() {
-        for(let key of this.map.values()) {
-            const entity = Entities[key.toUpperCase()]
-            entity.generateModel()
-        }
-    }
 }

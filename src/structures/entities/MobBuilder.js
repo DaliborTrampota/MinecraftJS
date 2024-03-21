@@ -7,10 +7,9 @@ export default class MobBuilder {
 
     constructor(key) {
         this.key = key
-        this.model = false
         this.aiClass = false
 
-        this.bones = false
+        this.geometries = []
         this.loadData(window.entityData[key])
     }
 
@@ -20,27 +19,23 @@ export default class MobBuilder {
     }
 
     loadData(data) {
-        console.log("loading entity", this.key, data)
-        this.bones = data.bones
+        console.debug("loading entity", this.key)
+        this.generateGeometry(data.bones)
     }
 
-    generateModel() {
-        const model = new Group()
-        model.name = this.key
-
+    generateGeometry(bones) {
         let modelUVs = TextureManager.textureMap.get(this.key)
         let w = 64
         let h = 60
 
-        for(let b of this.bones) {
-            const group = new Group()
-            group.name = b.name
-
+        for(let b of bones) {
+            let i = 0
             for(let cube of b.cubes) {
                 const pos = cube.origin.map((v, i) => (v + cube.size[i] / 2) / 16) // cube geometry is centered around 0 0 0 
                 const size = cube.size.map(v => v / 16)
-                const geometry = new BoxGeometry(size[0], size[1], size[2])
-                
+                const geometry = new BoxGeometry(1, 1, 1)//size[0], size[1], size[2])
+                //geometry.translate(0, size[1] / 2, 0)
+                //console.log(cube)
                 const uvs = this.#unpackUVs(
                     ...cube.size, 
                     cube.uv[0] + modelUVs[0] * w,
@@ -51,14 +46,25 @@ export default class MobBuilder {
 
                 //let max = Object.values(uvs).flat().reduce((a, b) => Math.max(a, b))
                 geometry.setAttribute('uv', new BufferAttribute(new Float32Array(uvs), 2))
-                
-                const mesh = new Mesh(geometry, TextureManager.textures[3])
-
-                mesh.position.set(pos[0], pos[1], pos[2])
-                model.add(mesh)
+                geometry.name = `${b.name}_${i}`
+                this.geometries.push({ geometry, pos, size })
+                i++
             }
         }
-        return this.model = model
+    }
+
+    generateModel() {
+        const model = new Group()
+        model.name = this.key
+
+        for(let g of this.geometries) {
+            const mesh = new Mesh(g.geometry, TextureManager.textures[3])
+            mesh.position.set(g.pos[0], g.pos[1], g.pos[2])
+            mesh.scale.set(g.size[0], g.size[1], g.size[2])
+            model.add(mesh)
+        }
+
+        return model
     }
 
     #unpackUVs(x, y, z, u, v, w, h) {

@@ -6,7 +6,7 @@ import LivingEntity from "./LivingEntity";
 export default class MobEntity extends LivingEntity {
 
     constructor(mobData) {
-        super(mobData.model)
+        super(mobData.generateModel())
         this.ai = new mobData.aiClass(this)
         this.mobData = mobData
 
