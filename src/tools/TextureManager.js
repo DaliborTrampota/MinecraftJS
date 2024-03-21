@@ -1,13 +1,13 @@
 import { TextureLoader, NearestFilter, DoubleSide, FrontSide, DefaultLoadingManager, SRGBColorSpace, Vector3, ShaderMaterial, NearestMipMapLinearFilter } from 'three';
 
 
-
 export default class TextureManager {
 
     /**
      * Holds UVs 
      */
     static textureMap = new Map()
+    static items = new Map()
     static atlasMap = new Map()
     static textures = []
     static animationMs = 0
@@ -36,6 +36,8 @@ export default class TextureManager {
         const opaqueAtlas = this.loader.load(window.textures.atlases.opaque)
         const transparentAtlas = this.loader.load(window.textures.atlases.transparent)
         const entityAtlas = this.loader.load(window.textures.atlases.entities)
+
+        this.loadItems(window.textures.items)
         
         await new Promise((res) => this.loader.manager.onLoad = () => (res()))
 
@@ -61,6 +63,24 @@ export default class TextureManager {
         
         console.info('Textures were loaded!')
         //this.animateTextures()
+    }
+
+    async loadItems(paths) {
+        const promises = []
+
+        for(let name of paths) {
+            promises.push(this.loader.load(`/resources/textures/items/${name}`))
+        }
+
+        return Promise.all(promises).then((icons) => {
+            for(let i = 0; i < icons.length; ++i) {
+                const icon = icons[i]
+                icon.magFilter = NearestFilter
+                icon.minFilter = NearestMipMapLinearFilter
+                icon.colorSpace = SRGBColorSpace
+                TextureManager.items.set(paths[i].split(".")[0], icon)
+            }
+        })
     }
 
     //todo make one 100ms interval for all textures

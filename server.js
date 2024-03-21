@@ -50,6 +50,7 @@ app.get('/textures', (req, res) => {
             liquids: require('./public/resources/textures/atlases/liquids_uvs.json'),
             entities: require('./public/resources/textures/atlases/entities_uvs.json'),
         },
+        items: fs.readdirSync('./public/resources/textures/items')
     })
 })
 

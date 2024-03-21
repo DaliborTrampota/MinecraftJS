@@ -9,8 +9,8 @@ export default class BlockItem extends Item {
 
     constructor(block, key){
         super(key ?? block.key)
-        this.block = block        
-        this.image
+        this.block = block   
+        this.image = false//`/resources/textures/blocks/${key}.png`
         this.pixelated = false
     }
 
