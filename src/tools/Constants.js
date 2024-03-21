@@ -102,6 +102,7 @@ const BASE_PLAYER_SETTINGS = {
     viewDistance: 4,
     health: 100,
     acceleration: 60,
+    airDrag: 10,
     jump: 1,
     speed: 5,
     sprintMultiplier: 1.5,

@@ -1,10 +1,10 @@
 import { Clock, DirectionalLight, DirectionalLightHelper, CubeTextureLoader, AmbientLight } from 'three';
-import Stats from 'https://cdn.jsdelivr.net/npm/three@0.141.0/examples/jsm/libs/stats.module.js';
+import Stats from 'three/examples/jsm/libs/stats.module.js'
 
 import RegisterManager from './registers/RegisterManager.js';
 import TextureManager from '../tools/TextureManager.js';
 import BiomeGenerator from './generators/BiomeGenerator.js';
-import World from './World.js';
+import World from './level/World.js';
 
 import Player from './player/Player.js';
 import Stack from './item/Stack.js';
@@ -18,7 +18,7 @@ export default class Game {
         this.camera = camera;
 
         this.textureManager = new TextureManager()
-        this.register = new RegisterManager()
+        this.register
 
         this.player
         this.world
@@ -37,10 +37,16 @@ export default class Game {
         //this.createLight()
 
         await this.textureManager.load()
+        this.register = new RegisterManager()
+        
         this.register.blocks.generateModels()
         this.register.items.generateIcons()
         
-        console.log('Loaded blocks:', this.register.blocks.map.size, 'Loaded items:', this.register.items.map.size)
+        console.log('Loaded blocks:', this.register.blocks.map.size)
+        console.log('Loaded items:', this.register.items.map.size)
+        console.log('Loaded entities:', this.register.entities.map.size)
+        console.log('Loaded biomes:', this.register.biomes.map.size)
+        console.log('Loaded recipes:', this.register.recipes.map.size)
         
         this.player = new Player(this.camera, this)
         this.world = new World(new BiomeGenerator(this.register), this.register, this.player)
@@ -54,6 +60,8 @@ export default class Game {
         this.player.inventory.addStack(Stack.create('stone', 64))
         this.player.inventory.addStack(Stack.create('oak_vertical_slab', 64))
         this.player.inventory.addStack(Stack.create('slab', 64))
+        this.player.inventory.addStack(Stack.create('slime_spawn_egg', 64))
+        this.player.inventory.addStack(Stack.create('cow_spawn_egg', 64))
         this.player.inventory.addStack(Stack.create('table', 64))
         this.player.inventory.addStack(Stack.create('chair', 64))
         this.player.inventory.addStack(Stack.create('furnace', 64))

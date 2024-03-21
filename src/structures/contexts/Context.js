@@ -8,6 +8,7 @@ export default class Context {
     constructor(player, stack){
         this.player = player
         this.stack = stack
+        this.hitPosition = false
     }
 
     get world() {
@@ -65,6 +66,9 @@ export default class Context {
                 closest.point = this.getIntersectedPoint(prevPos.clone(), dir.clone(), t)
             }
         }
+        
+        this.position = position
+
         const angle = closest.normal.angleTo(dir) * 180 / Math.PI
         return { block, position, normal: closest.normal.clone().negate(), angle, point: closest.point.sub(position.clone().floor()), found: true }
     }

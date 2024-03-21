@@ -7,7 +7,7 @@ import LivingEntity from '../entities/LivingEntity.js';
 
 import Controller from './Controller.js';
 import Inventory from '../entities/Inventory.js';
-import Chunk from '../Chunk.js';
+import Chunk from '../level/Chunk.js';
 import BlockPlaceContext from '../contexts/BlockPlaceContext.js';
 import BlockItem from '../item/BlockItem.js';
 import Stack from '../item/Stack.js';
@@ -22,7 +22,7 @@ const Y_WIDTH = WIDTH * 0.75
 export default class Player extends LivingEntity {
 
     constructor(camera){
-        super()
+        super(Player.createModel())
         this.camera = camera
         this.camera.position.set(0, -PLAYER_DIMENSIONS.cameraOffset, 0)
         this.model.add(camera)
@@ -37,6 +37,7 @@ export default class Player extends LivingEntity {
         this.controller = new Controller(this)
 
         this.placeDelay = 0
+        this.useDelay = 0
 
         this.holding = {
             clickStack: [],
@@ -48,8 +49,6 @@ export default class Player extends LivingEntity {
         document.addEventListener('mouseup', this.onMouseRelease.bind(this));
 
         this.maxUpStep = 0.5
-
-        window.game.addUpdateSub(this)
     }
 
     get eyePos(){
@@ -73,7 +72,11 @@ export default class Player extends LivingEntity {
     }
 
     setPlaceDelay(){
-        this.placeDelay = BASE_PLAYER_SETTINGS.placeDelay
+        this.useDelay = BASE_PLAYER_SETTINGS.placeDelay
+    }
+
+    setUseDelay(delay) {
+        this.useDelay = delay
     }
 
     Update(delta){
@@ -84,11 +87,14 @@ export default class Player extends LivingEntity {
         if(this.holding.LMB || this.holding.clickStack[0] == MOUSE_BUTTON.LMB){
             this.interact(MOUSE_BUTTON.LMB)
         }else if(this.holding.RMB || this.holding.clickStack[0] == MOUSE_BUTTON.RMB){
-            this.placeDelay -= delta * 1000
             this.interact(MOUSE_BUTTON.RMB)
         }
+        this.useDelay -= delta * 1000
     }
 
+    curChunkChanged() {
+        window.game.world.updateViewDistance()
+    }
     
     calculateVelocity(delta){
         if(!this.controller.flying && !this.grounded){
@@ -98,13 +104,13 @@ export default class Player extends LivingEntity {
         }
         
         const curSpeed = (this.controller.sprint ? BASE_PLAYER_SETTINGS.sprintMultiplier : 1) * BASE_PLAYER_SETTINGS.speed
-        let moveDir = new Vector3(this.controller.horizontal, 0, -this.controller.vertical).normalize().multiplyScalar(curSpeed)
+        this.moveDirection.set(this.controller.horizontal, 0, -this.controller.vertical).normalize()
 
         this.eyePos //has to be called otherwise the game freezes? figure out why TODO
 
         //if(!this.controller.flying){
         const Y = this.velocity.y
-        this.velocity = moveTowards(this.velocity.clone(), moveDir.clone(), BASE_PLAYER_SETTINGS.acceleration * delta)
+        this.velocity = moveTowards(this.velocity.clone(), this.moveDirection.clone().multiplyScalar(curSpeed), this.grounded ? BASE_PLAYER_SETTINGS.acceleration * delta : BASE_PLAYER_SETTINGS.airDrag * delta)
         this.velocity.y = clamp(Y, -80, 20)//todo implement drag
         //}
         if(this.gamemode != GAMEMODE.SPECTATOR){
@@ -112,7 +118,7 @@ export default class Player extends LivingEntity {
             let rot = Math.atan2(dir.x, dir.z);
             const worldDir = this.velocity.applyAxisAngle(Vector3.UpC, rot)
             this.grounded = false
-            for(let i = 0; i < 3; i++)//fixes weird bug where the player would get stuck in a block
+            for(let i = 0; i < 3; ++i)
                 this.collide(worldDir, delta)
 
             this.velocity.applyAxisAngle(Vector3.UpC, -rot)
@@ -147,7 +153,7 @@ export default class Player extends LivingEntity {
             
             if(hitRes.block.isInteractable) {
                 this.holding.RMB = false
-                if(this.placeDelay > 0) return
+                if(this.useDelay > 0) return
                 return hitRes.block.interact(BlockInteractContext.from(context, hitRes))
             }
 
@@ -155,13 +161,15 @@ export default class Player extends LivingEntity {
             let stack = this.inventory.slot
             if(!stack) return false
 
-            if(this.placeDelay > 0) return
+            if(this.useDelay > 0) return
 
             if(stack.item instanceof BlockItem){
                 let blockPlaceContext = new BlockPlaceContext(this, stack)
                 return stack.item.use(blockPlaceContext)
             }else{
-                console.warn('action not implemented for item', stack.item)
+                stack.item.use(context)
+                if(stack.item.useOneAtATime) this.holding.RMB = false
+                else this.setUseDelay(175)
             }
         }
 
@@ -314,13 +322,11 @@ export default class Player extends LivingEntity {
         this.camera.quaternion.setFromEuler(camRot);
     }
 
-    createModel(){
+    static createModel(){
         const geometry = new BoxGeometry(PLAYER_DIMENSIONS.width * 2, PLAYER_DIMENSIONS.height, PLAYER_DIMENSIONS.depth * 2)
         const material = new MeshBasicMaterial( { color: 0x00ff00, opacity: 0.3, transparent: true } );
         const model = new Mesh( geometry, material )
         model.geometry.translate(0, -1, 0)
-
-        model.bb = new Box3().setFromObject(model)
 
         model.h = geometry.parameters.height
         model.w = geometry.parameters.width

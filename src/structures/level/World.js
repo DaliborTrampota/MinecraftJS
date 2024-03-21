@@ -1,4 +1,4 @@
-import { WORLD_SETTINGS } from "../tools/Constants.js";
+import { WORLD_SETTINGS } from "../../tools/Constants.js";
 import Chunk from "./Chunk.js"
 
 export default class World {
