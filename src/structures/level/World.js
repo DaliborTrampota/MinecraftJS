@@ -34,6 +34,7 @@ export default class World {
                 ch.rebuild()
                 ch.needsUpdate = false
             }
+            ch.tickWater(delta)
         }
     }
 

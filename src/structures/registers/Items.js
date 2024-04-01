@@ -60,6 +60,8 @@ export default class Items extends AbstractRegister {
 
         this.COW_SPAWN_EGG = this.register(new SpawnEggItem('slime_spawn_egg', Entities.COW))
         this.SLIME_SPAWN_EGG = this.register(new SpawnEggItem('cow_spawn_egg', Entities.SLIME))
+        
+        this.WATER = this.registerBlock(Blocks.WATER, 'DEFAULT')
     }
 
     generateIcons() {

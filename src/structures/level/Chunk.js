@@ -4,6 +4,7 @@ import { PosMap, create3DArray, map } from "../../tools/Utils.js"
 import ItemEntity from "../entities/ItemEntity.js";
 import LootTable from "../LootTable.js";
 import TerrainBuilder from "./TerrainBuilder.js";
+import WaterBlock from '../blocks/WaterBlock.js';
 
 const { chunkSize, chunkHeight } = WORLD_SETTINGS
 
@@ -29,6 +30,8 @@ export default class Chunk {
         this.Init()
         this.builder = new TerrainBuilder(this)
         this.mesh
+
+        this.waterTimer = 1
     }
 
     get register(){
@@ -213,6 +216,26 @@ export default class Chunk {
             if(this.data[x][y][z] != 0) return y
         }
         return -1
+    }
+
+    tickWater(delta) {
+        this.waterTimer -= delta
+        if(this.waterTimer < 0) {
+            let toTick = []
+            for(let key in this.metadata) {
+                const state = this.metadata[key]
+                if(state.get('waterLevel')) {
+                    toTick.push(state)
+                }
+            }
+            for(let state of toTick) {
+                if(WaterBlock.spread(this.world, state.pos, state)) {
+                    this.removeVoxel(state.pos, false)
+                }
+            }
+            this.waterTimer = 1
+            console.log('water tick', toTick.length)
+        }
     }
     // spawnBlock(blockID){
     //     if(blockID <= 0) return false //update to next stage?

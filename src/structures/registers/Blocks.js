@@ -4,6 +4,7 @@ import Items from "./Items.js";
 import FurnaceBlock from "../blocks/FurnaceBlock.js";
 import VoxelBlock from "../blocks/VoxelBlock.js";
 import AbstractRegister from "./AbstractRegister.js";
+import WaterBlock from "../blocks/WaterBlock.js";
 
 export default class Blocks extends AbstractRegister {
 
@@ -65,6 +66,7 @@ export default class Blocks extends AbstractRegister {
         this.OAK_LOG = this.register(new Block('oak_log', Material.SOLID))
         this.TABLE = this.register(new VoxelBlock('table', Material.SOLID))
         this.CHAIR = this.register(new VoxelBlock('chair', Material.SOLID))
+        this.WATER = this.register(new WaterBlock('water_still', Material.LIQUID).hasNoCollisions().isTransparent())
     }
 
     static getByTexture(texture) {

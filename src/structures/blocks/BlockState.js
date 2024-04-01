@@ -9,7 +9,7 @@ export default class BlockState {
     static ANGLE_TO = Vector3.North
     static COLUMN_ANGLE_TO = Vector3.Up
 
-    constructor(pos, block, meta = {}) {
+    constructor(pos, block, meta = {}, store = {}) {
         this.pos = pos
         this.id = `${pos.x}_${pos.y}_${pos.z}`
         this.block = block
@@ -21,13 +21,13 @@ export default class BlockState {
         this.rotationAxis = meta.rotationAxis ?? this.calculateRotationAxis() // this is for orientation of the block (rotate to face the direction) not rotation. Rotation rotates around the direction axis 
         //this.inventory = new MachineInterface(meta.inventory ?? []) 
 
-        this.cache = {}
+        this.store = store
     }
 
     get angle() {
-        if(this.cache['angle']) return this.cache['angle']        
+        if(this.store['angle']) return this.store['angle']        
 
-        return this.cache['angle'] = angleToAxis(this.angleToAxis, this.facing)
+        return this.store['angle'] = angleToAxis(this.angleToAxis, this.facing)
     }
 
     get angleToAxis() {
@@ -35,9 +35,13 @@ export default class BlockState {
     }
 
 
-    setValue(prop, value) {
-        this[prop] = value
+    set(prop, value) {
+        this.store[prop] = value
         return this
+    }
+
+    get(prop) {
+        return this.store[prop]
     }
 
     rotated(side) {
