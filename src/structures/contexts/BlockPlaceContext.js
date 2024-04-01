@@ -1,5 +1,5 @@
 import { Vector3, Vector2 } from 'three';
-import { Material, Section } from "../../tools/Constants.js"
+import { Material, Section, WORLD_SETTINGS } from "../../tools/Constants.js"
 import Context from "./Context.js"
 
 
@@ -23,6 +23,7 @@ export default class BlockPlaceContext extends Context {
 
     get canPlace(){
         if(!this.hitResult.found) return false
+        if(this.hitResult.position.y < 0 || this.hitResult.position.y >= WORLD_SETTINGS.chunkHeight - 1) return false
 
         this.hitResult.position.add(this.hitResult.normal).floor()
         let playerBlockPos = this.player.eyePos.floor()
