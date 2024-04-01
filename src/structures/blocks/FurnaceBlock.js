@@ -9,7 +9,7 @@ export default class FurnaceBlock extends FunctionalBlock {
         super(key, material)
 
         this.entityClass = FurnaceEntity
-        this.interfaceClass = FurnaceInterface
+        //this.interfaceClass = FurnaceInterface
     }
 
     get isInteractable() {

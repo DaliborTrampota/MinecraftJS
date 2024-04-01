@@ -4,13 +4,8 @@ export default class BlockEntity extends EventTarget {
     constructor(block, interfaceClass) {
         super()
         this.block = block
-        this.interfaceClass = interfaceClass ?? false
         
         window.game.addUpdateSub(this)
-    }
-
-    get hasInterface() {
-        return Boolean(this.interfaceClass)
     }
     
     putToSlots(slots, stacks) {

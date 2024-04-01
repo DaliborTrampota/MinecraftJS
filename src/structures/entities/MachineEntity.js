@@ -7,7 +7,8 @@ import Stack from "../item/Stack.js"
 export default class MachineEntity extends BlockEntity {
 
     constructor(block, interfaceClass) {
-        super(block, interfaceClass)
+        super(block)
+        this.interfaceClass = interfaceClass ?? false
         this.inputSlots = new Array()
         this.outputSlots = new Array()
 
@@ -15,6 +16,10 @@ export default class MachineEntity extends BlockEntity {
 
         this.validRecipes = []
         this.activeRecipe = null
+    }
+    
+    get hasInterface() {
+        return Boolean(this.interfaceClass)
     }
 
     Update(delta) {
