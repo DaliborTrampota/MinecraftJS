@@ -1,4 +1,4 @@
-import { Vector3, Vector2, Euler, Raycaster, MeshBasicMaterial, Mesh, BoxGeometry, Box3, Group } from 'three';
+import { Vector3, Vector2, Euler, Raycaster, MeshBasicMaterial, Mesh, BoxGeometry } from 'three';
 import { PI_2, GAMEMODE, BASE_PLAYER_SETTINGS, PLAYER_DIMENSIONS, CrossCheck, CornerCheck, MOUSE_BUTTON } from '../../tools/Constants.js'
 import { clamp, moveTowards } from '../../tools/Utils.js'
 

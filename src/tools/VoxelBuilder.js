@@ -86,7 +86,6 @@ export default class VoxelBuilder {
     static rotateFaceTo(side, verts) {
         verts = verts.map(v => v - 0.5)
         const matrix = side instanceof Matrix4 ? side : VoxelBuilder.ROTATION_MAP[side]
-        console.log(matrix)
 
         for(let i = 0; i < verts.length; i += 3){
             const vert = new Vector3(verts[i], verts[i + 1], verts[i + 2])

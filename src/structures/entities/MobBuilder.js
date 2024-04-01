@@ -1,4 +1,4 @@
-import { BoxGeometry, BufferAttribute, Group, Mesh, MeshBasicMaterial, MeshStandardMaterial } from "three"
+import { BoxGeometry, BufferAttribute, Group, Mesh } from "three"
 import TextureManager from "../../tools/TextureManager"
 
 

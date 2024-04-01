@@ -1,4 +1,4 @@
-import { Vector3, Vector2, MeshBasicMaterial, Mesh, BoxGeometry, Box3  } from 'three';
+import { Vector3, Vector2, Box3  } from 'three';
 import { BASE_PLAYER_SETTINGS } from '../../tools/Constants.js'
 import { clamp, moveTowards } from '../../tools/Utils.js'
 

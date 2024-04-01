@@ -1,4 +1,4 @@
-import { Vector3, BufferGeometry, BufferAttribute, Mesh, WireframeGeometry, LineSegments } from 'three';
+import { Vector3, BufferGeometry, BufferAttribute, Mesh } from 'three';
 import { WORLD_SETTINGS } from "../../tools/Constants.js"
 import TextureManager from "../../tools/TextureManager.js";
 import VoxelBuilder from '../../tools/VoxelBuilder.js';
