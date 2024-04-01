@@ -208,7 +208,12 @@ export default class Chunk {
         return this.blockEntities.get(pos)
     } 
 
-
+    heightAt(x, z){
+        for(let y = chunkHeight - 1; y >= 0; --y){
+            if(this.data[x][y][z] != 0) return y
+        }
+        return -1
+    }
     // spawnBlock(blockID){
     //     if(blockID <= 0) return false //update to next stage?
     //     const geometry = new BufferGeometry()

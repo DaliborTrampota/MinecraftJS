@@ -8,6 +8,9 @@ import World from './level/World.js';
 
 import Player from './player/Player.js';
 import Stack from './item/Stack.js';
+import OverworldGenerator from './generators/OverworldGenerator.js';
+import SkyBlockGenerator from './generators/SkyBlockGenerator.js';
+import OneChunkGenerator from './generators/OneChunkGenerator.js';
 
 export default class Game {
 
@@ -49,7 +52,9 @@ export default class Game {
         console.log('Loaded recipes:', this.register.recipes.map.size)
         
         this.player = new Player(this.camera, this)
-        this.world = new World(new BiomeGenerator(this.register), this.register, this.player)
+        this.world = new World(new OverworldGenerator(this.register), this.register, this.player)
+        // this.world = new World(new SkyBlockGenerator(this.register), this.register, this.player)
+        // this.world = new World(new OneChunkGenerator(this.register), this.register, this.player)
 
         window.clock.start()
         

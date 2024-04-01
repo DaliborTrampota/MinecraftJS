@@ -1,0 +1,37 @@
+import { WORLD_SETTINGS } from "../../tools/Constants"
+import BiomeGenerator from "./BiomeGenerator"
+
+
+export default class OverworldGenerator {
+
+    constructor(register) {
+        this.register = register
+        this.biomeGenerator = new BiomeGenerator(register)
+    }
+
+    getVoxel(pos) {
+        const height = Math.floor(this.biomeGenerator.getHeight(pos.x, pos.z))
+        const y = Math.floor(pos.y)
+        
+        if(y == height) {
+            const biome = this.biomeGenerator.getBiome(pos.x, pos.z)
+            switch(biome.key){
+                case 'forest':
+                    return this.register.getBlockID('grass_block')
+                case 'hills':
+                    return this.register.getBlockID('stone')
+                case 'desert':
+                    return this.register.getBlockID('sand')
+            }
+            //console.log(biome)
+            if(biome > 5) return this.register.getBlockID('sand')
+            if(biome > 2) return this.register.getBlockID('gravel')
+            return this.register.getBlockID('grass_block')
+        }
+        else if(y < height && y > height - 3) return this.register.getBlockID('dirt')
+        else if(y < height) return this.register.getBlockID('stone')
+        
+        else if(y <= WORLD_SETTINGS.globalSeaLevel) return this.register.getBlockID('water_still')
+        else return this.register.getBlockID('air')
+    }
+}
