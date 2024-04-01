@@ -17,7 +17,7 @@ export default class TerrainBuilder {
         this.chunkPosAttr
 
         this.groupStart = 0
-        this.geometry = new BufferGeometry();
+        this.geometry = new BufferGeometry()
         this.mesh
     }
 
@@ -236,6 +236,11 @@ export default class TerrainBuilder {
         return 1
     }
 
+
+    dispose() {
+        window.scene.remove(this.mesh)
+        this.geometry.dispose()
+    }
 }
 
 

@@ -23,11 +23,11 @@ export default class BlockPlaceContext extends Context {
 
     get canPlace(){
         if(!this.hitResult.found) return false
-        if(this.hitResult.position.y < 0 || this.hitResult.position.y >= WORLD_SETTINGS.chunkHeight - 1) return false
-
+        
         this.hitResult.position.add(this.hitResult.normal).floor()
+        if(this.hitResult.position.y < 0 || this.hitResult.position.y > WORLD_SETTINGS.chunkHeight - 1) return false
         let playerBlockPos = this.player.eyePos.floor()
-
+        
         if(this.world.getVoxelFromPos(this.hitResult.position).material != Material.AIR && this.world.getVoxelFromPos(this.hitResult.position.sub(this.hitResult.normal).material != Material.AIR)) {
             return false
         }
