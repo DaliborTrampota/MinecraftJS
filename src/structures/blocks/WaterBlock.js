@@ -25,6 +25,7 @@ export default class WaterBlock extends Block {
      */
     static spread(world, pos, state) {
         let waterLevel = state.get('waterLevel')
+        state.set('updateWater', false)
         if(waterLevel == 0) return true
 
         let newPos = pos.clone()
@@ -46,32 +47,31 @@ export default class WaterBlock extends Block {
             // curLevel += spread
             // waterLevel -= spread
             
-            // blockState.set('waterLevel', curLevel)
-            // const chunk = world.getChunkFromPos(newPos)
-            // chunk.addVoxel(newPos, world.register.getBlock('water').id, blockState)
-            // newStates.push(blockState)
         }
-        // state.set('waterLevel', waterLevel)
         return false//waterLevel == 0
     } 
 
 
     static checkBlock(world, pos) {
-        let block = world.getVoxelFromPos(pos)
+        const block = world.getVoxelFromPos(pos)
         return block.material == Material.AIR || block.material == Material.LIQUID       
     }
 
     static createWater(world, pos, level) {
-        let blockState = world.getBlockState(pos) ?? new BlockState(pos, WaterBlock.INSTANCE)
+        if(level == 0) return
+        const blockState = world.getBlockState(pos) ?? new BlockState(pos.clone(), WaterBlock.INSTANCE)
+        const curLevel = blockState.get('waterLevel') ?? 0
+        if(curLevel >= level) return
 
-        blockState.set('waterLevel', Math.max(blockState.get('waterLevel') ?? 0, level))
-        console.log(blockState.get('waterLevel'))
+        blockState.set('waterLevel', level)
+        blockState.set('updateWater', true)
+
         const chunk = world.getChunkFromPos(pos)
-        chunk.addVoxel(pos, world.register.getBlock('water').id, blockState)
+        chunk.addVoxel(pos, WaterBlock.INSTANCE.id, blockState)
     }
 
     getState(ctx) {
-        return new BlockState(ctx.hitResult.position.floor(), ctx.block, undefined, { waterLevel: this.spreadDist })
+        return new BlockState(ctx.hitResult.position.floor(), ctx.block, undefined, { waterLevel: this.spreadDist, updateWater: true })
     }
 
 

@@ -224,7 +224,7 @@ export default class Chunk {
             let toTick = []
             for(let key in this.metadata) {
                 const state = this.metadata[key]
-                if(state.get('waterLevel')) {
+                if(state.get('updateWater') && state.get('waterLevel')) {
                     toTick.push(state)
                 }
             }
@@ -234,7 +234,6 @@ export default class Chunk {
                 }
             }
             this.waterTimer = 1
-            console.log('water tick', toTick.length)
         }
     }
     // spawnBlock(blockID){
