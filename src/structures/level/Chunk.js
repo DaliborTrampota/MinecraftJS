@@ -4,7 +4,6 @@ import { PosMap, create3DArray, map } from "../../tools/Utils.js"
 import ItemEntity from "../entities/ItemEntity.js";
 import LootTable from "../LootTable.js";
 import TerrainBuilder from "./TerrainBuilder.js";
-import WaterBlock from '../blocks/WaterBlock.js';
 
 const { chunkSize, chunkHeight } = WORLD_SETTINGS
 
@@ -186,6 +185,8 @@ export default class Chunk {
         pos.x -= this.mesh.position.x
         pos.z -= this.mesh.position.z
 
+        //if(pos.y < 0 || pos.y >= chunkHeight) return false
+
         this.setVoxel(pos, blockID)//possible out of bounds on borders
         if(blockData) {
             this.metadata[blockData.id] = blockData
@@ -224,12 +225,12 @@ export default class Chunk {
             let toTick = []
             for(let key in this.metadata) {
                 const state = this.metadata[key]
-                if(state.get('updateWater') && state.get('waterLevel')) {
+                if(state.get('updateLiquid') && state.get('liquidLevel')) {
                     toTick.push(state)
                 }
             }
             for(let state of toTick) {
-                if(WaterBlock.spread(this.world, state.pos, state)) {
+                if(state.block.update(this.world, state)) {
                     this.removeVoxel(state.pos, false)
                 }
             }

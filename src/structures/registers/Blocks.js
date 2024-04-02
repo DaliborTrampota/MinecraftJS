@@ -4,7 +4,8 @@ import Items from "./Items.js";
 import FurnaceBlock from "../blocks/FurnaceBlock.js";
 import VoxelBlock from "../blocks/VoxelBlock.js";
 import AbstractRegister from "./AbstractRegister.js";
-import WaterBlock from "../blocks/WaterBlock.js";
+import Liquid from "../blocks/liquids/Liquid.js";
+import { Vector3 } from "three";
 
 export default class Blocks extends AbstractRegister {
 
@@ -33,6 +34,22 @@ export default class Blocks extends AbstractRegister {
         return block
     }
 
+    static registerLiquid(liquids) {
+        for(const liq of liquids) {
+            if(!(liq instanceof Liquid)) {
+                console.error("Liquid must be an instance of Liquid", liq)
+                return this
+            }
+            
+            liq.id = Blocks.ID
+            Blocks.new().map.set(Blocks.ID, liq.key)
+            Blocks.ID++
+
+        }
+
+        return liquids
+    }
+
     static init() {
         for(let name in window.blockData) {
             let block = window.blockData[name]
@@ -59,14 +76,20 @@ export default class Blocks extends AbstractRegister {
         this.FURNACE = this.register(new FurnaceBlock('furnace', Material.SOLID))
         this.DISPENSER = this.register(new FurnaceBlock('dispenser', Material.SOLID))
         this.GLASS = this.register(new Block('glass', Material.SOLID).isTransparent())
-        this.WATER_STILL = this.register(new Block('water_still', Material.LIQUID).hasNoCollisions().isTransparent())
         this.STAIRS = this.register(new VoxelBlock('stairs', Material.SOLID))
         this.SLAB = this.register(new VoxelBlock('slab', Material.SOLID))
         this.OAK_VERTICAL_SLAB = this.register(new VoxelBlock('oak_vertical_slab', Material.SOLID))
         this.OAK_LOG = this.register(new Block('oak_log', Material.SOLID))
         this.TABLE = this.register(new VoxelBlock('table', Material.SOLID))
         this.CHAIR = this.register(new VoxelBlock('chair', Material.SOLID))
-        this.WATER = this.register(new WaterBlock('water_still', Material.LIQUID).hasNoCollisions().isTransparent())
+
+        ;[this.WATER_STILL, this.WATER_FLOW] = this.registerLiquid(Liquid.create('water', 7, true)
+            .map(l => l.hasNoCollisions().isTransparent())
+        )
+        ;[this.LAVA_STILL, this.LAVA_FLOW] = this.registerLiquid(Liquid.create('lava', 3, false)
+            .map(l => l.hasNoCollisions().isTransparent().setFlowDirection(Vector3.Up))
+        )
+        console.log(this.WATER_STILL)
     }
 
     static getByTexture(texture) {

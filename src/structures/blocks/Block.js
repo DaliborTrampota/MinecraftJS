@@ -14,7 +14,6 @@ export default class Block {
         this.transparent = false
         this.solid = true
 
-        this.textures = {}
         this.orientable = false
 
         this.voxel = false

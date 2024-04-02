@@ -1,0 +1,11 @@
+{
+    "geometry": "cube",
+    "animated": true,
+    "animation": {
+        "frames": 20,
+        "interval": 100
+    },
+    "textures": {
+        "all": "lava_still"
+    }
+}
