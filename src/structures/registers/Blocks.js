@@ -89,7 +89,6 @@ export default class Blocks extends AbstractRegister {
         ;[this.LAVA_STILL, this.LAVA_FLOW] = this.registerLiquid(Liquid.create('lava', 3, false)
             .map(l => l.hasNoCollisions().isTransparent().setFlowDirection(Vector3.Up))
         )
-        console.log(this.WATER_STILL)
     }
 
     static getByTexture(texture) {

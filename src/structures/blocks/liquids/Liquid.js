@@ -28,7 +28,7 @@ export default class Liquid extends Block {
             ctx.hitResult.position.floor(), 
             ctx.block, 
             undefined, 
-            { liquidLevel: this.spreadDist, updateLiquid: true }
+            { liquidLevel: this.spreadDist, dirty: true }
         )
     }
 
@@ -40,9 +40,22 @@ export default class Liquid extends Block {
      * @returns {boolean|Array<BlockState>} true if the block and state should be removed
      */
     update(world, state) {
-        let waterLevel = state.get('liquidLevel')
-        state.set('updateLiquid', false)
-        if(waterLevel == 0) return true
+        let waterLevel = state.get('liquidLevel'), source
+        if(source = state.get('source')) {
+            if(!(source = world.getBlockState(source))) {
+                state.set('liquidLevel', --waterLevel)
+            } else {
+                state.set('dirty', false)
+            } 
+        } else {
+            source = state
+            state.set('dirty', false)
+        }
+
+        if(waterLevel == 0) {
+            source?.set('flow', source.get('flow').filter(p => p.equals(state.pos)))
+            return true
+        }
 
         let newPos = state.pos.clone()
         if(Liquid.checkBlock(world, newPos.add(this.flowDirection))) {
@@ -50,15 +63,17 @@ export default class Liquid extends Block {
                 state.set('liquidLevel', 0)
                 return false
             }
-            return this.spread(world, newPos, this.spreadDist - 1)
+            if(this.spread(world, newPos, this.spreadDist - 1, state.pos.clone())?.set('source', state.get('source') ?? state.pos))
+                source?.add('flow', newPos)
+            return false
         }
 
         for(let side of CrossCheck) {
             newPos = state.pos.clone().add(side)
             if(!Liquid.checkBlock(world, newPos)) continue
 
-            this.spread(world, newPos, waterLevel - 1)
-
+            if(this.spread(world, newPos, waterLevel - 1, state.pos.clone())?.set('source', state.get('source') ?? state.pos))
+                source?.add('flow', newPos)
 
             // let curLevel = blockState.get('waterLevel') ?? 0
             // if(curLevel == 8) continue
@@ -68,11 +83,18 @@ export default class Liquid extends Block {
             // waterLevel -= spread
             
         }
-        return false//waterLevel == 0
+        return false
     }
 
 
-    spread(world, pos, level) {
+    /**
+     * Spreads liquid to the given position, creates BlockState and places Block
+     * @param {import('../../level/World.js').default} world World instance
+     * @param {Vector3} pos Position where to spread the liquid
+     * @param {number} level Level of the liquid 
+     * @returns {BlockState?} Newly created or already existing BlockState
+     */
+    spread(world, pos, level, prevPos) {
         if(level == 0) return
 
         let blockState = world.getBlockState(pos) 
@@ -87,14 +109,19 @@ export default class Liquid extends Block {
             ? world.register.getBlock(this.baseKey + '_still') 
             : world.register.getBlock(this.baseKey + '_flow')
 
-        blockState ??= new BlockState(pos.clone(), block)
+        blockState ??= new BlockState(pos.clone(), block, {
+            rotationAxis: Vector3.Up,
+            facing: prevPos.sub(pos),
+        })
         
         blockState.set('liquidLevel', level)
-        blockState.set('updateLiquid', true)
+        blockState.set('dirty', true)
         
         
         const chunk = world.getChunkFromPos(pos)
         chunk.addVoxel(pos, block.id, blockState)
+
+        return blockState
     }
 
     static checkBlock(world, pos) {
