@@ -21,7 +21,7 @@ export default class Context {
         options.placeOnAir ??= false
         
         const getBlockAt = (pos, world) => {
-            return world.getVoxelFromPos(pos.clone())
+            return world.getVoxelFromPos(pos) //dont need to clone pos
         }
 
         const getState = (pos, world) => {

@@ -28,7 +28,9 @@ export default class BlockPlaceContext extends Context {
         if(this.hitResult.position.y < 0 || this.hitResult.position.y > WORLD_SETTINGS.chunkHeight - 1) return false
         let playerBlockPos = this.player.eyePos.floor()
         
-        if(this.world.getVoxelFromPos(this.hitResult.position).material != Material.AIR && this.world.getVoxelFromPos(this.hitResult.position.sub(this.hitResult.normal).material != Material.AIR)) {
+        if(this.world.getVoxelFromPos(this.hitResult.position).material != Material.AIR 
+            && this.world.getVoxelFromPos(this.hitResult.position.sub(this.hitResult.normal).material != Material.AIR)
+        ) {
             return false
         }
         
@@ -45,9 +47,10 @@ export default class BlockPlaceContext extends Context {
         const blockState = this.block.getState(this)
         const chunk = this.player.world.getChunkFromPos(this.hitResult.position)
 
+        const position = this.hitResult.position.clone()
         if(this.block.hasEntity)
-            chunk.setEntityAt(this.hitResult.position, new this.block.entityClass())
-        chunk.addVoxel(this.hitResult.position, this.block.id, blockState)
+            chunk.setEntityAt(position, new this.block.entityClass())
+        chunk.addVoxel(position, this.block.id, blockState)
 
         this.player.inventory.interface.updateHotbar()
     }
