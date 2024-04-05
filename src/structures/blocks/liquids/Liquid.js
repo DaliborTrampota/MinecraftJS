@@ -68,21 +68,32 @@ export default class Liquid extends Block {
             return false
         }
 
-        for(let side of CrossCheck) {
-            newPos = state.pos.clone().add(side)
-            if(!Liquid.checkBlock(world, newPos)) continue
-
-            if(this.spread(world, newPos, waterLevel - 1, state.pos.clone())?.set('source', state.get('source') ?? state.pos))
-                source?.add('flow', newPos)
-
-            // let curLevel = blockState.get('waterLevel') ?? 0
-            // if(curLevel == 8) continue
-
-            // const spread = Math.min(maxSpread, maxLevel - curLevel, waterLevel)
-            // curLevel += spread
-            // waterLevel -= spread
-            
+        const holes = this.findHoles(world, state.pos.clone())
+        if(holes.length == 0) {
+            for(let side of CrossCheck) {
+                newPos = state.pos.clone().add(side)
+                if(!Liquid.checkBlock(world, newPos)) continue
+    
+                if(this.spread(world, newPos, waterLevel - 1, state.pos.clone())?.set('source', state.get('source') ?? state.pos))
+                    source?.add('flow', newPos)
+    
+                // let curLevel = blockState.get('waterLevel') ?? 0
+                // if(curLevel == 8) continue
+    
+                // const spread = Math.min(maxSpread, maxLevel - curLevel, waterLevel)
+                // curLevel += spread
+                // waterLevel -= spread
+                
+            }
+        } else {
+            for(let holeDir of holes) {
+                newPos = state.pos.clone().add(holeDir)
+                if(this.spread(world, newPos, waterLevel - 1, state.pos.clone())?.set('source', state.get('source') ?? state.pos))
+                    source?.add('flow', newPos)
+                
+            }
         }
+
         return false
     }
 
@@ -100,8 +111,8 @@ export default class Liquid extends Block {
         let blockState = world.getBlockState(pos) 
         const curLevel = blockState?.get('liquidLevel') ?? 0
 
-        if(this.canReplicate && level == this.spreadDist - 1 && curLevel == this.spreadDist - 1) // creating water sources
-            level = this.spreadDist 
+        // if(this.canReplicate && level == this.spreadDist - 1 && curLevel == this.spreadDist - 1) // creating water sources
+        //     level = this.spreadDist 
 
         if(curLevel >= level || (blockState && blockState.block.baseKey !== this.baseKey)) return
 
@@ -122,6 +133,37 @@ export default class Liquid extends Block {
         chunk.addVoxel(pos, block.id, blockState)
 
         return blockState
+    }
+
+    findHoles(world, pos, radius = 5) {
+        let shortest = Infinity
+        let holeDirs = []
+        
+        for(let i = -radius; i <= radius; i++) {
+            for(let j = -radius; j <= radius; j++) {
+                const tempPos = pos.clone().add(new Vector3(i, 0, j))
+                if(!Liquid.checkBlock(world, tempPos)) continue
+                if(Liquid.checkBlock(world, tempPos.add(this.flowDirection))) {
+                    const dir = tempPos.sub(pos).setY(0)
+                    const len = dir.length()
+                    if(len < shortest) {
+                        holeDirs = [dir]
+                        shortest = len
+                    } else if(len == shortest) {
+                        holeDirs.push(dir)
+                    }
+                }
+            }
+        }
+        const dirs = []
+        for(let dir of holeDirs) {
+            for(let i = 0; i < 3; i++) {
+                let comp = dir.getComponent(i)
+                if(comp != 0) 
+                    dirs.push(new Vector3(0, 0, 0).setComponent(i, Math.sign(comp)))
+            }
+        }
+        return dirs
     }
 
     static checkBlock(world, pos) {
