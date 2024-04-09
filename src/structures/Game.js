@@ -14,6 +14,8 @@ import OneChunkGenerator from './generators/OneChunkGenerator.js';
 
 export default class Game {
 
+    static #ID = 0
+
     constructor(renderer, camera){
         window.game = this
 
@@ -106,7 +108,13 @@ export default class Game {
     }
 
     addUpdateSub(obj){
-        if('Update' in obj) this.updateSubs.push({ obj, clock: new Clock()})
+        if('Update' in obj) {
+            if(!obj.id) {
+                console.warn("No ID for", obj, "which subscribed to Update, given", Game.#ID)
+                obj.id = Game.#ID++
+            }
+            this.updateSubs.push({ obj, clock: new Clock()})
+        }
         else console.warn('No Update method!', obj);
     }
 

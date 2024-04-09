@@ -10,11 +10,11 @@ export default class LivingEntity {
 
     constructor(model){
         this.model = model
-        this.loadModel(model)
 
 
         this.health = 100
 
+        this.weight = 1
         this.velocity = new Vector3(0, 0, 0)
         this.chunkCoords = new Vector2(0, 0)
         this.vertTarget = 0
@@ -120,7 +120,7 @@ export default class LivingEntity {
 
     calculateVelocity(delta){
         if(!this.grounded){
-            this.velocity.y += delta * this.world.gravity * 1.5
+            this.velocity.y += delta * this.world.gravity * 1.5 * this.weight
         }
         
         const Y = this.velocity.y
@@ -171,13 +171,9 @@ export default class LivingEntity {
         return AABBs        
     }
 
-    loadModel(model){
-        model.bb = new Box3().setFromObject(model)
-
-        // model.h = geometry.parameters.height
-        // model.w = geometry.parameters.width
-        // model.d = geometry.parameters.depth
-        
-        return model
+    delete() {
+        this.model.removeFromParent()
+        window.game.removeUpdateSub(this)
+        console.log('deleted', this)
     }
 }

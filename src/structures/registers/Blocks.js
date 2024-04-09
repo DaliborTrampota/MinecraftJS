@@ -5,6 +5,7 @@ import FurnaceBlock from "../blocks/FurnaceBlock.js";
 import VoxelBlock from "../blocks/VoxelBlock.js";
 import AbstractRegister from "./AbstractRegister.js";
 import WaterBlock from "../blocks/WaterBlock.js";
+import PhysicalBlock from "../blocks/PhysicalBlock.js";
 
 export default class Blocks extends AbstractRegister {
 
@@ -52,8 +53,8 @@ export default class Blocks extends AbstractRegister {
         this.STONE = this.register(new Block('stone', Material.SOLID))
         this.COBBLESTONE = this.register(new Block('cobblestone', Material.SOLID))
         this.MOSSY_COBBLESTONE = this.register(new Block('mossy_cobblestone', Material.SOLID))
-        this.GRAVEL = this.register(new Block('gravel', Material.SOLID))
-        this.SAND = this.register(new Block('sand', Material.SOLID))
+        this.GRAVEL = this.register(new PhysicalBlock('gravel', Material.SOLID).setWeight(0.8))
+        this.SAND = this.register(new PhysicalBlock('sand', Material.SOLID).setWeight(0.6))
         this.SANDSTONE = this.register(new Block('sandstone', Material.SOLID))
         this.END_STONE = this.register(new Block('end_stone', Material.SOLID))
         this.FURNACE = this.register(new FurnaceBlock('furnace', Material.SOLID))
