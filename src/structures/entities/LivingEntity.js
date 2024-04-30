@@ -13,6 +13,7 @@ export default class LivingEntity {
 
 
         this.health = 100
+        this.speed = 2
 
         this.weight = 1
         this.velocity = new Vector3(0, 0, 0)
@@ -124,14 +125,14 @@ export default class LivingEntity {
         }
         
         const Y = this.velocity.y
-        this.velocity = moveTowards(this.velocity.clone(), this.moveDirection.clone(), this.grounded ? BASE_PLAYER_SETTINGS.acceleration * delta : BASE_PLAYER_SETTINGS.airDrag * delta)
+        this.velocity = moveTowards(this.velocity.clone(), this.moveDirection.clone().multiplyScalar(this.speed), this.grounded ? BASE_PLAYER_SETTINGS.acceleration * delta : BASE_PLAYER_SETTINGS.airDrag * delta)
         this.velocity.y = clamp(Y, -80, 20)//todo implement drag
 
         let dir = this.model.getWorldDirection(new Vector3())
         let rot = Math.atan2(dir.x, dir.z);
         const worldDir = this.velocity.applyAxisAngle(Vector3.UpC, rot)
         this.grounded = false
-        for(let i = 0; i < 3; i++)//fixes weird bug where the player would get stuck in a block
+        for(let i = 0; i < 3; i++)
             this.collide(worldDir, delta)
         this.velocity.applyAxisAngle(Vector3.UpC, -rot)
     }

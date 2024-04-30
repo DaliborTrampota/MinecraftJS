@@ -2,6 +2,7 @@ import AbstractRegister from "./AbstractRegister.js";
 import MobBuilder from "../entities/MobBuilder.js";
 import BaseAI from "../entities/ai/BaseAI.js";
 import SlimeAI from "../entities/ai/SlimeAI.js";
+import RandomWalkAI from "../entities/ai/RandomWalkAI.js";
 
 export default class Entities extends AbstractRegister {
 
@@ -30,7 +31,7 @@ export default class Entities extends AbstractRegister {
     }
 
     static init() {
-        this.COW = this.register(new MobBuilder('cow').setAI(BaseAI))
+        this.COW = this.register(new MobBuilder('cow').setAI(RandomWalkAI))
         this.SLIME = this.register(new MobBuilder('slime').setAI(SlimeAI))
     }
 }

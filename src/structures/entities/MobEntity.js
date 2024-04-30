@@ -11,6 +11,7 @@ export default class MobEntity extends LivingEntity {
         this.mobData = mobData
 
         this.maxUpStep = 1.1
+        this.speed = 3
     }
 
     Update(delta) {
