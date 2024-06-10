@@ -99,13 +99,16 @@ export default class TerrainBuilder {
             const drawCall = (materialGroups[material] ??= new DrawCall(material))
             if (breaking)  {
                 const breakID = TextureManager.atlasMap.get(`break_${breaking.progress}`)
-                const breakUVs = VoxelBuilder.getUVs(blockData.getFace(side, !shouldDrawFace, true).uvs, TextureManager.textureMap.get(`break_${breaking.progress}`))
+                const breakUVs = VoxelBuilder.getUVs(
+                    blockData.getFace(side, !shouldDrawFace, true).uvs, 
+                    TextureManager.textureMap.get(`break_${breaking.progress}`)
+                )
+                
                 const breakDrawCall = (materialGroups[breakID] ??= new DrawCall(breakID))
                 breakDrawCall.vertices.push(...verts)
                 breakDrawCall.uvs.push(...breakUVs)
                 breakDrawCall.ao.push(...new Array(verts.length / 3).fill(1))
                 //breakingArr.push({ offset: drawCall.vertices.length / 3, uvs: TextureManager.textureMap.get(`break_${breaking.progress}`) })
-                console.log(breakDrawCall)
             }
 
             if (blockData.voxel || !WORLD_SETTINGS.ambientOcclusion) {
@@ -118,6 +121,12 @@ export default class TerrainBuilder {
             drawCall.uvs.push(...uvs)
 
         }
+    }
+
+    updateGroup(index, textureID, uvs) {
+        const group = this.geometry.groups[index]
+        group.materialIndex = textureID
+        this.UVs.splice(group.start, group.count, uvs)
     }
 
     processDrawCall(drawCall) {
