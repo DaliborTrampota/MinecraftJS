@@ -12,6 +12,7 @@ export default class Block {
         this.resistance = 0
 
         this.transparent = false
+        this.selfCulled = false
         this.solid = true
 
         this.textures = {}
@@ -49,8 +50,9 @@ export default class Block {
         return this
     }
 
-    isTransparent() {
+    isTransparent(selfCulled = false) {
         this.transparent = true
+        this.selfCulled = selfCulled
         return this
     }
 

@@ -9,6 +9,14 @@ export default class OverworldGenerator {
         this.biomeGenerator = new BiomeGenerator(register)
     }
 
+    getBiome(x, y) {
+        return this.biomeGenerator.getBiome(x, y)
+    }
+
+    getHeight(x, y) {
+        return this.biomeGenerator.getHeight(x, y)
+    }
+
     getVoxel(pos) {
         const height = Math.floor(this.biomeGenerator.getHeight(pos.x, pos.z))
         const y = Math.floor(pos.y)

@@ -1,13 +1,17 @@
+import Features from '../registers/Features.js'
 import Biome from './Biome.js'
 
 export default class OverworldBiomes {
     
     static forest() {
         return new Biome('forest').setTemperature(0.5).setHumidity(0.35).setAltitude(0.5)
+            .addFeature(Features.TREE, 0.02)
+            .addFeature(Features.POND, 0.005)
     } 
 
     static desert() {
         return new Biome('desert').setTemperature(0.9).setHumidity(0.15).setAltitude(0.3)
+            .addFeature(Features.POND, 0.002)
     }
 
     static hills() {
@@ -16,6 +20,8 @@ export default class OverworldBiomes {
 
     static plains() {
         return new Biome('plains').setTemperature(0.5).setHumidity(0.5).setAltitude(0.5)
+            .addFeature(Features.TREE, 0.005)
+            .addFeature(Features.POND, 0.01)
     }
 
     static taiga() {
@@ -36,5 +42,9 @@ export default class OverworldBiomes {
 
     static badlands() {
         return new Biome('badlands').setTemperature(2).setHumidity(0).setAltitude(0.5)
+    }
+
+    static ocean() {
+        return new Biome('ocean')
     }
 }

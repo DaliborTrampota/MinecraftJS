@@ -65,6 +65,7 @@ export default class Blocks extends AbstractRegister {
         this.SLAB = this.register(new VoxelBlock('slab', Material.SOLID))
         this.OAK_VERTICAL_SLAB = this.register(new VoxelBlock('oak_vertical_slab', Material.SOLID))
         this.OAK_LOG = this.register(new Block('oak_log', Material.SOLID))
+        this.LEAVES = this.register(new Block('leaves', Material.SOLID).isTransparent(true))
         this.TABLE = this.register(new VoxelBlock('table', Material.SOLID))
         this.CHAIR = this.register(new VoxelBlock('chair', Material.SOLID))
         this.WATER = this.register(new WaterBlock('water_still', Material.LIQUID).hasNoCollisions().isTransparent())

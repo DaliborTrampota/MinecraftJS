@@ -60,6 +60,9 @@ export default class BiomeGenerator {
         }
         //console.log(curClimate)
 
+        let height = Math.floor(this.getHeight(x, y))
+        if(height < WORLD_SETTINGS.globalSeaLevel) return this.register.getBiome('ocean')
+
         const biomes = Array.from(this.register.biomes.map.values(), key => this.register.getBiome(key))
         const biomesSorted = biomes.sort((a, b) => this.fitness(curClimate, a) - this.fitness(curClimate, b))
         //console.log(biomesSorted, biomesSorted.map(b => this.fitness(curClimate, b[1])))
