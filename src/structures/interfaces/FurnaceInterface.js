@@ -9,7 +9,6 @@ export default class FurnaceInterface extends MachineInterface {
 
     constructor(entity, inventory) {
         super(entity, inventory)
-        this.entity = entity
         this.html = new InterfaceFactory(5, 5, 'furnace')
             .section(3, 2, 0, 0, 'input')
             .section(1, 1, 4, 2, 'fuel')
@@ -18,6 +17,7 @@ export default class FurnaceInterface extends MachineInterface {
 
         this.entity.addEventListener('progress', this.#updateList)//.bind(this))
         this.entity.addEventListener('recipeFinished', this.#onRecipeFinish)//.bind(this))
+
         this.createLayers()
     }
 
@@ -25,26 +25,6 @@ export default class FurnaceInterface extends MachineInterface {
         super.close()
         this.entity.removeEventListener('progress', this.#updateList)//.bind(this))
         this.entity.removeEventListener('recipeFinished', this.#onRecipeFinish)//.bind(this))
-    }
-
-    createLayers() {
-        const layers = document.createElement('div')
-        layers.setAttribute('class', 'gui-layers')
-        // this.layersDiv.setAttribute('class', 'gui-container')
-        this.html.appendChild(layers)
-        this.layersDiv = layers
-    }
-
-    drawLayers() {
-        this.layersDiv.innerHTML = ''
-        
-        for(let layer in this.layers) {
-            // const layerImg = document.createElement('img')
-            // layerImg.setAttribute('class', 'pixelated gui-bg')
-            // layerImg.setAttribute('alt', 'progress arrow')
-            // layerImg.src = this.layers[layer]
-            this.layersDiv.appendChild(this.layers[layer])
-        }
     }
 
     createProgressLayers(percentage) {
@@ -76,9 +56,7 @@ export default class FurnaceInterface extends MachineInterface {
     }
 
     updateLayers({ detail: recipe }) {
-        //console.log(recipe)
         this.layers.progress = this.createProgressLayers(recipe.progress)
-
         this.drawLayers()
     }
 

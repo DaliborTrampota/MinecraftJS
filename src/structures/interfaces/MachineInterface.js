@@ -21,13 +21,14 @@ export default class MachineInterface extends Interface {
         return slots
     }
 
-    setInterface(html, background) {
-        super.setInterface(html, background)
-        this.createLayers()
-        // for(const layer in this.layers) {
-        //     this.layers[layer].node.src = this.layers[layer].image
-        // }
-    }
+    // setInterface(html, background) {
+    //     console.log("setting interface")
+    //     super.setInterface(html, background)
+    //     this.createLayers()
+    //     // for(const layer in this.layers) {
+    //     //     this.layers[layer].node.src = this.layers[layer].image
+    //     // }
+    // }
 
     update() {
         console.log('update')
@@ -39,9 +40,38 @@ export default class MachineInterface extends Interface {
         }
     }
 
-    createLayers() {}
+    /**
+     * Creates container for layers
+     */
+    createLayers() {
+        const layers = document.createElement('div')
+        layers.setAttribute('class', 'gui-layers')
+        // this.layersDiv.setAttribute('class', 'gui-container')
+        this.html.appendChild(layers)
+        this.layersDiv = layers
+    }
 
+    /**
+     * Runs on every 'progress' event from recipe.
+     * Need to manually subscribe to the progress event on entity instance.
+     * @param {Number} delta 
+     */
     updateLayers(delta) {}
+
+    /**
+     * Draws layers on the screen. Should be called from updateLayers.
+     */
+    drawLayers() {
+        this.layersDiv.innerHTML = ''
+        
+        for(let layer in this.layers) {
+            // const layerImg = document.createElement('img')
+            // layerImg.setAttribute('class', 'pixelated gui-bg')
+            // layerImg.setAttribute('alt', 'progress arrow')
+            // layerImg.src = this.layers[layer]
+            this.layersDiv.appendChild(this.layers[layer])
+        }
+    }
 
     // dragStart(e) {
     //     super.dragStart(e)

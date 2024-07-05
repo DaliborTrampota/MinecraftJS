@@ -1,6 +1,6 @@
-import FurnaceEntity from "../entities/blocks/FurnaceEntity.js";
-import FurnaceInterface from "../interfaces/FurnaceInterface.js";
-import FunctionalBlock from "./FunctionalBlock.js";
+import FurnaceEntity from "../../entities/blocks/FurnaceEntity.js";
+import FurnaceInterface from "../../interfaces/FurnaceInterface.js";
+import FunctionalBlock from "../FunctionalBlock.js";
 
 
 export default class FurnaceBlock extends FunctionalBlock {
@@ -23,4 +23,6 @@ export default class FurnaceBlock extends FunctionalBlock {
         }
         return false
     }
+
+    onRemove() {}
 }

@@ -1,11 +1,12 @@
 import { Material } from "../../tools/Constants.js";
 import Block from "../blocks/Block.js";
 import Items from "./Items.js";
-import FurnaceBlock from "../blocks/FurnaceBlock.js";
+import FurnaceBlock from "../blocks/machines/FurnaceBlock.js";
 import VoxelBlock from "../blocks/VoxelBlock.js";
 import AbstractRegister from "./AbstractRegister.js";
 import WaterBlock from "../blocks/WaterBlock.js";
 import PhysicalBlock from "../blocks/PhysicalBlock.js";
+import CraftingTableBlock from "../blocks/machines/CraftingTable.js";
 
 export default class Blocks extends AbstractRegister {
 
@@ -65,9 +66,12 @@ export default class Blocks extends AbstractRegister {
         this.SLAB = this.register(new VoxelBlock('slab', Material.SOLID))
         this.OAK_VERTICAL_SLAB = this.register(new VoxelBlock('oak_vertical_slab', Material.SOLID))
         this.OAK_LOG = this.register(new Block('oak_log', Material.SOLID))
+        this.OAK_PLANKS = this.register(new Block('oak_planks', Material.SOLID))
+        this.LEAVES = this.register(new Block('leaves', Material.SOLID).isTransparent(true))
         this.TABLE = this.register(new VoxelBlock('table', Material.SOLID))
         this.CHAIR = this.register(new VoxelBlock('chair', Material.SOLID))
         this.WATER = this.register(new WaterBlock('water_still', Material.LIQUID).hasNoCollisions().isTransparent())
+        this.CRAFTING_TABLE = this.register(new CraftingTableBlock('crafting_table', Material.SOLID))
     }
 
     static getByTexture(texture) {
