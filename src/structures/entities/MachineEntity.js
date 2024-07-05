@@ -51,7 +51,7 @@ export default class MachineEntity extends BlockEntity {
                 this.currentRecipe = recipe.time === -1 ? 
                     new InstantRecipe(recipe, this) :
                     new ActiveRecipe(recipe, this)
-        } else {
+        } else if(this.currentRecipe) {
             if(this.currentRecipe.time === -1) {
                 this.outputSlots = this.outputSlots.map(s => null)
             }

@@ -27,6 +27,10 @@ export default class InventoryInterface extends Interface {
         return this.player.inventory
     }
 
+    get entity() {
+        return this.player.inventory
+    }
+
     selectHotbar(index, oldIdx) {
         let curSlot = this.htmlHotbarSlots[oldIdx]
         let newSlot = this.htmlHotbarSlots[index]
@@ -86,36 +90,38 @@ export default class InventoryInterface extends Interface {
         return slots
     }
 
-    swap(origin, target, data) {
-        const stack = super.swap(origin, target, data)
+    swapOrMerge(origin, target, data) {
+        const stack = super.swapOrMerge(origin, target, data)
         this.inv.onSlotChange(stack, data.targetSection, data.targetID)
         return stack
     }
 
     onDrop(e){
         const data = super.onDrop(e)
+        if (!data) return false
         
         const originInterface = this.interfaces[data.originInterface] ?? this
         const targetSlots = this.slots(data.targetSection)
         const originSlots = originInterface.slots(data.originSection)
 
-        const stack = this.swap(originSlots, targetSlots, data)
+        const stack = this.swapOrMerge(originSlots, targetSlots, data)
         this.update()
         if(this != originInterface)
             originInterface.update()
-
+        
         originInterface.entity.onSlotChange(stack, data.originSection)
     }
 
     allowDrop(e) {
         const [ifaceName, slotID, section] = e.dataTransfer.types.find(t => t.startsWith("dragover"))?.split(":")?.slice(1) ?? []
         if(!ifaceName || ifaceName == e.target.parentNode.dataset.interface) return super.allowDrop(e)
+
+        const originInterface = this.interfaces[ifaceName] ?? this
+        const originSlots = originInterface.slots(section)
+        const originStack = originSlots[Number(slotID)]
         
-        //const originInterface = this.interfaces[ifaceName] ?? this
-        //const originSlots = originInterface.slots(section)
-        //const stack = originSlots[Number(slotID)]
-        
-        const curStack = this.slots(e.target.dataset.section)[Number(e.target.dataset.id)]
-        !curStack ? super.allowDrop(e) : console.log("Slot already occupied")
+        this.allowDropMergeCheck(e.target.dataset.section, Number(e.target.dataset.id), originStack) 
+            ? e.preventDefault() 
+            : console.debug("Slot already occupied")
     }
 }

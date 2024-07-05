@@ -57,12 +57,10 @@ export default class CraftingTableInterface extends MachineInterface {
         this.layers.progress = this.createArrow(visible)
         this.update()
         this.drawLayers()
-        console.log("preview")
     }
 
     onRecipeFinish({ detail: recipe }) {
         this.update()
-        console.log("finish")
     }
 
 }

@@ -31,7 +31,6 @@ export default class MachineInterface extends Interface {
     // }
 
     update() {
-        console.log('update')
         for(let i = 0; i < this.htmlSlots.length; ++i) {
             let ID = this.htmlSlots[i].dataset.id
             let section = this.htmlSlots[i].dataset.section
@@ -78,8 +77,8 @@ export default class MachineInterface extends Interface {
     //     this.entity.onSlotChange()
     // }
 
-    swap(origin, target, data) {
-        const stack = super.swap(origin, target, data)
+    swapOrMerge(origin, target, data) {
+        const stack = super.swapOrMerge(origin, target, data)
         this.entity.onSlotChange(stack, data.targetSection, data.targetID)
         return stack
     }
@@ -91,7 +90,7 @@ export default class MachineInterface extends Interface {
         const originSlots = originInterface.slots(data.originSection)
         const targetSlots = this.slots(data.targetSection)
 
-        const stack = this.swap(originSlots, targetSlots, data)
+        const stack = this.swapOrMerge(originSlots, targetSlots, data)
 
         originInterface.update()
         if(this != originInterface)
@@ -103,13 +102,19 @@ export default class MachineInterface extends Interface {
 
     allowDrop(e) {
         const [ifaceName, slotID, section] = e.dataTransfer.types.find(t => t.startsWith("dragover"))?.split(":")?.slice(1) ?? []
-        if(!ifaceName) return super.allowDrop(e)
+        if(!ifaceName || ifaceName == e.target.parentNode.dataset.interface) return super.allowDrop(e)
         
         const originInterface = ifaceName == this.name ? this : this.inventory//todo figure out
         const originSlots = originInterface.slots(section)
-        const stack = originSlots[Number(slotID)]
+        const originStack = originSlots[Number(slotID)]
 
-        this.entity.validateItem(e.target.dataset.section, stack?.item) ? super.allowDrop(e) : console.log("Invalid item")
+        if(!this.entity.validateItem(e.target.dataset.section, originStack?.item))
+            return console.debug("Invalid item")
+        
+        this.allowDropMergeCheck(e.target.dataset.section, Number(e.target.dataset.id), originStack) 
+            ? e.preventDefault() 
+            : console.debug("Slot already occupied")
+        
     }
 
     close() {

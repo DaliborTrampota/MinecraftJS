@@ -33,7 +33,7 @@ export default class InstantRecipe {
     output() {
         const slots = this.entity.outputSlots
         let outputs = this.outputs
-        console.log('output', outputs, slots)
+        
         for(let i = 0; i < slots.length; ++i) {
             if(slots[i]) continue
             slots[i] = outputs.shift()
