@@ -111,4 +111,8 @@ export default class MachineInterface extends Interface {
 
         this.entity.validateItem(e.target.dataset.section, stack?.item) ? super.allowDrop(e) : console.log("Invalid item")
     }
+
+    close() {
+        //do not call close on interface, inventory calls it, only once request pointer lock
+    }
 }
