@@ -21,6 +21,7 @@ export default class MachineInterface extends Interface {
         return slots
     }
 
+
     // setInterface(html, background) {
     //     console.log("setting interface")
     //     super.setInterface(html, background)
@@ -34,7 +35,7 @@ export default class MachineInterface extends Interface {
         for(let i = 0; i < this.htmlSlots.length; ++i) {
             let ID = this.htmlSlots[i].dataset.id
             let section = this.htmlSlots[i].dataset.section
-            let stack = this.entity.slots(section)[ID]
+            let stack = this.slots(section)[ID]
             stack ? InterfaceFactory.setSlot(this.htmlSlots[i], stack) : InterfaceFactory.clearSlot(this.htmlSlots[i])
         }
     }

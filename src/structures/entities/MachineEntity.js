@@ -30,8 +30,6 @@ export default class MachineEntity extends BlockEntity {
         return slots.findIndex(s => s?.item.id == stack.item.id && !s.full)
     }
 
-
-
     onSlotChange(stack, section, id) {
         console.log('onSlotChange', section, id)
         if (section == 'input') {

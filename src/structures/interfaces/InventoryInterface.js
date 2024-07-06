@@ -30,6 +30,12 @@ export default class InventoryInterface extends Interface {
     get entity() {
         return this.player.inventory
     }
+    
+    slots(section) {
+        const slots = this.inv[section]
+        if(!slots) throw new Error(`Invalid inventory section: ${section}`)
+        return slots
+    }
 
     selectHotbar(index, oldIdx) {
         let curSlot = this.htmlHotbarSlots[oldIdx]
@@ -82,12 +88,6 @@ export default class InventoryInterface extends Interface {
             if(!this.inv.hotbar[i]?.amount) this.inv.hotbar[i] = undefined
             setSlot(html, this.inv.hotbar[i])
         }
-    }
-
-    slots(section) {
-        const slots = this.inv[section]
-        if(!slots) throw new Error(`Invalid inventory section: ${section}`)
-        return slots
     }
 
     swapOrMerge(origin, target, data) {

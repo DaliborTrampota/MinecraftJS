@@ -25,10 +25,6 @@ export default class FurnaceEntity extends MachineEntity {
         this.fuelMap.set(Items.OAK_LOG, 200)
     }
 
-    slots(section) {
-        return this[`${section}Slots`]
-    }
-
     validateItem(slot, item) {
         if(slot == 'input')
             return true//this.findRecipe(item)

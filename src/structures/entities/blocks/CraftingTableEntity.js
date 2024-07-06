@@ -15,10 +15,6 @@ export default class CraftingTableEntity extends MachineEntity {
         this.inputRows = [3, 3, 3]
     }
 
-    slots(section) {
-        return this[`${section}Slots`]
-    }
-
     validateItem(slot, item) {
         if(slot == 'input')
             return true//this.findRecipe(item)
@@ -56,15 +52,4 @@ export default class CraftingTableEntity extends MachineEntity {
         return !Boolean(stack.amount)
         
     }
-
-    isFuel(item) {
-        return this.fuelMap.has(item)
-    }
-
-    
-    onSlotChange(stack, section, id) {
-        super.onSlotChange(stack, section, id)
-    }
-
-
 }
