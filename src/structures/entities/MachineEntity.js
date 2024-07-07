@@ -1,6 +1,9 @@
 import BlockEntity from "./BlockEntity.js"
 import Recipes from "../registers/Recipes.js";
+
 import ActiveRecipe from "../recipes/ActiveRecipe.js"
+import InstantRecipe from "../recipes/InstantRecipe.js";
+
 import Stack from "../item/Stack.js"
 
 
@@ -15,24 +18,62 @@ export default class MachineEntity extends BlockEntity {
         this.inputRows = []
 
         this.validRecipes = []
-        this.activeRecipe = null
+        this.currentRecipe = null
     }
     
     get hasInterface() {
         return Boolean(this.interfaceClass)
     }
 
-    Update(delta) {
-        super.Update(delta)
-
-        if(this.activeRecipe) {
-            this.activeRecipe.update(delta)
-        }
-    }
 
     getSlotFor(slots, stack) {
         return slots.findIndex(s => s?.item.id == stack.item.id && !s.full)
     }
+
+    onSlotChange(stack, section, id) {
+        console.log('onSlotChange', section, id)
+        if (section == 'input') {
+            this.inputChanged()
+        } else if(section == 'output') {
+            this.outputChanged()
+        }
+    }
+
+
+    inputChanged() {
+        this.findRecipes()
+        console.log(this.validRecipes)
+        if(this.validRecipes.exact.length) {
+            const recipe = this.validRecipes.exact[0]
+            if (this.currentRecipe?.recipe.key != recipe.key)
+                this.currentRecipe = recipe.time === -1 ? 
+                    new InstantRecipe(recipe, this) :
+                    new ActiveRecipe(recipe, this)
+        } else if(this.currentRecipe) {
+            if(this.currentRecipe.time === -1) {
+                this.outputSlots = this.outputSlots.map(s => null)
+            }
+            this.currentRecipe = null
+            this.dispatchEvent(new CustomEvent('recipePreview', { detail: false }))
+            this.dispatchEvent(new CustomEvent('progress', { detail: 0 }))
+        }
+
+    }
+
+    outputChanged() {
+        if(this.currentRecipe.time === -1) {
+            this.currentRecipe.consume()
+            this.currentRecipe.output()
+        } else {
+            this.currentRecipe.active = this.currentRecipe.canOutput()
+        }
+    }
+
+    Update(delta) {
+        super.Update(delta)
+        this.currentRecipe?.update(delta)
+    }
+
 
     findRecipes() {
         let acc = 0
@@ -43,26 +84,8 @@ export default class MachineEntity extends BlockEntity {
         this.validRecipes = Recipes.getValid(this.block.key, inputted)
     }
 
-    onSlotChange(stack, section, id) {
-        console.log(section)
-        if(section == 'input') {
-            this.findRecipes()
-            console.log(this.validRecipes)
-            if(this.validRecipes.exact.length) {
-                this.activeRecipe = new ActiveRecipe(this.validRecipes.exact[0], this)
-            }else {
-                this.activeRecipe = null
-            }
-        }
-        if(section == 'output') {
-            if(this.activeRecipe) {
-                this.activeRecipe.active = this.activeRecipe.canOutput()
-            }
-        }
-    }
-
     
-    putToSlots(slots, stacks) {
+    _putToSlots(slots, stacks) {
         stck:
         for(let stack of stacks) {
             let emptyIdx = -1
@@ -79,7 +102,7 @@ export default class MachineEntity extends BlockEntity {
         return true
     }
 
-    hasSpaceForOutput(slots, output) {
+    _hasSpaceForOutput(slots, output) {
         for(let stack of output) {
             let emptyIdx = -1
             for(let i = 0; i < slots.length; i++) {

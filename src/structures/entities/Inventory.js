@@ -1,22 +1,34 @@
+import InventoryCrafting from "../interfaces/InventoryCrafting.js"
 import InventoryInterface from "../interfaces/InventoryInterface.js"
+import InstantRecipe from "../recipes/InstantRecipe.js"
+import Recipes from "../registers/Recipes.js"
 
 
-export default class Inventory {
+export default class Inventory extends EventTarget {
 
     static COL = 10
     static ROW = 4
     static HOTBAR_SIZE = 10
 
     constructor(player) {
+        super()
         this.interface = new InventoryInterface(player)
+        this.crafting = new InventoryCrafting(player, this)
 
         this.slots = new Array(Inventory.COL * Inventory.ROW + Inventory.HOTBAR_SIZE)
         this.armor = new Array(4)
         this.offhand = new Array(1)
         this.hotbar = this.slots.view(this.slots.length - Inventory.HOTBAR_SIZE, this.slots.length) //view to the hotbar slots in the inventory
+
+        this.inputSlots = new Array(4)
+        this.outputSlots = new Array(1)
+
+        this.inputRows = [2, 2]
+        this.validRecipes = []
+        this.currentRecipe = null
         
         this.selectedSlot = 0
-
+        
         //window.game.addUpdateSub(this)
     }
 
@@ -79,10 +91,60 @@ export default class Inventory {
         
         this.interface.updateHotbar()
         return toDrop
-    }  
+    } 
 
-    onSlotChange(stack, section, id) {
-        
+    dropCrafting() {
+
     }
 
+    validateItem(section, _) {
+        if(section === 'output') return false
+        return true
+    }
+
+    
+    findRecipes() {
+        let acc = 0
+        let inputted = this.inputRows.map(len => {
+            acc += len
+            return [...this.inputSlots.slice(acc - len, acc)]
+        })
+        this.validRecipes = Recipes.getValid('crafting_table', inputted)
+    }
+    
+    onSlotChange(stack, section, id) {
+        if (section == 'input') {
+            this.inputChanged()
+        } else if(section == 'output') {
+            this.outputChanged()
+        }
+    }
+
+
+    inputChanged() {
+        this.findRecipes()
+        console.debug('Found recipes:', this.validRecipes)
+        if(this.validRecipes.exact.length) {
+            const recipe = this.validRecipes.exact[0]
+            if(recipe.time !== -1)
+                throw new Error('Recipe is not instant')
+
+            if (this.currentRecipe?.recipe.key != recipe.key)
+                this.currentRecipe = new InstantRecipe(recipe, this)
+
+            this.currentRecipe?.update()
+        } else if(this.currentRecipe) {
+            this.outputSlots = this.outputSlots.map(s => null)
+            this.currentRecipe = null
+            this.dispatchEvent(new CustomEvent('recipePreview', { detail: false }))
+            this.dispatchEvent(new CustomEvent('progress', { detail: 0 }))
+        }
+
+    }
+
+    outputChanged() {
+        this.currentRecipe.consume()
+        this.currentRecipe.output()
+        this.currentRecipe.update()
+    }
 }

@@ -117,7 +117,8 @@ export default class Chunk {
         }
         if(block.material == Material.AIR) return true
         if(block.material == Material.LIQUID) return blockData.id != block.id
-        if(block.transparent) return blockData.id != block.id
+        if(block.transparent) return blockData.selfCulled || blockData.id != block.id
+        
         return false
     }
 

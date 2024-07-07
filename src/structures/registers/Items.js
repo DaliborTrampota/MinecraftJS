@@ -48,6 +48,7 @@ export default class Items extends AbstractRegister {
         this.SANDSTONE = this.registerBlock(Blocks.SANDSTONE, 'DEFAULT')
         this.END_STONE = this.registerBlock(Blocks.END_STONE, 'DEFAULT')
         this.FURNACE = this.registerBlock(Blocks.FURNACE, 'DEFAULT')
+        this.CRAFTING_TABLE = this.registerBlock(Blocks.CRAFTING_TABLE, 'DEFAULT')
         this.DISPENSER = this.registerBlock(Blocks.DISPENSER, 'DEFAULT')
         this.GLASS = this.registerBlock(Blocks.GLASS, 'DEFAULT')
         // this.WATER_STILL = this.registerBlock(Blocks.WATER_STILL, 'DEFAULT')
@@ -55,6 +56,7 @@ export default class Items extends AbstractRegister {
         this.SLAB = this.registerBlock(Blocks.SLAB, 'DEFAULT')
         this.OAK_VERTICAL_SLAB = this.registerBlock(Blocks.OAK_VERTICAL_SLAB, 'DEFAULT')
         this.OAK_LOG = this.registerBlock(Blocks.OAK_LOG, 'DEFAULT')
+        this.OAK_PLANKS = this.registerBlock(Blocks.OAK_PLANKS, 'DEFAULT')
         this.TABLE = this.registerBlock(Blocks.TABLE, 'FURNITURE')
         this.CHAIR = this.registerBlock(Blocks.CHAIR, 'FURNITURE')
 
