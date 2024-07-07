@@ -145,5 +145,6 @@ export default class Inventory extends EventTarget {
     outputChanged() {
         this.currentRecipe.consume()
         this.currentRecipe.output()
+        this.currentRecipe.update()
     }
 }
