@@ -1,4 +1,4 @@
-import Features from '../registers/Features.js'
+import Features from '../../registers/Features.js'
 import Biome from './Biome.js'
 
 export default class OverworldBiomes {

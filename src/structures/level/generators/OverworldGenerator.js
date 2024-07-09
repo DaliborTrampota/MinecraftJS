@@ -1,4 +1,4 @@
-import { WORLD_SETTINGS } from "../../tools/Constants"
+import { WORLD_SETTINGS } from "../../../tools/Constants"
 import BiomeGenerator from "./BiomeGenerator"
 
 

@@ -5,7 +5,8 @@ import ItemEntity from "../entities/ItemEntity.js";
 import LootTable from "../LootTable.js";
 import TerrainBuilder from "./TerrainBuilder.js";
 import WaterBlock from '../blocks/WaterBlock.js';
-import Feature from '../generators/Feature.js';
+import Feature from '../level/generators/Feature.js';
+
 const { chunkSize, chunkHeight } = WORLD_SETTINGS
 
 export default class Chunk {

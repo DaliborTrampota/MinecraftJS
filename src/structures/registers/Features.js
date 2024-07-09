@@ -1,7 +1,7 @@
 import { Vector3 } from "three";
-import Feature from "../generators/Feature";
+import Feature from "../level/generators/Feature";
 import AbstractRegister from "./AbstractRegister";
-import Palette from "../generators/Palette";
+import Palette from "../level/generators/Palette";
 import Blocks from "./Blocks";
 
 

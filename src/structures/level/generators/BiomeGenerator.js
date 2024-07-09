@@ -1,6 +1,6 @@
 
-import { WORLD_SETTINGS } from '../../tools/Constants.js';
-import NoiseGenerator from '../../tools/Noise.js'
+import { WORLD_SETTINGS } from '../../../tools/Constants.js';
+import NoiseGenerator from '../../../tools/Noise.js'
 
 export default class BiomeGenerator {
     
