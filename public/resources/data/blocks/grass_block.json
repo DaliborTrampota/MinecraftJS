@@ -1,9 +1,0 @@
-{
-    "geometry": "cube",
-    
-    "textures": {
-        "top": "grass_block_top",
-        "bottom": "dirt",
-        "side": "grass_block_side"
-    }
-}
