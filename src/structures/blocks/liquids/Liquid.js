@@ -42,7 +42,7 @@ export default class Liquid extends Block {
     update(world, state) {
         let waterLevel = state.get('liquidLevel'), source
         if(source = state.get('source')) {
-            if(!(source = world.getBlockState(source))) {
+            if(!(source = world.getBlockState(source))) { // if source is destroyed?
                 state.set('liquidLevel', --waterLevel)
             } else {
                 state.set('dirty', false)
