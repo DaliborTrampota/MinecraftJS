@@ -13,7 +13,7 @@
   "type": "module",
   "scripts": {
     "server": "cd server & node --env-file=.env server.js",
-    "dev": "cd public & vite",
+    "dev": "vite",
     "build": "vite build"
   },
   "author": "Dalibor Trampota",
