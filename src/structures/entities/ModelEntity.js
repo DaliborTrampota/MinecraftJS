@@ -6,9 +6,10 @@ import Chunk from '../level/Chunk.js';
 import AABB from '../../tools/AABB.js';
 
 
-export default class Entity {
+export default class ModelEntity {
 
-    constructor(model){
+    constructor(world, model){
+        this.world = world
         this.model = model
 
         this.velocity = new Vector3(0, 0, 0)
@@ -16,12 +17,6 @@ export default class Entity {
         this.vertTarget = 0
 
         this.grounded = false
-        this.holding = {
-            clickStack: [],
-            RMB: false,
-            LMB: false
-        }
-
         this.maxUpStep = 0.5
     }
 
@@ -81,8 +76,8 @@ export default class Entity {
      * 
      */
     collide(target, delta) {
-        const AABBs = this.surroundingAABBs()
         const entityBB = this.getCollisionAABB()
+        const AABBs = this.surroundingAABBs(entityBB)
         
         let result = { time: 1 }
         for(let bb of AABBs) {
@@ -92,11 +87,10 @@ export default class Entity {
         }
         
         if(result.time != 1) {
-            const yDiff = result.bb.yMax - entityBB.yMin//this.feetPos.y
+            const yDiff = result.bb.yMax - entityBB.yMin
             if(this.grounded && yDiff > 0 && yDiff <= this.maxUpStep) {
                 this.position.y += yDiff + 0.05
                 return
-            //    this.grounded = true
             }
 
             const remainingSpeed = target.clone().multiplyScalar(1 - result.time)
@@ -138,17 +132,15 @@ export default class Entity {
         return AABB.fromVectors(moved.min, moved.max)//.move(this.model.getWorldPosition(new Vector3()))
     }
 
-    getCollisionAABB() {
-        return AABB.fromVectors(this.feetPos.add(new Vector3(-0.3, 0, -0.3)), this.feetPos.add(new Vector3(0.3, 1.8, 0.3)))
-    }
 
-    surroundingAABBs() {
+    surroundingAABBs(bb) {
         const AABBs = []
-        const feetPos = this.feetPos.floor()
+        const bottom = Math.floor(bb.yMin)
+        
         const RADIUS = 1
-        for(let x = feetPos.x - RADIUS; x <= feetPos.x + RADIUS; x++) {
-            for(let z = feetPos.z - RADIUS; z <= feetPos.z + RADIUS; z++) {
-                for(let y = feetPos.y + 1 + RADIUS; y >= feetPos.y - RADIUS - 1; y--) {
+        for(let x = this.position.x - RADIUS; x <= this.position.x + RADIUS; x++) {
+            for(let z = this.position.z - RADIUS; z <= this.position.z + RADIUS; z++) {
+                for(let y = bottom + 1 + RADIUS; y >= bottom - RADIUS - 1; y--) {
                     let pos = new Vector3(x, y, z)
                     if(!this.world.checkVoxel(pos)) continue // TODO
                     const bbs = AABB.fromBlock(this.world.getVoxelFromPos(pos), pos)

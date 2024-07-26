@@ -1,14 +1,14 @@
 
-import { Vector3 } from 'three';
+import { Vector2, Vector3 } from 'three';
 import { BASE_PLAYER_SETTINGS, CornerCheck, CrossCheck } from '../../tools/Constants.js';
 import { moveTowards } from '../../tools/Utils.js';
 import Chunk from '../level/Chunk.js';
 import Stack from '../item/Stack.js';
 
-import Entity from "./Entity.js";
+import ModelEntity from './ModelEntity.js';
 
 
-export default class ItemEntity extends Entity {
+export default class ItemEntity extends ModelEntity {
 
     static MERGE_ERROR = 0.01
     static MERGE_RADIUS = 2
@@ -34,11 +34,30 @@ export default class ItemEntity extends Entity {
         this.model.children[0].lookAt(target.x, this.position.y, target.z)
     }
 
+    get chunk() {
+        return window.game.world.chunks[Chunk.id(this.chunkCoords.x, this.chunkCoords.y)]
+    } 
+
+    get position() {
+        return this.model.position
+    }
+
+    set position(vector) {
+        this.model.position.copy(vector)
+        let chunk = window.game.world.getChunkFromPos(vector)
+        if(chunk) this.chunkCoords = new Vector2(chunk.x, chunk.y)
+    }
+
     get stack(){
         return new Stack(this.item, this.amount)
     }
 
-    calculateVecocity(delta){
+    calculateVelocity(delta){
+        super.calculateVelocity(delta)
+    }
+
+    
+    calculateVecocity_old(delta){
         if(!this.grounded) this.velocity.y += delta * this.world.gravity
         else this.velocity.y = 0
 
@@ -64,18 +83,6 @@ export default class ItemEntity extends Entity {
         }
         this.velocity.y = Y
         
-        if(this.velocity.z > 0 && this.back || this.velocity.z < 0 && this.front){
-            this.velocity.x += this.velocity.x > 0 ? Math.abs(this.velocity.z) : -Math.abs(this.velocity.z)
-            this.velocity.z = 0
-        }
-
-        if(this.velocity.x > 0 && this.right || this.velocity.x < 0 && this.left){
-            this.velocity.z += this.velocity.z > 0 ? Math.abs(this.velocity.x) : -Math.abs(this.velocity.x)
-            this.velocity.x = 0
-        }
-        
-        if(this.velocity.y > 0 && this.top || this.velocity.y <= 0 && this.bottom)
-            this.velocity.y = 0
     }
 
     Update(delta){

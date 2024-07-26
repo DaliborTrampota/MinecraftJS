@@ -4,18 +4,18 @@ import { clamp, moveTowards } from '../../tools/Utils.js'
 
 import Chunk from '../level/Chunk.js';
 import AABB from '../../tools/AABB.js';
+import ModelEntity from './ModelEntity.js';
 
 
-export default class LivingEntity {
+export default class LivingEntity extends ModelEntity {
 
     constructor(model){
-        this.model = model
-
+        super(undefined, model)
 
         this.health = 100
         this.speed = 2
-
         this.weight = 1
+
         this.velocity = new Vector3(0, 0, 0)
         this.chunkCoords = new Vector2(0, 0)
         this.vertTarget = 0
@@ -135,13 +135,6 @@ export default class LivingEntity {
         for(let i = 0; i < 3; i++)
             this.collide(worldDir, delta)
         this.velocity.applyAxisAngle(Vector3.UpC, -rot)
-    }
-
-    getAABB() {
-        this.model.geometry.computeBoundingBox()
-        const bb = this.model.geometry.boundingBox
-        const moved = bb.clone().applyMatrix4(this.model.matrixWorld)
-        return AABB.fromVectors(moved.min, moved.max)//.move(this.model.getWorldPosition(new Vector3()))
     }
 
     getCollisionAABB() {
