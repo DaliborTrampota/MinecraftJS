@@ -8,9 +8,9 @@ import World from './level/World.js';
 
 import Player from './player/Player.js';
 import Stack from './item/Stack.js';
-import OverworldGenerator from './generators/OverworldGenerator.js';
-import SkyBlockGenerator from './generators/SkyBlockGenerator.js';
-import OneChunkGenerator from './generators/OneChunkGenerator.js';
+import OverworldGenerator from './level/generators/OverworldGenerator.js';
+import SkyBlockGenerator from './level/generators/SkyBlockGenerator.js';
+import OneChunkGenerator from './level/generators/OneChunkGenerator.js';
 
 export default class Game {
 
