@@ -108,6 +108,7 @@ export default class TextureManager {
         return new ShaderMaterial({
             transparent: true, 
             side: DoubleSide, 
+            forceSinglePass: true,
             name: 'liquids',
             uniforms: {
                 textureAtlas: { value: atlas },
