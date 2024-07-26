@@ -1,6 +1,7 @@
 import InterfaceFactory from "./InterfaceFactory.js";
 import Interface from "./Interface.js";
 import Inventory from "../entities/Inventory.js"
+import { GAMEMODE } from "../../tools/Constants.js";
 
 
 export default class InventoryInterface extends Interface {
@@ -55,8 +56,13 @@ export default class InventoryInterface extends Interface {
             this.interfaces[iface.name] = iface
             //iface.interfaces[this.name] = this
         } else {
-            this.interfaces[this.inv.crafting.name] = this.inv.crafting
-            this.inv.crafting.open()
+            if(this.player.gamemode === GAMEMODE.CREATIVE) {
+                this.interfaces[this.inv.creative.name] = this.inv.creative
+                this.inv.creative.open()
+            } else if(this.player.gamemode === GAMEMODE.SURVIVAL) {
+                this.interfaces[this.inv.crafting.name] = this.inv.crafting
+                this.inv.crafting.open()
+            }
         }
         super.open()
         this.player.controller.inGUI = this.isOpen

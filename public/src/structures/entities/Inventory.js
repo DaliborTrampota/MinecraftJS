@@ -1,4 +1,4 @@
-import CreativeInventoryInterface from "../interfaces/CreativeInterface.js"
+import CreativeSection from "../interfaces/CreativeInterface.js"
 import InventoryCrafting from "../interfaces/InventoryCrafting.js"
 import InventoryInterface from "../interfaces/InventoryInterface.js"
 import InstantRecipe from "../recipes/InstantRecipe.js"
@@ -13,8 +13,9 @@ export default class Inventory extends EventTarget {
 
     constructor(player) {
         super()
-        this.interface = new CreativeInventoryInterface(player)
+        this.interface = new InventoryInterface(player)
         this.crafting = new InventoryCrafting(player, this)
+        this.creative = new CreativeSection()
 
         this.slots = new Array(Inventory.COL * Inventory.ROW + Inventory.HOTBAR_SIZE)
         this.armor = new Array(4)
@@ -95,7 +96,7 @@ export default class Inventory extends EventTarget {
     } 
 
     dropCrafting() {
-
+//todo
     }
 
     validateItem(section, _) {

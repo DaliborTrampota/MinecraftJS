@@ -50,9 +50,13 @@ export default class AbstractRegister {
         return this[key.toUpperCase()].id
     }
 
-    static all() {
+    static all(keys = false) {
         const map = this.new().map
-        console.log(map.values())
-        return Array.from(map, ([k, v]) => this[v.toUpperCase()])
+        if(keys) return [...map.values()]
+        return Array.from(map, ([k, v]) => {
+            let t = this[v.toUpperCase()]
+            if(!t) console.warn('No item found for', v)
+            return t
+        }).filter(r => r)
     }
 }

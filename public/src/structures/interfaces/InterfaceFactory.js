@@ -75,7 +75,7 @@ class InterfaceFactory {
             tab.style.position = 'absolute'
             tab.style.width = (Slot.WIDTH) + 'px'
             tab.style.height = (Slot.HEIGHT) + 'px'
-            tab.style.left = (Slot.WIDTH * i) + 'px'
+            tab.style.left = (Slot.WIDTH * i + this.xGap * i) + 'px'
             tab.style.top = -(Slot.HEIGHT + this.yGap) + 'px'
 
             const img = document.createElement('img')
