@@ -139,8 +139,7 @@ export default class Block {
 
         }
         
-        // console.log(direction, rotationAxis)
-        console.log(facing, rotation)
+        console.debug(facing, rotation)
         return new BlockState(ctx.hitResult.position.floor(), ctx.block, {
             facing,
             rotationAxis,

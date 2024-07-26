@@ -59,7 +59,7 @@ export default class FurnaceEntity extends MachineEntity {
                 break
             }
 
-            console.log('Inventory is full')
+            console.debug('Inventory is full')
             break // full or empty stack was added to empty slot
         }
         return !Boolean(stack.amount)

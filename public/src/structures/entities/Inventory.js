@@ -63,7 +63,7 @@ export default class Inventory extends EventTarget {
                 break
             }
 
-            console.log('Inventory is full')
+            console.debug('Inventory is full')
             break // full or empty stack was added to empty slot
         }
         this.interface.update()

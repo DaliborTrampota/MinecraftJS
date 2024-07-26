@@ -1,4 +1,4 @@
-import { Clock, DirectionalLight, DirectionalLightHelper, CubeTextureLoader, AmbientLight } from 'three';
+import { Clock, DirectionalLight, DirectionalLightHelper, CubeTextureLoader, AmbientLight, Color } from 'three';
 import Stats from 'three/examples/jsm/libs/stats.module.js'
 
 import RegisterManager from './registers/RegisterManager.js';
@@ -46,11 +46,11 @@ export default class Game {
         this.register.blocks.generateModels()
         this.register.items.generateIcons()
         
-        console.log('Loaded blocks:', this.register.blocks.map.size)
-        console.log('Loaded items:', this.register.items.map.size)
-        console.log('Loaded entities:', this.register.entities.map.size)
-        console.log('Loaded biomes:', this.register.biomes.map.size)
-        console.log('Loaded recipes:', this.register.recipes.map.size)
+        console.debug('Loaded blocks:', this.register.blocks.map.size)
+        console.debug('Loaded items:', this.register.items.map.size)
+        console.debug('Loaded entities:', this.register.entities.map.size)
+        console.debug('Loaded biomes:', this.register.biomes.map.size)
+        console.debug('Loaded recipes:', this.register.recipes.map.size)
         
         this.player = new Player(this.camera, this)
         this.world = new World(new OverworldGenerator(this.register), this.register, this.player)
@@ -153,6 +153,7 @@ export default class Game {
             'resources/skybox/front.png',
             'resources/skybox/back.png',
         ]);
+        // window.scene.background = new Color(80.0/255.0, 207.0/255.0, 242.0/255.0)
         window.scene.background = texture;
     }
 }

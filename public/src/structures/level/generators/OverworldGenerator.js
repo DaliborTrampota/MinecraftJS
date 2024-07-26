@@ -23,7 +23,6 @@ export default class OverworldGenerator {
                 case 'desert':
                     return this.register.getBlockID('sand')
             }
-            //console.log(biome)
             if(biome > 5) return this.register.getBlockID('sand')
             if(biome > 2) return this.register.getBlockID('gravel')
             return this.register.getBlockID('grass_block')

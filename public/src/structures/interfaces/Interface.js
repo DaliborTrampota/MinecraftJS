@@ -55,7 +55,6 @@ export default class Interface {
         Interface.GUI.innerHTML = ''
         Interface.GUI.style.display = 'none'
         document.body.requestPointerLock()
-        console.log('closing')
         this.isOpen = false
     }
 

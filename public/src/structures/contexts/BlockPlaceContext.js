@@ -37,7 +37,7 @@ export default class BlockPlaceContext extends Context {
         }
         
         if(playerBlockPos.equals(this.hitResult.position) || playerBlockPos.sub(Vector3.UpC).equals(this.hitResult.position))
-            return false//console.log('cant place')
+            return false
         return true
     }
 

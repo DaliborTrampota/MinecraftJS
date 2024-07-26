@@ -28,8 +28,8 @@ export default class LootTable {
     }
 
     dropToStack(drop){
-        //console.log(drop)
-        if(drop.type == 'item') return Stack.create(drop.name, drop.amount ?? 1)
+        if(drop.type == 'item') 
+            return Stack.create(drop.name, drop.amount ?? 1)
 
     }
 

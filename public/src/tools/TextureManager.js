@@ -32,7 +32,6 @@ export default class TextureManager {
     async load(){
         console.info('Loading textures...')
 
-        // console.log(lightFrag)
         const lightFrag = await fetch(`${baseURL}/shaders/light.frag`).then(r => r.text())
         const lightVert = await fetch(`${baseURL}/shaders/light.vert`).then(r => r.text())
         const liquidVert = await fetch(`${baseURL}/shaders/liquid.vert`).then(r => r.text())

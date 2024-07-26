@@ -105,7 +105,6 @@ export default class TerrainBuilder {
                 breakDrawCall.uvs.push(...breakUVs)
                 breakDrawCall.ao.push(...new Array(verts.length / 3).fill(1))
                 //breakingArr.push({ offset: drawCall.vertices.length / 3, uvs: TextureManager.textureMap.get(`break_${breaking.progress}`) })
-                console.log(breakDrawCall)
             }
 
             if (blockData.voxel || !WORLD_SETTINGS.ambientOcclusion) {
@@ -144,7 +143,7 @@ export default class TerrainBuilder {
         this.geometry.setAttribute('chunkPos', this.chunkPosAttr)
         this.geometry.computeVertexNormals()
 
-        if(update) return //console.log(this.geometry)
+        if(update) return
         
         this.mesh = new Mesh(this.geometry, TextureManager.textures)
     }

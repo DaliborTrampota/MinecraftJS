@@ -58,11 +58,9 @@ export default class BiomeGenerator {
             humidity: this.humidityNoise.Get(x, 0, y),
             altitude: this.altitudeNoise.Get(x, 0, y)
         }
-        //console.log(curClimate)
 
         const biomes = Array.from(this.register.biomes.map.values(), key => this.register.getBiome(key))
         const biomesSorted = biomes.sort((a, b) => this.fitness(curClimate, a) - this.fitness(curClimate, b))
-        //console.log(biomesSorted, biomesSorted.map(b => this.fitness(curClimate, b[1])))
         return biomesSorted[0]
     }
 

@@ -31,7 +31,7 @@ export default class MachineEntity extends BlockEntity {
     }
 
     onSlotChange(stack, section, id) {
-        console.log('onSlotChange', section, id)
+        console.debug('onSlotChange', section, id)
         if (section == 'input') {
             this.inputChanged()
         } else if(section == 'output') {
@@ -42,7 +42,7 @@ export default class MachineEntity extends BlockEntity {
 
     inputChanged() {
         this.findRecipes()
-        console.log(this.validRecipes)
+        console.debug('valid recipes', this.validRecipes)
         if(this.validRecipes.exact.length) {
             const recipe = this.validRecipes.exact[0]
             if (this.currentRecipe?.recipe.key != recipe.key)

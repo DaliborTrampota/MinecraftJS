@@ -175,6 +175,6 @@ export default class LivingEntity {
     delete() {
         this.model.removeFromParent()
         window.game.removeUpdateSub(this)
-        console.log('deleted', this)
+        console.debug('deleted', this)
     }
 }

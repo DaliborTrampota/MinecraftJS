@@ -92,7 +92,6 @@ async function loadImages() {
     }
 
     // await Promise.all(Object.values(images))
-    console.log(images)
     return images
 }
 

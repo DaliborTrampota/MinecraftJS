@@ -63,7 +63,7 @@ export default class World {
     }
 
     updateViewDistance(){
-        console.log('updating view distance')
+        console.debug('updating view distance')
         for(let chID of this.activeChunks){//todo unload only necessarry chunks
             this.chunks[chID].unload()
         }
@@ -123,7 +123,6 @@ export default class World {
 
     checkVoxel(pos){
         let block = this.getVoxelFromPos(pos)
-        //console.log(pos, block ? block : false)
         if(block) return block.solid
         return false
     }
