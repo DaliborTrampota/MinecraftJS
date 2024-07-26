@@ -9,3 +9,8 @@
 - rotations
 - physic blocks
 - better movement stairs
+- 
+BUGS:
+    - transparent blocks render order
+    - lag or unfocus makes you fall through
+    - colisions on chunk borders
