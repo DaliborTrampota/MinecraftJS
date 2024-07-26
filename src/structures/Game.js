@@ -97,6 +97,9 @@ export default class Game {
             if (t.uniforms.time) {
                 t.uniforms.time.value += delta
             }
+            if (t.uniforms.cameraPos) {
+                t.uniforms.cameraPos.value = this.player.eyePos
+            }
             // if (t.uniforms.animFrame && TextureManager.animationMs > 100) {
             //     t.uniforms.animFrame.value++
             //     TextureManager.animationMs = 0
