@@ -69,7 +69,9 @@ export default class Items extends AbstractRegister {
     generateIcons() {
         for(let key of this.map.values()) {
             const item = Items[key.toUpperCase()]
-            if(item instanceof BlockItem)
+            if(!item)
+                continue
+            // if(item instanceof BlockItem)
                 item.createImage()
         }
     }

@@ -3,7 +3,6 @@ import Stats from 'three/examples/jsm/libs/stats.module.js'
 
 import RegisterManager from './registers/RegisterManager.js';
 import TextureManager from '../tools/TextureManager.js';
-import BiomeGenerator from './generators/BiomeGenerator.js';
 import World from './level/World.js';
 
 import Player from './player/Player.js';
@@ -147,12 +146,12 @@ export default class Game {
     createSkybox(){
         const loader = new CubeTextureLoader();
         const texture = loader.load([
-            'resources/images/skybox/right.png',
-            'resources/images/skybox/left.png',
-            'resources/images/skybox/top.png',
-            'resources/images/skybox/bottom.png',
-            'resources/images/skybox/front.png',
-            'resources/images/skybox/back.png',
+            'resources/skybox/right.png',
+            'resources/skybox/left.png',
+            'resources/skybox/top.png',
+            'resources/skybox/bottom.png',
+            'resources/skybox/front.png',
+            'resources/skybox/back.png',
         ]);
         window.scene.background = texture;
     }

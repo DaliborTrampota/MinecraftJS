@@ -15,7 +15,7 @@ export default class InventoryInterface extends Interface {
 
         this.interfaces = {}
 
-        //this.background = '/resources/images/gui/inventory.png'
+        //this.background = '/resources/gui/inventory.png'
         
         this.html = new InterfaceFactory(5, 5, 'player-inventory')
             .section(Inventory.COL, Inventory.ROW, 0, 0, 'slots')

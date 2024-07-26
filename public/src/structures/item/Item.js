@@ -7,11 +7,15 @@ export default class Item {
     constructor(key){
         this.key = key
 
-        this.image = `/resources/textures/items/${key}.png`
+        this.image = `/textures/items/${key}.png`
         this.pixelated = true
         this.stack = 64
         this.tab = "DEFAULT"
         this.damage = 0
+    }
+
+    createImage() {//todo refactor
+        this.image = TextureManager.items.get(this.key).image.src
     }
 
     getModel(position) {

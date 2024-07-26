@@ -1,5 +1,9 @@
 import { TextureLoader, NearestFilter, DoubleSide, FrontSide, DefaultLoadingManager, SRGBColorSpace, Vector3, ShaderMaterial, NearestMipMapLinearFilter } from 'three';
 
+// import lightFrag from '../shaders/light.frag?raw'
+// import lightVert from '../shaders/light.frag?raw'
+// import liquidVert from '../shaders/light.frag?raw'
+import { baseURL } from './Constants';
 
 export default class TextureManager {
 
@@ -28,15 +32,16 @@ export default class TextureManager {
     async load(){
         console.info('Loading textures...')
 
-        const lightFrag = await fetch("/src/shaders/light.frag").then(r => r.text())
-        const lightVert = await fetch("/src/shaders/light.vert").then(r => r.text())
-        const liquidVert = await fetch("/src/shaders/liquid.vert").then(r => r.text())
-
-        const liquidAtlas = this.loader.load(window.textures.atlases.liquids)
-        const opaqueAtlas = this.loader.load(window.textures.atlases.opaque)
-        const transparentAtlas = this.loader.load(window.textures.atlases.transparent)
-        const entityAtlas = this.loader.load(window.textures.atlases.entities)
-
+        // console.log(lightFrag)
+        const lightFrag = await fetch(`${baseURL}/shaders/light.frag`).then(r => r.text())
+        const lightVert = await fetch(`${baseURL}/shaders/light.vert`).then(r => r.text())
+        const liquidVert = await fetch(`${baseURL}/shaders/liquid.vert`).then(r => r.text())
+        
+        const liquidAtlas = this.loader.load(baseURL +  window.textures.atlases.liquids)
+        const opaqueAtlas = this.loader.load(baseURL + window.textures.atlases.opaque)
+        const transparentAtlas = this.loader.load(baseURL + window.textures.atlases.transparent)
+        const entityAtlas = this.loader.load(baseURL + window.textures.atlases.entities)
+        
         this.loadItems(window.textures.items)
         
         await new Promise((res) => this.loader.manager.onLoad = () => (res()))
@@ -50,6 +55,7 @@ export default class TextureManager {
         TextureManager.addAtlas(transparentMaterial, window.textures.uvs.transparent)
         TextureManager.addAtlas(liquidMaterial, window.textures.uvs.liquids)
         TextureManager.addAtlas(entityMaterial, window.textures.uvs.entities)
+
             
         //     if(block?.animation) {
         //         this.animatedTextures[TextureManager.textureMap.get(textureName)] = {
@@ -67,9 +73,9 @@ export default class TextureManager {
 
     async loadItems(paths) {
         const promises = []
-
-        for(let name of paths) {
-            promises.push(this.loader.load(`/resources/textures/items/${name}`))
+        
+        for(let path of paths) {
+            promises.push(this.loader.load(`${baseURL}/${path}`))
         }
 
         return Promise.all(promises).then((icons) => {
@@ -78,7 +84,7 @@ export default class TextureManager {
                 icon.magFilter = NearestFilter
                 icon.minFilter = NearestMipMapLinearFilter
                 icon.colorSpace = SRGBColorSpace
-                TextureManager.items.set(paths[i].split(".")[0], icon)
+                TextureManager.items.set(paths[i].split('/').at(-1).split('.').at(0), icon)
             }
         })
     }

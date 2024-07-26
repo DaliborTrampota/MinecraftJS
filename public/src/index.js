@@ -1,6 +1,7 @@
 import { Scene, Clock, PerspectiveCamera, WebGLRenderer } from 'three';
 import './tools/Extensions.js'
 import PhotoBooth from './tools/PhotoBooth.js';
+import { baseURL } from './tools/Constants.js';
 
 Array.prototype.view = function(start, end) {
     return new Proxy(this, {
@@ -30,7 +31,7 @@ Array.prototype.findIndexFrom = function(start, callback, wrap = false) {
     return -1
 }
 
-const baseURL = 'http://localhost:8000'
+
 
 async function main() {
 
@@ -73,21 +74,21 @@ main()
 
 
 async function fetchData() {
-    window.textures = await fetch(`${baseURL}/textures`).then(res => res.json())
-    window.blockData = await fetch(`${baseURL}/blockData`).then(res => res.json())
-    window.itemData = await fetch(`${baseURL}/itemData`).then(res => res.json())
-    window.recipeData = await fetch(`${baseURL}/recipes`).then(res => res.json())
-    window.entityData = await fetch(`${baseURL}/entities`).then(res => res.json())
+    window.textures = await fetch(`${baseURL}/atlases`).then(res => res.json())
+    window.blockData = await fetch(`${baseURL}/data/blocks`).then(res => res.json())
+    window.itemData = await fetch(`${baseURL}/data/items`).then(res => res.json())
+    window.recipeData = await fetch(`${baseURL}/data/recipes`).then(res => res.json())
+    window.entityData = await fetch(`${baseURL}/data/entities`).then(res => res.json())
     // let biomeData = await fetch('/biomes').then(res => res.json())
     // let dimensionData = await fetch('/dimensions').then(res => res.json())
     // let structureData = await fetch('/structures').then(res => res.json())
-    window.lootTableData = await fetch(`${baseURL}/lootTables`).then(res => res.json())
+    window.lootTableData = await fetch(`${baseURL}/data/lootTables`).then(res => res.json())
 }
 
 async function loadImages() {
     const images = {
-        slot: await loadImage(`/resources/images/gui/slot.png`),
-        progressArrow: await loadImage(`/resources/images/gui/progressArrow.png`),
+        slot: await loadImage(`/resources/gui/slot.png`),
+        progressArrow: await loadImage(`/resources/gui/progressArrow.png`),
     }
 
     // await Promise.all(Object.values(images))
