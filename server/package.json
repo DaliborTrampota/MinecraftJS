@@ -1,0 +1,15 @@
+{
+  "name": "voxel-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "dependencies": {
+    "canvas": "^2.11.2",
+    "express": "^4.17.1"
+  },
+  "scripts": {
+    "run": "node --env-file=.env server.js"
+  },
+  "author": "Dalibor Trampota",
+  "license": "ISC"
+}

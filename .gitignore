@@ -3,3 +3,4 @@ package-lock.json
 minecraft/*
 public/resources/textures/atlases/*
 .timetracker
+build/*
