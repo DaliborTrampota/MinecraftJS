@@ -12,27 +12,27 @@ export default class BiomeGenerator {
             octaves: 1,
             scale: 32,
             persistence: 1,
-            lacunarity: 2.0,
-            exponentiation: 4,
-            height: 2,
+            lacunarity: 1.8,
+            exponentiation: 1,
+            height: 1,
         })
         this.humidityNoise = new NoiseGenerator({
             seed: 6 + 2,
             octaves: 1,
             scale: 32,
             persistence: 1,
-            lacunarity: 2.0,
-            exponentiation: 4,
-            height: 2,
+            lacunarity: 1.8,
+            exponentiation: 1,
+            height: 1,
         })
         this.altitudeNoise = new NoiseGenerator({
             seed: 6 + 3,
             octaves: 1,
             scale: 32,
             persistence: 1,
-            lacunarity: 2.0,
-            exponentiation: 4,
-            height: 2,
+            lacunarity: 1.8,
+            exponentiation: 1,
+            height: 1,
         })
 
         this.heightNoise = new NoiseGenerator({
@@ -40,7 +40,7 @@ export default class BiomeGenerator {
             octaves: 3,
             scale: 64,
             persistence: 0.5,
-            lacunarity: 2.0,
+            lacunarity: 2,
             exponentiation: 4,
             height: WORLD_SETTINGS.chunkHeight / 4,
         })
@@ -76,9 +76,6 @@ export default class BiomeGenerator {
         //(this.weirdness - d.weirdness) * (this.weirdness - d.weirdness) + (this.offset - d.offset) * (this.offset - d.offset);
         return temperature + humidity + altitude;
     }
-
-
-
 }
 
 /*
