@@ -1,5 +1,5 @@
-import { WORLD_SETTINGS } from "../../tools/Constants"
-import BiomeGenerator from "./BiomeGenerator"
+import { WORLD_SETTINGS } from "../../../tools/Constants.js"
+import BiomeGenerator from "./BiomeGenerator.js"
 
 
 export default class OverworldGenerator {

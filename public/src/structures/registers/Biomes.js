@@ -1,7 +1,7 @@
 import AbstractRegister from "./AbstractRegister.js";
 
-import OverworldBiomes from "../generators/OverworldBiomes.js";
-import Biome from "../generators/Biome.js";
+import OverworldBiomes from "../level/generators/OverworldBiomes.js";
+import Biome from "../level/generators/Biome.js";
 
 export default class Biomes extends AbstractRegister {
 
