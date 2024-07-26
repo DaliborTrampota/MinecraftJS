@@ -107,7 +107,6 @@ export default class Game {
         }
 
         this.renderer.render(window.scene, this.camera);
-        //console.log(this.renderer.info.render.calls)
     }
 
     addUpdateSub(obj){
