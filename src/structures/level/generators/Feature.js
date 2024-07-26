@@ -8,6 +8,13 @@ export default class Feature {
         this.operations = []
     }
 
+    place(pallete, blockData = false) {
+        this.operations.push((world, pos) => {
+            world.setVoxel(pos, pallete.getBlock(), blockData)
+        })
+        return this
+    }
+
     createLine(start, end, palette, blockData = false) {
         this.operations.push((world, pos) => {
             Feature.line(world, pos.clone().add(start), pos.clone().add(end), palette, blockData)
