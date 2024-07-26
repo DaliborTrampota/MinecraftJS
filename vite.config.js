@@ -22,5 +22,7 @@ export default {
         outDir: '../build',
         emptyOutDir: true,        
     },
-
+    server: {
+        hmr: false,
+    },
 }
