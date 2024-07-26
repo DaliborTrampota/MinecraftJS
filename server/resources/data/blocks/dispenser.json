@@ -1,0 +1,13 @@
+{
+    "geometry": "cube",
+    "rotation": "cameraFacing",
+
+    "textures": {
+        "front": "N",
+        "back": "S",
+        "top": "U",
+        "bottom": "D",
+        "right": "E",
+        "left": "W"
+    }
+}

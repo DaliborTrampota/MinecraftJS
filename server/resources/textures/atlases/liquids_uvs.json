@@ -1,0 +1,20 @@
+{
+    "water_still": [
+        0,
+        0,
+        0.03125,
+        1
+    ],
+    "water_still_grey": [
+        0.03125,
+        0,
+        0.0625,
+        1
+    ],
+    "water_still_nontransparent": [
+        0.0625,
+        0,
+        0.09375,
+        1
+    ]
+}

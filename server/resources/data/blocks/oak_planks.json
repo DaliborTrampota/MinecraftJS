@@ -1,0 +1,8 @@
+{
+    "geometry": "cube",
+    "rotation": "facing",
+
+    "textures": {
+        "all": "oak_planks"
+    }
+}

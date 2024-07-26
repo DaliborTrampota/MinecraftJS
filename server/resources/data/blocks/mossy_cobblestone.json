@@ -1,0 +1,6 @@
+{
+    "geometry": "cube",
+    "textures": {
+        "all": "mossy_cobblestone"
+    }
+}

@@ -1,0 +1,37 @@
+{
+    "type": "block",
+    "pools": [
+        {
+            "items": 1,
+            "drops": [
+                {
+                    "type": "item",
+                    "name": "grass_block",
+                    "conditions": [
+                        {
+                            "condition": "match_tool",
+                            "enchantments": [
+                                {
+                                    "enchantment": "silk_touch",
+                                    "levels": {
+                                      "min": 1
+                                    }
+                                }
+                            ]
+
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "items": 1,
+            "drops": [
+                {
+                    "type": "item",
+                    "name": "dirt"
+                }
+            ]
+        }
+    ]
+}
