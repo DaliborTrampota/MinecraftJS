@@ -2,8 +2,7 @@ import { Vector3 } from 'three';
 import { createEnum } from './Utils.js';
 import Side from '../structures/Side.js';
 
-
-const baseURL = 'http://localhost:8000'
+const baseURL = import.meta.env.VITE_BASE_URL
 
 const PI_2 = Math.PI / 2;
 
