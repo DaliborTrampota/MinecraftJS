@@ -88,8 +88,8 @@ export default class InventoryCrafting extends Interface {
     }
 
     close() {
-        this.entity.removeEventListener('recipeFinished', this.#onRecipeFinish)
-        this.entity.removeEventListener('recipePreview', this.#onRecipePreview)
+        // this.entity.removeEventListener('recipeFinished', this.#onRecipeFinish)
+        // this.entity.removeEventListener('recipePreview', this.#onRecipePreview)
         this.inv.dropCrafting()
     }
     
@@ -152,6 +152,7 @@ export default class InventoryCrafting extends Interface {
     }
 
     onRecipeFinish({ detail: recipe }) {
+        console.log('finish')
         this.update()
     }
 }
