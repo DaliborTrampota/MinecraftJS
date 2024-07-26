@@ -12,6 +12,10 @@ export default {
                 {
                     src: 'localserver.js',
                     dest: '../build'
+                },
+                {
+                    src: 'package.json',
+                    dest: '../build'
                 }
             ]
         })
