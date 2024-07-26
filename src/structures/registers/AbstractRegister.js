@@ -49,4 +49,10 @@ export default class AbstractRegister {
             
         return this[key.toUpperCase()].id
     }
+
+    static all() {
+        const map = this.new().map
+        console.log(map.values())
+        return Array.from(map, ([k, v]) => this[v.toUpperCase()])
+    }
 }

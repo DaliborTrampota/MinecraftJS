@@ -1,3 +1,4 @@
+import CreativeInventoryInterface from "../interfaces/CreativeInterface.js"
 import InventoryCrafting from "../interfaces/InventoryCrafting.js"
 import InventoryInterface from "../interfaces/InventoryInterface.js"
 import InstantRecipe from "../recipes/InstantRecipe.js"
@@ -12,7 +13,7 @@ export default class Inventory extends EventTarget {
 
     constructor(player) {
         super()
-        this.interface = new InventoryInterface(player)
+        this.interface = new CreativeInventoryInterface(player)
         this.crafting = new InventoryCrafting(player, this)
 
         this.slots = new Array(Inventory.COL * Inventory.ROW + Inventory.HOTBAR_SIZE)

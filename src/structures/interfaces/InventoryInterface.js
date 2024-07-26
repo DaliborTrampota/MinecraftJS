@@ -20,6 +20,7 @@ export default class InventoryInterface extends Interface {
         this.html = new InterfaceFactory(5, 5, 'player-inventory')
             .section(Inventory.COL, Inventory.ROW, 0, 0, 'slots')
             .section(Inventory.HOTBAR_SIZE, 1, 0, Inventory.ROW + 0.25, 'hotbar')
+            //.tab('test', 'https://static.wikia.nocookie.net/minecraft_gamepedia/images/7/75/Wheat_JE2_BE2.png', (t) => console.log('clicked tab', t))
             .build(true, this)
     }
 
