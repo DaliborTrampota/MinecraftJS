@@ -139,7 +139,7 @@ class InterfaceFactory {
 
 
     static setSlot(htmlSlot, stack) {
-        htmlSlot.children[0].src = stack.item.image
+        htmlSlot.children[0].src = stack.item.image || Slot.EMPTY
         htmlSlot.children[0].setAttribute('alt', `${stack.item.name}`)
         htmlSlot.children[1].innerHTML = stack.amount
     }

@@ -88,7 +88,7 @@ export default class InventoryInterface extends Interface {
     updateHotbar() {
         const setSlot = (html, stack) => {
             html.count.innerHTML = stack?.amount ?? ''
-            html.image.src = stack?.item.image ?? InterfaceFactory.Slot.EMPTY
+            html.image.src = stack?.item.image || InterfaceFactory.Slot.EMPTY
             if(stack?.item.pixelated) html.image.classList.add('pixelated')
             else html.image.classList.remove('pixelated')
             
