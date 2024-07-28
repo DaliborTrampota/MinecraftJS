@@ -36,7 +36,7 @@ export default class Liquid extends Block {
     /**
      * 
      * @param {import('../../level/World.js').default} world 
-     * @param {import('./BlockState.js').default} state 
+     * @param {import('../BlockState.js').default} state 
      * @returns {boolean|Array<BlockState>} true if the block and state should be removed
      */
     update(world, state) {

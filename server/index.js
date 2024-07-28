@@ -7,7 +7,7 @@ const { parseDataFiles, createTextureAtlas } = require('./utils');
 
 const app = express()
 const PORT = 8000
-const local = false
+const local = true
 
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
