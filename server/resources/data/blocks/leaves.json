@@ -1,0 +1,6 @@
+{
+    "geometry": "cube",
+    "textures": {
+        "all": "oak_leaves_green"
+    }
+}

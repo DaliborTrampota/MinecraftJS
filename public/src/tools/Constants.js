@@ -73,6 +73,10 @@ const Half = {
     Bottom: 1
 }
 
+const UpDownCheck = [
+    new Vector3(0, 1, 0),
+    new Vector3(0, -1, 0)
+]
 
 const CrossCheck = [ 
     new Vector3(1, 0, 0),
@@ -128,7 +132,7 @@ const WORLD_SETTINGS = {
     globalSeaLevel: 12,
     chunkSize: 16,
     chunkHeight: 128,
-    ambientOcclusion: false,
+    ambientOcclusion: true,
 }
 
 const GAME_SETTINGS = {
@@ -161,6 +165,7 @@ export {
 
     CrossCheck,
     CornerCheck,
+    UpDownCheck,
     Section,
     Material,
     

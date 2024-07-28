@@ -30,10 +30,11 @@ export default class Biomes extends AbstractRegister {
         return biome
     }
 
-    static {
+    static init() {
         this.FOREST = this.register(OverworldBiomes.forest())
         this.DESERT = this.register(OverworldBiomes.desert())
         this.HILLS = this.register(OverworldBiomes.hills())
+        this.OCEAN = this.register(OverworldBiomes.ocean())
         // this.PLAINS = this.register(OverworldBiomes.plains())
         // this.TAIGA = this.register(OverworldBiomes.taiga())
         // this.SNOWY = this.register(OverworldBiomes.snowy())

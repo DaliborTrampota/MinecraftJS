@@ -7,6 +7,8 @@ import World from './level/World.js';
 
 import Player from './player/Player.js';
 import Stack from './item/Stack.js';
+
+import BiomeGenerator from './level/generators/BiomeGenerator.js';
 import OverworldGenerator from './level/generators/OverworldGenerator.js';
 import SkyBlockGenerator from './level/generators/SkyBlockGenerator.js';
 import OneChunkGenerator from './level/generators/OneChunkGenerator.js';
@@ -51,6 +53,7 @@ export default class Game {
         console.debug('Loaded entities:', this.register.entities.map.size)
         console.debug('Loaded biomes:', this.register.biomes.map.size)
         console.debug('Loaded recipes:', this.register.recipes.map.size)
+        console.debug('Loaded features:', this.register.features.map.size)
         
         this.player = new Player(this.camera, this)
         this.world = new World(new OverworldGenerator(this.register), this.register, this.player)
@@ -66,20 +69,24 @@ export default class Game {
         this.player.inventory.addStack(Stack.create('furnace', 64))
         this.player.inventory.addStack(Stack.create('oak_log', 64))
         this.player.inventory.addStack(Stack.create('stone', 64))
+        this.player.inventory.addStack(Stack.create('oak_vertical_slab', 64))
+        this.player.inventory.addStack(Stack.create('oak_log', 64))
+        this.player.inventory.addStack(Stack.create('slab', 64))
         this.player.inventory.addStack(Stack.create('slime_spawn_egg', 64))
         this.player.inventory.addStack(Stack.create('cow_spawn_egg', 64))
-        this.player.inventory.addStack(Stack.create('dispenser', 64))
-        this.player.inventory.addStack(Stack.create('stairs', 64))
-        this.player.inventory.addStack(Stack.create('oak_vertical_slab', 64))
-        this.player.inventory.addStack(Stack.create('slab', 64))
-        this.player.inventory.addStack(Stack.create('table', 64))
-        this.player.inventory.addStack(Stack.create('chair', 64))
-        this.player.inventory.addStack(Stack.create('grass_block', 64))
-        this.player.inventory.addStack(Stack.create('sand', 64))
-        this.player.inventory.addStack(Stack.create('sand', 64))
-        this.player.inventory.addStack(Stack.create('sand', 64))
-        this.player.inventory.addStack(Stack.create('cobblestone', 64))
-        this.player.inventory.addStack(Stack.create('glass', 64))
+        this.player.inventory.addStack(Stack.create('water_still', 64))
+        this.player.inventory.addStack(Stack.create('lava_still', 64))
+        // this.player.inventory.addStack(Stack.create('table', 64))
+        // this.player.inventory.addStack(Stack.create('chair', 64))
+        // this.player.inventory.addStack(Stack.create('furnace', 64))
+        // this.player.inventory.addStack(Stack.create('dispenser', 64))
+        // this.player.inventory.addStack(Stack.create('oak_log', 64))
+        // this.player.inventory.addStack(Stack.create('grass_block', 64))
+        // this.player.inventory.addStack(Stack.create('sand', 64))
+        // this.player.inventory.addStack(Stack.create('sand', 64))
+        // this.player.inventory.addStack(Stack.create('sand', 64))
+        // this.player.inventory.addStack(Stack.create('cobblestone', 64))
+        // this.player.inventory.addStack(Stack.create('glass', 64))
 
     }
 

@@ -30,8 +30,9 @@ export default class BlockPlaceContext extends Context {
         if(this.hitResult.position.y < 0 || this.hitResult.position.y > WORLD_SETTINGS.chunkHeight - 1) return false
         let playerBlockPos = this.player.eyePos.floor()
         
-        if(this.world.getVoxelFromPos(this.hitResult.position).material != Material.AIR 
-            && this.world.getVoxelFromPos(this.hitResult.position.sub(this.hitResult.normal).material != Material.AIR)
+
+        if(![Material.AIR, Material.LIQUID].includes(this.world.getVoxelFromPos(this.hitResult.position).material) 
+            && ![Material.AIR, Material.LIQUID].includes(this.world.getVoxelFromPos(this.hitResult.position.sub(this.hitResult.normal).material))
         ) {
             return false
         }
