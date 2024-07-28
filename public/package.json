@@ -1,0 +1,7 @@
+{
+  "name": "voxel-client",
+  "version": "1.0.0",
+  "description": "Client for MinecraftJS",
+  "author": "Dalibor Trampota",
+  "license": "ISC"
+}

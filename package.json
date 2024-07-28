@@ -1,19 +1,21 @@
 {
-  "name": "minecraftjs",
+  "name": "voxel-game",
   "version": "1.0.0",
-  "description": "",
-  "main": "server.js",
+  "description": "Voxel game similar to Minecraft",
   "dependencies": {
-    "canvas": "^2.11.2",
     "express": "^4.17.1",
     "three": "^0.160.0"
   },
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "server": "cd server & node --env-file=.env index.js",
+    "dev": "vite",
+    "build": "vite build"
   },
-  "author": "",
+  "author": "Dalibor Trampota",
   "license": "ISC",
   "devDependencies": {
+    "vite-plugin-static-copy": "^1.0.6",
     "vite": "^5.1.6"
   }
 }

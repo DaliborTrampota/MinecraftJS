@@ -1,0 +1,15 @@
+{
+  "name": "voxel-api",
+  "version": "1.0.0",
+  "description": "Backend for MinecraftJS",
+  "main": "index.js",
+  "dependencies": {
+    "canvas": "^2.11.2",
+    "express": "^4.17.1"
+  },
+  "scripts": {
+    "run": "node --env-file=.env index.js"
+  },
+  "author": "Dalibor Trampota",
+  "license": "ISC"
+}

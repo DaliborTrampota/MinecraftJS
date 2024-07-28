@@ -1,5 +1,7 @@
-node_modules/*
+node_modules
 package-lock.json
 minecraft/*
-public/resources/textures/atlases/*
+server/resources/textures/atlases/*
 .timetracker
+build/*
+
