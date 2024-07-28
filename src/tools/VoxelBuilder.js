@@ -49,7 +49,7 @@ export default class VoxelBuilder {
     }
 
     static buildFace(side, blockState, blockData, culling = false) {
-        let { verts, uvs, material } = blockData.getFace(side, culling)
+        let { verts, uvs, material } = blockData.getFace(side, culling, false, blockState)
         
         if(blockState) {
             verts = this.rotateVertices(verts, blockState.angle, blockState.rotationAxis)
@@ -132,7 +132,7 @@ export default class VoxelBuilder {
                 const side = Side.NameToSide(sideName)
 
                 let uv = face.uv ? face.uv.map(v => v/16) : VoxelBuilder.autoUVs(from, to, side)//[0, 0, 1, 1]
-                //console.log(uv, face, sideName, from, to)
+                //console.debug(uv, face, sideName, from, to)
 
                 let i = 0
                 let tempVerts = [], tempUVs = [], tempRawUVs = []

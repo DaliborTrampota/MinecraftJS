@@ -7,6 +7,7 @@ class InterfaceFactory {
         this.name = name
         this.slots = []
         this.htmlSlots = {}
+        this.tabs = []
         this.xGap = xGap ?? 5
         this.yGap = yGap ?? 5
     }
@@ -35,6 +36,16 @@ class InterfaceFactory {
         return this
     }
 
+    tab(id, img, onClick) {
+        this.tabs.push({
+            id,
+            img,
+            onClick,
+        })
+
+        return this
+    }
+
     build(background, iface) {
         const div = document.createElement('div')
         div.setAttribute('class', 'gui-container')
@@ -52,6 +63,35 @@ class InterfaceFactory {
             if(slot.x > maxX) maxX = slot.x
             if(slot.y < minY) minY = slot.y
             if(slot.y > maxY) maxY = slot.y
+
+        })
+
+        this.tabs.forEach((tabData, i) => {
+            const tab = document.createElement('button')
+            tab.setAttribute('class', 'gui-tab')
+            tab.dataset.id = tabData.id
+            tab.onclick = tabData.onClick.bind(null, tabData.id)
+            
+            tab.style.position = 'absolute'
+            tab.style.width = (Slot.WIDTH) + 'px'
+            tab.style.height = (Slot.HEIGHT) + 'px'
+            tab.style.left = (Slot.WIDTH * i) + 'px'
+            tab.style.top = -(Slot.HEIGHT + this.yGap) + 'px'
+
+            const img = document.createElement('img')
+            // img.style.position = 'absolute'
+            img.src = tabData.img
+            // img.style.top = '0px'
+            // img.style.left = '0px'
+            img.width = Slot.WIDTH
+            img.height = Slot.HEIGHT
+
+            img.setAttribute('alt', `tab ${tabData.id}`)
+            img.setAttribute('class', 'pixelated')
+
+
+            tab.appendChild(img)
+            div.appendChild(tab)
 
         })
 
@@ -99,7 +139,7 @@ class InterfaceFactory {
 
 
     static setSlot(htmlSlot, stack) {
-        htmlSlot.children[0].src = stack.item.image
+        htmlSlot.children[0].src = stack.item.image || Slot.EMPTY
         htmlSlot.children[0].setAttribute('alt', `${stack.item.name}`)
         htmlSlot.children[1].innerHTML = stack.amount
     }

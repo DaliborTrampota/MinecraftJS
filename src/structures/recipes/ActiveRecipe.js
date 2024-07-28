@@ -32,9 +32,9 @@ export default class ActiveRecipe {
                 this.output()
                 this.consume()
                 this.entity.dispatchEvent(new CustomEvent('recipeFinished', { detail: this }))
-                this.active = this.canOutput()
                 this.progress = 0
                 this.entity.onSlotChange(null, "input", null)
+                this.active = this.canOutput()
             }
         }
     }

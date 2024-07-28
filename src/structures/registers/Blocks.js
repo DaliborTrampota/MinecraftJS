@@ -1,11 +1,13 @@
 import { Material } from "../../tools/Constants.js";
+import { Vector3 } from "three";
 import Block from "../blocks/Block.js";
 import Items from "./Items.js";
-import FurnaceBlock from "../blocks/FurnaceBlock.js";
+import FurnaceBlock from "../blocks/machines/FurnaceBlock.js";
 import VoxelBlock from "../blocks/VoxelBlock.js";
 import AbstractRegister from "./AbstractRegister.js";
 import Liquid from "../blocks/liquids/Liquid.js";
-import { Vector3 } from "three";
+import PhysicalBlock from "../blocks/PhysicalBlock.js";
+import CraftingTableBlock from "../blocks/machines/CraftingTable.js";
 
 export default class Blocks extends AbstractRegister {
 
@@ -69,8 +71,8 @@ export default class Blocks extends AbstractRegister {
         this.STONE = this.register(new Block('stone', Material.SOLID))
         this.COBBLESTONE = this.register(new Block('cobblestone', Material.SOLID))
         this.MOSSY_COBBLESTONE = this.register(new Block('mossy_cobblestone', Material.SOLID))
-        this.GRAVEL = this.register(new Block('gravel', Material.SOLID))
-        this.SAND = this.register(new Block('sand', Material.SOLID))
+        this.GRAVEL = this.register(new PhysicalBlock('gravel', Material.SOLID).setWeight(0.8))
+        this.SAND = this.register(new PhysicalBlock('sand', Material.SOLID).setWeight(0.6))
         this.SANDSTONE = this.register(new Block('sandstone', Material.SOLID))
         this.END_STONE = this.register(new Block('end_stone', Material.SOLID))
         this.FURNACE = this.register(new FurnaceBlock('furnace', Material.SOLID))
@@ -80,6 +82,8 @@ export default class Blocks extends AbstractRegister {
         this.SLAB = this.register(new VoxelBlock('slab', Material.SOLID))
         this.OAK_VERTICAL_SLAB = this.register(new VoxelBlock('oak_vertical_slab', Material.SOLID))
         this.OAK_LOG = this.register(new Block('oak_log', Material.SOLID))
+        this.OAK_PLANKS = this.register(new Block('oak_planks', Material.SOLID))
+        this.LEAVES = this.register(new Block('leaves', Material.SOLID).isTransparent(true))
         this.TABLE = this.register(new VoxelBlock('table', Material.SOLID))
         this.CHAIR = this.register(new VoxelBlock('chair', Material.SOLID))
 
@@ -89,6 +93,8 @@ export default class Blocks extends AbstractRegister {
         ;[this.LAVA_STILL, this.LAVA_FLOW] = this.registerLiquid(Liquid.create('lava', 3, false)
             .map(l => l.hasNoCollisions().isTransparent().setFlowDirection(Vector3.Up))
         )
+        
+        this.CRAFTING_TABLE = this.register(new CraftingTableBlock('crafting_table', Material.SOLID))
     }
 
     static getByTexture(texture) {

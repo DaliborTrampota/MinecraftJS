@@ -1,6 +1,8 @@
 import { Vector3, Vector2 } from 'three';
 import { Material, Section, WORLD_SETTINGS } from "../../tools/Constants.js"
 import Context from "./Context.js"
+import PhysicalBlock from '../blocks/PhysicalBlock.js';
+import PhysicalBlockEntity from '../entities/PhysicalBlockEntity.js';
 
 
 export default class BlockPlaceContext extends Context {
@@ -49,9 +51,18 @@ export default class BlockPlaceContext extends Context {
         const chunk = this.player.world.getChunkFromPos(this.hitResult.position)
 
         const position = this.hitResult.position.clone()
-        if(this.block.hasEntity)
+        if(this.block.hasEntity) {
             chunk.setEntityAt(position, new this.block.entityClass())
-        chunk.addVoxel(position, this.block.id, blockState)
+        }
+
+        const shouldFall = (this.block instanceof PhysicalBlock) && !this.player.world.getVoxelFromPos(position.clone().add(this.block.gravity)).solid
+
+        if(shouldFall) {
+            const entity = new PhysicalBlockEntity(this.block)
+            entity.position.copy(position)
+            chunk.setEntityAt(position, entity)
+        }
+        else chunk.addVoxel(position, this.block.id, blockState)
 
         this.player.inventory.interface.updateHotbar()
     }

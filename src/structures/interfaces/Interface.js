@@ -55,6 +55,7 @@ export default class Interface {
         Interface.GUI.innerHTML = ''
         Interface.GUI.style.display = 'none'
         document.body.requestPointerLock()
+        console.log('closing')
         this.isOpen = false
     }
 
@@ -87,26 +88,45 @@ export default class Interface {
         }
     }
 
-    allowDrop(e){ //drop from-to same interface
-        const [ifaceName, slotID, section] = e.dataTransfer.types.find(t => t.startsWith("dragover"))?.split(":")?.slice(1) ?? []//origin data
-        if(!ifaceName || ifaceName == e.target.parentNode.dataset.interface) return e.preventDefault(e) //same interface?
-            
+    /**
+     * This is called only when item is dropped to same interface as it was dragged from.
+     * Otherwise implement override in child class.
+     * @param {DragEvent} e event
+     */
+    allowDrop(e) {
+        const [ifaceName, slotID, section] = e.dataTransfer.types.find(t => t.startsWith("dragover"))?.split(":")?.slice(1) ?? []
 
-        //const originInterface = this.interfaces[ifaceName] ?? this
-        //const originSlots = originInterface.slots(section)
+        const targetSection = e.target.dataset.section
+        const targetSlotID = Number(e.target.dataset.id)
+        if(Number(slotID) === targetSlotID && section === targetSection) 
+            return console.debug('Same slot')
 
-        //const stack = originSlots[Number(slotID)]
-        let targetSlotID = Number(e.target.dataset.id)
-    
-        const curStack = this.slots(e.target.dataset.section)[targetSlotID]
-        !curStack ? e.preventDefault(e) : console.log("Slot already occupied")
+        const originStack = this.slots(section)[Number(slotID)]
+        this.allowDropMergeCheck(e.target.dataset.section, Number(e.target.dataset.id), originStack) 
+            ? e.preventDefault() 
+            : console.debug("Slot already occupied")
     }
 
-    swap(origin, target, data){
+    allowDropMergeCheck(tSection, tID, originStack) {
+        const curStack = this.slots(tSection)[Number(tID)]
+        if(curStack) {
+            if(curStack.item === originStack.item && curStack.amount + originStack.amount > curStack.item.stack)
+                return false
+        }
+        return true
+    }
+
+    swapOrMerge(origin, target, data){
         const temp = origin[data.originID]
+        if(target[data.targetID]?.item == origin[data.originID].item) { //merge if same items
+            target[data.targetID].merge(origin[data.originID])
+            if(!origin[data.originID].amount) origin[data.originID] = undefined
+            return target[data.targetID]
+        }
+        // swap
         origin[data.originID] = target[data.targetID]
         target[data.targetID] = temp
-        console.log(temp, data, origin)
+        
         return temp
     } 
 }

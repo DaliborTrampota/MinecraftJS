@@ -10,11 +10,12 @@ export default class LivingEntity {
 
     constructor(model){
         this.model = model
-        this.loadModel(model)
 
 
         this.health = 100
+        this.speed = 2
 
+        this.weight = 1
         this.velocity = new Vector3(0, 0, 0)
         this.chunkCoords = new Vector2(0, 0)
         this.vertTarget = 0
@@ -120,18 +121,18 @@ export default class LivingEntity {
 
     calculateVelocity(delta){
         if(!this.grounded){
-            this.velocity.y += delta * this.world.gravity * 1.5
+            this.velocity.y += delta * this.world.gravity * 1.5 * this.weight
         }
         
         const Y = this.velocity.y
-        this.velocity = moveTowards(this.velocity.clone(), this.moveDirection.clone(), this.grounded ? BASE_PLAYER_SETTINGS.acceleration * delta : BASE_PLAYER_SETTINGS.airDrag * delta)
+        this.velocity = moveTowards(this.velocity.clone(), this.moveDirection.clone().multiplyScalar(this.speed), this.grounded ? BASE_PLAYER_SETTINGS.acceleration * delta : BASE_PLAYER_SETTINGS.airDrag * delta)
         this.velocity.y = clamp(Y, -80, 20)//todo implement drag
 
         let dir = this.model.getWorldDirection(new Vector3())
         let rot = Math.atan2(dir.x, dir.z);
         const worldDir = this.velocity.applyAxisAngle(Vector3.UpC, rot)
         this.grounded = false
-        for(let i = 0; i < 3; i++)//fixes weird bug where the player would get stuck in a block
+        for(let i = 0; i < 3; i++)
             this.collide(worldDir, delta)
         this.velocity.applyAxisAngle(Vector3.UpC, -rot)
     }
@@ -171,13 +172,9 @@ export default class LivingEntity {
         return AABBs        
     }
 
-    loadModel(model){
-        model.bb = new Box3().setFromObject(model)
-
-        // model.h = geometry.parameters.height
-        // model.w = geometry.parameters.width
-        // model.d = geometry.parameters.depth
-        
-        return model
+    delete() {
+        this.model.removeFromParent()
+        window.game.removeUpdateSub(this)
+        console.log('deleted', this)
     }
 }

@@ -47,11 +47,14 @@ export default class World {
                 let chunk = new Chunk(i, j, this)
                 this.chunks[chunk.id] = chunk
 
-                window.scene.add(chunk.generate())
-                chunk.load()
-
                 this.activeChunks.push(chunk.id)
             }
+        }
+        for(let chID in this.chunks) {
+            const chunk = this.chunks[chID]
+            chunk.generateFeatures()
+            window.scene.add(chunk.generate())
+            chunk.load()
         }
     }
 
@@ -72,16 +75,30 @@ export default class World {
         const start = this.player.chunkCoords.x - this.player.viewDistance
         const end = this.player.chunkCoords.y + this.player.viewDistance + 1
 
+        let newChunks = []
         for(let i = start; i < end; ++i){
             for(let j = start; j < end; ++j){
                 const ID = Chunk.id(i, j)
 
-                if(!this.chunks[ID]) this.chunks[ID] = new Chunk(i, j, this);
-                if(!this.chunks[ID].mesh) window.scene.add(this.chunks[ID].generate())
+                if(!this.chunks[ID]) {
+                    this.chunks[ID] = new Chunk(i, j, this);
+                    newChunks.push(ID)
+                } else {
+                    this.chunks[ID].load()
+                }
+                // if(!this.chunks[ID].mesh) window.scene.add(this.chunks[ID].generate())
 
-                this.chunks[ID].load()
                 this.activeChunks.push(ID)
             }
+        }
+
+        for(let chID of newChunks) {
+            let chunk = this.chunks[chID]
+            // if(!chunk.mesh) {
+                chunk.generateFeatures()
+                window.scene.add(chunk.generate())
+                chunk.load()
+            // }
         }
     }
 
@@ -92,6 +109,7 @@ export default class World {
     getChunkFromPos(pos){
         let x = Math.floor(pos.x / WORLD_SETTINGS.chunkSize);
         let y = Math.floor(pos.z / WORLD_SETTINGS.chunkSize);
+        // console.log(x, y, pos)
 
         return this.chunks[Chunk.id(x, y)]
     }
@@ -141,5 +159,17 @@ export default class World {
     getBlockState(pos){
         const chunk = this.getChunkFromPos(pos)
         return chunk.getBlockState(pos)
+    }
+
+
+    setVoxel(pos, blockID, blockData) {
+        const chunk = this.getChunkFromPos(pos)
+        if(!chunk) return console.log(pos.x / WORLD_SETTINGS.chunkSize, pos.z / WORLD_SETTINGS.chunkSize, "Chunk not found")
+        return chunk.setVoxel(pos, blockID, blockData)
+    }
+
+    addVoxel(pos, blockID, blockData) {
+        const chunk = this.getChunkFromPos(pos)
+        return chunk.addVoxel(pos, blockID, blockData)
     }
 }

@@ -3,16 +3,18 @@ import Stats from 'three/examples/jsm/libs/stats.module.js'
 
 import RegisterManager from './registers/RegisterManager.js';
 import TextureManager from '../tools/TextureManager.js';
-import BiomeGenerator from './generators/BiomeGenerator.js';
+import BiomeGenerator from './level/generators/BiomeGenerator.js';
 import World from './level/World.js';
 
 import Player from './player/Player.js';
 import Stack from './item/Stack.js';
-import OverworldGenerator from './generators/OverworldGenerator.js';
-import SkyBlockGenerator from './generators/SkyBlockGenerator.js';
-import OneChunkGenerator from './generators/OneChunkGenerator.js';
+import OverworldGenerator from './level/generators/OverworldGenerator.js';
+import SkyBlockGenerator from './level/generators/SkyBlockGenerator.js';
+import OneChunkGenerator from './level/generators/OneChunkGenerator.js';
 
 export default class Game {
+
+    static #ID = 0
 
     constructor(renderer, camera){
         window.game = this
@@ -50,7 +52,8 @@ export default class Game {
         console.log('Loaded entities:', this.register.entities.map.size)
         console.log('Loaded biomes:', this.register.biomes.map.size)
         console.log('Loaded recipes:', this.register.recipes.map.size)
-        
+        console.log('Loaded features:', this.register.features.map.size)
+
         this.player = new Player(this.camera, this)
         this.world = new World(new OverworldGenerator(this.register), this.register, this.player)
         // this.world = new World(new SkyBlockGenerator(this.register), this.register, this.player)
@@ -61,7 +64,9 @@ export default class Game {
         for(let key of this.register.items.map.keys()) {
             // this.player.inventory.addStack(Stack.create(key, 64))
         }
-        this.player.inventory.addStack(Stack.create('stairs', 64))
+        this.player.inventory.addStack(Stack.create('crafting_table', 1))
+        this.player.inventory.addStack(Stack.create('furnace', 64))
+        this.player.inventory.addStack(Stack.create('oak_log', 64))
         this.player.inventory.addStack(Stack.create('stone', 64))
         this.player.inventory.addStack(Stack.create('oak_vertical_slab', 64))
         this.player.inventory.addStack(Stack.create('oak_log', 64))
@@ -97,6 +102,9 @@ export default class Game {
             if (t.uniforms.time) {
                 t.uniforms.time.value += delta
             }
+            if (t.uniforms.cameraPos) {
+                t.uniforms.cameraPos.value = this.player.eyePos
+            }
             // if (t.uniforms.animFrame && TextureManager.animationMs > 100) {
             //     t.uniforms.animFrame.value++
             //     TextureManager.animationMs = 0
@@ -109,7 +117,13 @@ export default class Game {
     }
 
     addUpdateSub(obj){
-        if('Update' in obj) this.updateSubs.push({ obj, clock: new Clock()})
+        if('Update' in obj) {
+            if(!obj.id) {
+                console.warn("No ID for", obj, "which subscribed to Update, given", Game.#ID)
+                obj.id = Game.#ID++
+            }
+            this.updateSubs.push({ obj, clock: new Clock()})
+        }
         else console.warn('No Update method!', obj);
     }
 

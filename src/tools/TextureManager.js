@@ -108,6 +108,7 @@ export default class TextureManager {
         return new ShaderMaterial({
             transparent: true, 
             side: DoubleSide, 
+            forceSinglePass: true,
             name: 'liquids',
             uniforms: {
                 textureAtlas: { value: atlas },
@@ -136,6 +137,7 @@ export default class TextureManager {
                 lightDir: { value: new Vector3(0.5, -1, 1) },
                 //time: { value: 0 },
                 animFrame: { value: 0 },
+                cameraPos: { value: new Vector3(0, 0, 0) },
                 //resolution: { value: new Vector2(500, 600) },
             },
             vertexShader,
@@ -158,11 +160,10 @@ export default class TextureManager {
                 lightDir: { value: new Vector3(0.5, -1, 1) },
                 // time: { value: 0 },
                 animFrame: { value: 0 },
+                cameraPos: { value: new Vector3(0, 0, 0) },
             },
             vertexShader,
             fragmentShader,
         })
     }
-
-
 }

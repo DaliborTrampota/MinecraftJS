@@ -263,7 +263,7 @@ export default class Player extends LivingEntity {
         if(prevModel)
             this.camera.remove(prevModel)
         
-        const itemModel = stack.item.getModel(new Vector3(0.52, -0.42, -0.6))
+        const itemModel = stack.item.getModel(new Vector3(0.72, -0.42, -0.6))
         itemModel.scale.set(0.2, 0.2, 0.2)
         itemModel.rotation.set(0, -Math.PI/2, 0)
         this.camera.add(itemModel)

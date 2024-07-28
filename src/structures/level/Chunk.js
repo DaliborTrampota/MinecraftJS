@@ -4,6 +4,8 @@ import { PosMap, create3DArray, map } from "../../tools/Utils.js"
 import ItemEntity from "../entities/ItemEntity.js";
 import LootTable from "../LootTable.js";
 import TerrainBuilder from "./TerrainBuilder.js";
+import WaterBlock from '../blocks/WaterBlock.js';
+import Feature from '../level/generators/Feature.js';
 
 const { chunkSize, chunkHeight } = WORLD_SETTINGS
 
@@ -34,7 +36,7 @@ export default class Chunk {
     }
 
     /**
-     * @returns {import('../../structures/registers/RegisterManager.js').default}
+     * @returns {import('../registers/RegisterManager.js').default}
      */
     get register(){
         return this.world.register;
@@ -57,6 +59,32 @@ export default class Chunk {
                 for(let k = 0; k < chunkSize; ++k){
                     this.data[i][j][k] = this.world.getVoxel(new Vector3(i + this.x * chunkSize, j, k + this.y * chunkSize))
                 }
+            }
+        }
+    }
+
+    generateFeatures() {
+        for(let i = 0; i < chunkSize; ++i){
+            for(let k = 0; k < chunkSize; ++k){
+                let biome = this.world.generator.getBiome(i + this.x * chunkSize, k + this.y * chunkSize)
+                let height = Math.floor(this.world.generator.getHeight(i + this.x * chunkSize, k + this.y * chunkSize))//this.heightAt(i, k)
+                let feature = biome.getFeature()
+                if(feature) {
+                    this.register.getFeature(feature).generate(
+                        this.world, 
+                        new Vector3(i + this.x * chunkSize, height, k + this.y * chunkSize), 
+                        false
+                    )
+                }
+                // console.log(biome)
+                // let rand = Math.random()
+                // if(rand < 0.015) {
+                //     this.register.getFeature("tree").generate(
+                //         this.world, 
+                //         new Vector3(i + this.x * chunkSize, height, k + this.y * chunkSize), 
+                //         false
+                //     )
+                // }
             }
         }
     }
@@ -90,7 +118,8 @@ export default class Chunk {
         }
         if(block.material == Material.AIR) return true
         if(block.material == Material.LIQUID) return blockData.id != block.id
-        if(block.transparent) return blockData.id != block.id
+        if(block.transparent) return blockData.selfCulled || blockData.id != block.id
+        
         return false
     }
 
@@ -140,7 +169,7 @@ export default class Chunk {
         }
         
         this.needsUpdate = true
-        this.rebuildNeighbourChunks(pos, worldPos)
+        //this.rebuildNeighbourChunks(pos, worldPos)
     }
 
     removeVoxel(pos, drop){
@@ -178,12 +207,11 @@ export default class Chunk {
         return true
     }
 
-    setVoxel(pos, blockID){
-        const curBlockID = this.data[pos.x][pos.y][pos.z]
-        if(this.register.getBlock(curBlockID).material == Material.LIQUID) {
-            this.updateBlockStatesAround(pos)
-        }
-        this.data[pos.x][pos.y][pos.z] = blockID
+    setVoxel(pos, blockID, blockData){
+        if(pos.y < 0 || pos.y >= chunkHeight) return false
+        this.data[mod(pos.x, chunkSize)][pos.y][mod(pos.z, chunkSize)] = blockID
+        if(blockData)
+            this.metadata[blockData.id] = blockData
     }
 
     addVoxel(pos, blockID, blockData){
@@ -331,3 +359,7 @@ export default class Chunk {
     }
 
 }
+
+function mod(n, m) {
+    return ((n % m) + m) % m;
+  }

@@ -8,6 +8,8 @@ attribute float ao;
 varying vec2 vUV;
 varying float vAO;
 varying vec3 vNormal;
+varying vec3 vVertex;
+flat varying vec2 vChunkPos;
 
 
  

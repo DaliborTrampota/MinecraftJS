@@ -1,5 +1,6 @@
 import Blocks from './Blocks.js';
 import Items from './Items.js';
+import Features from './Features.js';
 import Biomes from './Biomes.js';
 import Entities from './Entities.js';
 import Recipes from './Recipes.js';
@@ -13,7 +14,8 @@ export default class RegisterManager {
 
         this.blocks = Blocks.new()
         this.items = Items.new() // items dependant on entities and blocks
-        this.biomes = Biomes.new()
+        this.features = Features.new()
+        this.biomes = Biomes.new() //biomes are using features duh
 
         this.recipes = Recipes.new()
     }
@@ -37,5 +39,9 @@ export default class RegisterManager {
 
     getBiome(biomeIdOrName){
         return Biomes.get(biomeIdOrName)
+    }
+
+    getFeature(key) {
+        return Features.get(key)
     }
 }

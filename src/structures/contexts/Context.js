@@ -32,7 +32,7 @@ export default class Context {
         let dir = this.player.camera.getWorldDirection(new Vector3()).setLength(dirLen)
         
         let position = this.player.camera.getWorldPosition(new Vector3())
-        let prevPos = new Vector3()
+        let prevPos = position.clone()
         let block = getBlockAt(position, this.player.world)
         let totalDistance = 0
         let bb = false
@@ -68,6 +68,7 @@ export default class Context {
         }
         
         this.position = position
+        if(closest.t == Infinity) return { block, position, found: true, inside: true }
 
         const angle = closest.normal.angleTo(dir) * 180 / Math.PI
         return { block, position, normal: closest.normal.clone().negate(), angle, point: closest.point.sub(position.clone().floor()), found: true }
