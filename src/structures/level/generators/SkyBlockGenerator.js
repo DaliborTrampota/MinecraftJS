@@ -1,6 +1,4 @@
 import { Vector3 } from "three"
-import { WORLD_SETTINGS } from "../../tools/Constants"
-import BiomeGenerator from "./BiomeGenerator"
 
 
 export default class SkyBlockGenerator {

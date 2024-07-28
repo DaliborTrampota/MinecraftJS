@@ -3,7 +3,7 @@ import Stats from 'three/examples/jsm/libs/stats.module.js'
 
 import RegisterManager from './registers/RegisterManager.js';
 import TextureManager from '../tools/TextureManager.js';
-import BiomeGenerator from './generators/BiomeGenerator.js';
+import BiomeGenerator from './level/generators/BiomeGenerator.js';
 import World from './level/World.js';
 
 import Player from './player/Player.js';
@@ -52,7 +52,8 @@ export default class Game {
         console.log('Loaded entities:', this.register.entities.map.size)
         console.log('Loaded biomes:', this.register.biomes.map.size)
         console.log('Loaded recipes:', this.register.recipes.map.size)
-        
+        console.log('Loaded features:', this.register.features.map.size)
+
         this.player = new Player(this.camera, this)
         this.world = new World(new OverworldGenerator(this.register), this.register, this.player)
         // this.world = new World(new SkyBlockGenerator(this.register), this.register, this.player)

@@ -126,7 +126,7 @@ const WORLD_SETTINGS = {
     globalSeaLevel: 12,
     chunkSize: 16,
     chunkHeight: 128,
-    ambientOcclusion: false,
+    ambientOcclusion: true,
 }
 
 const GAME_SETTINGS = {

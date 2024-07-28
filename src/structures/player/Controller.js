@@ -184,6 +184,7 @@ export default class Controller {
         }
         const gamemodeName = this.player.gamemode == GAMEMODE.SURVIVAL ? 'Survival' : this.player.gamemode == GAMEMODE.CREATIVE ? 'Creative' : 'Spectator'
         debug.insertAdjacentHTML('beforeend', `<div id=info-gamemode>Gamemode: ${gamemodeName}</div>`)
+        debug.insertAdjacentHTML('beforeend', `<div id=info-pos>Pos: ${this.player.feetPos}</div>`)
 
         this.debug.helpers.player = new BoxHelper(this.player.model, 0xffff00)
         this.debug.helpers.axis = new AxesHelper(100)
@@ -220,6 +221,7 @@ export default class Controller {
         }
         const gamemodeName = this.player.gamemode == GAMEMODE.SURVIVAL ? 'Survival' : this.player.gamemode == GAMEMODE.CREATIVE ? 'Creative' : 'Spectator'
         document.getElementById('info-gamemode').innerHTML = `Gamemode: ${gamemodeName}`
+        document.getElementById('info-pos').innerHTML = `Pos: ${this.player.feetPos.toArray().map(n => n.toFixed(2)).join(', ')}`
         for(let helper in this.debug.helpers) {
             this.debug.helpers[helper].update()
         } 
