@@ -4,8 +4,6 @@ import { PosMap, create3DArray, map } from "../../tools/Utils.js"
 import ItemEntity from "../entities/ItemEntity.js";
 import LootTable from "../LootTable.js";
 import TerrainBuilder from "./TerrainBuilder.js";
-import WaterBlock from '../blocks/WaterBlock.js';
-import Feature from '../level/generators/Feature.js';
 
 const { chunkSize, chunkHeight } = WORLD_SETTINGS
 
