@@ -44,6 +44,12 @@ export default class BlockState {
         return this.store[prop]
     }
 
+    add(prop, value) {
+        this.store[prop] ??= []
+        this.store[prop].push(value)
+        return this
+    }
+
     rotated(side) {
         return Side.rotate(side, -this.angle, this.rotationAxis) // negative angle because we want to get the side that would be rotated to the current side
     }

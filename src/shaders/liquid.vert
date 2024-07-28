@@ -199,6 +199,11 @@ void main(){
         float noise = cnoise(noisePos) * 0.2;
         newPosition += normal * noise;
         newPosition.y -= 0.1;
+    } else if (normal.y != 1.0) {
+        vec3 noisePos = vec3(position.x + chunkPos.x * 16.0 + time * 1.0, position.y, position.z + chunkPos.y * 16.0);
+        float noise = cnoise(noisePos) * 0.2;
+        newPosition.y += noise;
+        newPosition.y -= 0.1;
     }
 
     gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);

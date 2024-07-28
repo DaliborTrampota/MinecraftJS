@@ -27,7 +27,7 @@ export default class Controller {
         this.flying = false
 
         this.debug = {
-            properties: Object.entries(window.game.renderer.info).map(([key, o]) => Object.keys(o).map(prop => `${key}.${prop}`)).flat(),
+            properties: Object.entries(window.game.renderer.info).map(([key, o]) => Object.keys(o).filter(k => isNaN(k)).map(prop => `${key}.${prop}`)).flat(),
             active: false,
             helpers: {}
         }

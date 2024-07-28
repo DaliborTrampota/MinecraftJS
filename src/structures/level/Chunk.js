@@ -1,11 +1,9 @@
 import { Vector2, Vector3 } from 'three';
-import { WORLD_SETTINGS, CrossCheck, Material } from "../../tools/Constants.js"
+import { WORLD_SETTINGS, CrossCheck, Material, UpDownCheck } from "../../tools/Constants.js"
 import { PosMap, create3DArray, map } from "../../tools/Utils.js"
 import ItemEntity from "../entities/ItemEntity.js";
 import LootTable from "../LootTable.js";
 import TerrainBuilder from "./TerrainBuilder.js";
-import WaterBlock from '../blocks/WaterBlock.js';
-import Feature from '../level/generators/Feature.js';
 
 const { chunkSize, chunkHeight } = WORLD_SETTINGS
 
@@ -199,8 +197,10 @@ export default class Chunk {
             }
         }
         
-        this.setVoxel(pos, this.register.getBlockID('air'))
+        this.onBlockStateDeleted(this.metadata[`${pos.x}_${pos.y}_${pos.z}`])
         delete this.metadata[`${pos.x}_${pos.y}_${pos.z}`]
+        this.setVoxel(pos, this.register.getBlockID('air'))
+
         this.rebuildNeighbourChunks(pos, worldPos)
         return true
     }
@@ -220,10 +220,13 @@ export default class Chunk {
         pos.x -= this.mesh.position.x
         pos.z -= this.mesh.position.z
 
+        //if(pos.y < 0 || pos.y >= chunkHeight) return false
+
+        this.onBlockStateDeleted(this.metadata[`${pos.x}_${pos.y}_${pos.z}`])
+        if(blockData) this.metadata[blockData.id] = blockData
+        else delete this.metadata[`${pos.x}_${pos.y}_${pos.z}`]
         this.setVoxel(pos, blockID)//possible out of bounds on borders
-        if(blockData) {
-            this.metadata[blockData.id] = blockData
-        }
+
         this.rebuildNeighbourChunks(pos, worldPos)
         return true
     }
@@ -258,16 +261,35 @@ export default class Chunk {
             let toTick = []
             for(let key in this.metadata) {
                 const state = this.metadata[key]
-                if(state.get('updateWater') && state.get('waterLevel')) {
+                if(state.get('dirty') && state.get('liquidLevel')) {
                     toTick.push(state)
                 }
             }
             for(let state of toTick) {
-                if(WaterBlock.spread(this.world, state.pos, state)) {
+                if(state.block.update(this.world, state)) {
                     this.removeVoxel(state.pos, false)
+                    console.log("removing voxel")
                 }
             }
             this.waterTimer = 1
+        }
+    }
+
+    onBlockStateDeleted(state) {
+        if(state?.block.material == Material.LIQUID) {
+            const flow = state.get('flow')
+            if(!flow) return
+            for(let pos of flow) {
+                this.getBlockState(pos)?.set('dirty', true)
+            }
+        }
+    }
+
+    updateBlockStatesAround(pos) {
+        for(let side of CrossCheck.concat(UpDownCheck)) {
+            let newPos = pos.clone().add(side)
+            const state = this.getBlockState(newPos)
+            state?.set('dirty', true)
         }
     }
     // spawnBlock(blockID){

@@ -15,7 +15,6 @@ export default class Block {
         this.selfCulled = false
         this.solid = true
 
-        this.textures = {}
         this.orientable = false
 
         this.voxel = false
