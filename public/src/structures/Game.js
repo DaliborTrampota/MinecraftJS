@@ -12,17 +12,20 @@ import BiomeGenerator from './level/generators/BiomeGenerator.js';
 import OverworldGenerator from './level/generators/OverworldGenerator.js';
 import SkyBlockGenerator from './level/generators/SkyBlockGenerator.js';
 import OneChunkGenerator from './level/generators/OneChunkGenerator.js';
+import { baseURL } from '../tools/Constants.js';
 
-export default class Game {
+export default class Game extends EventTarget {
 
     static #ID = 0
 
     constructor(renderer, camera){
+        super()
         window.game = this
 
         this.renderer = renderer;
         this.camera = camera;
 
+        this.resourceManager = new ResourceManager(baseURL)
         this.textureManager = new TextureManager()
         this.register
 
@@ -39,12 +42,21 @@ export default class Game {
     }
 
     async Init(){
+
+        this.dispatchEvent(new CustomEvent('loading', { detail: 'Loading world data...'}))
+        await this.resourceManager.fetchData()
+        this.dispatchEvent(new CustomEvent('loading', { detail: 'Loading images...'}))
+        await this.resourceManager.fetchImages()
+            
+
         this.createSkybox()
         //this.createLight()
 
-        await this.textureManager.load()
+        this.dispatchEvent(new CustomEvent('loading', { detail: 'Loading textures...'}))
+        await this.textureManager.load(ResourceManager.textures)
+
+        this.dispatchEvent(new CustomEvent('loading', { detail: 'Registering blocks, items, entities,...'}))
         this.register = new RegisterManager()
-        
         this.register.blocks.generateModels()
         this.register.items.generateIcons()
         
@@ -87,7 +99,8 @@ export default class Game {
         // this.player.inventory.addStack(Stack.create('sand', 64))
         // this.player.inventory.addStack(Stack.create('cobblestone', 64))
         // this.player.inventory.addStack(Stack.create('glass', 64))
-
+        
+        this.dispatchEvent(new CustomEvent('loading', { detail: 'FINISH' }))
     }
 
     Update(){

@@ -2,6 +2,7 @@ import { Vector3 } from "three"
 import VoxelBuilder from "../../tools/VoxelBuilder.js"
 import BlockState from "./BlockState.js"
 import { angleToAxis } from "../../tools/Utils.js"
+import ResourceManager from "../../tools/ResourceManager.js"
 
 export default class Block {
 
@@ -24,7 +25,7 @@ export default class Block {
 
         this.entityClass = false
 
-        this.loadData(window.blockData[key])
+        this.loadData(ResourceManager.data.blocks[key])
     }
 
     get hasEntity() {

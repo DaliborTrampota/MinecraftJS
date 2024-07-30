@@ -1,3 +1,4 @@
+import ResourceManager from "../../tools/ResourceManager.js";
 import InterfaceFactory from "./InterfaceFactory.js";
 import MachineInterface from "./MachineInterface.js";
 
@@ -35,7 +36,7 @@ export default class CraftingTableInterface extends MachineInterface {
         canvas.setAttribute('class', 'gui-layer')
         canvas.id = "progressLayer"
 
-        const arrow = window.images.progressArrow
+        const arrow = ResourceManager.images.progressArrow
 
         canvas.width = arrow.width
         canvas.height = arrow.height

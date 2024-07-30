@@ -29,19 +29,19 @@ export default class TextureManager {
         TextureManager.textures.push(material)
     }
 
-    async load(){
+    async load(textures){
         console.info('Loading textures...')
 
         const lightFrag = await fetch(`${baseURL}/shaders/light.frag`).then(r => r.text())
         const lightVert = await fetch(`${baseURL}/shaders/light.vert`).then(r => r.text())
         const liquidVert = await fetch(`${baseURL}/shaders/liquid.vert`).then(r => r.text())
         
-        const liquidAtlas = this.loader.load(baseURL +  window.textures.atlases.liquids)
-        const opaqueAtlas = this.loader.load(baseURL + window.textures.atlases.opaque)
-        const transparentAtlas = this.loader.load(baseURL + window.textures.atlases.transparent)
-        const entityAtlas = this.loader.load(baseURL + window.textures.atlases.entities)
+        const liquidAtlas = this.loader.load(baseURL +  textures.atlases.liquids)
+        const opaqueAtlas = this.loader.load(baseURL + textures.atlases.opaque)
+        const transparentAtlas = this.loader.load(baseURL + textures.atlases.transparent)
+        const entityAtlas = this.loader.load(baseURL + textures.atlases.entities)
         
-        this.loadItems(window.textures.items)
+        this.loadItems(textures.items)
         
         await new Promise((res) => this.loader.manager.onLoad = () => (res()))
 
@@ -50,10 +50,10 @@ export default class TextureManager {
         const transparentMaterial = this.createTransparentMaterial(transparentAtlas, lightVert, lightFrag)
         const entityMaterial = this.createOpaqueMaterial(entityAtlas, lightVert, lightFrag)
 
-        TextureManager.addAtlas(opaqueMaterial, window.textures.uvs.opaque)
-        TextureManager.addAtlas(transparentMaterial, window.textures.uvs.transparent)
-        TextureManager.addAtlas(liquidMaterial, window.textures.uvs.liquids)
-        TextureManager.addAtlas(entityMaterial, window.textures.uvs.entities)
+        TextureManager.addAtlas(opaqueMaterial, textures.uvs.opaque)
+        TextureManager.addAtlas(transparentMaterial, textures.uvs.transparent)
+        TextureManager.addAtlas(liquidMaterial, textures.uvs.liquids)
+        TextureManager.addAtlas(entityMaterial, textures.uvs.entities)
 
             
         //     if(block?.animation) {

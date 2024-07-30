@@ -1,3 +1,5 @@
+import ResourceManager from "../../tools/ResourceManager"
+
 const MARGIN = 16
 const FRAME = 2
 
@@ -127,9 +129,9 @@ class InterfaceFactory {
         ctx.fillRect(0, 0, width + MARGIN, height + MARGIN)
         ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'
         ctx.fillRect(FRAME, FRAME, width + MARGIN - FRAME*2, height + MARGIN - FRAME*2)
-
+        
         this.slots.forEach(slot => {
-            ctx.drawImage(window.images.slot, slot.x + MARGIN/2, slot.y + MARGIN/2, Slot.WIDTH, Slot.HEIGHT)
+            ctx.drawImage(ResourceManager.images.slot, slot.x + MARGIN/2, slot.y + MARGIN/2, Slot.WIDTH, Slot.HEIGHT)
         })
         let dataURL = canvas.toDataURL()
         canvas.remove()

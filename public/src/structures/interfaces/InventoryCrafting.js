@@ -1,5 +1,6 @@
 import InterfaceFactory from "./InterfaceFactory.js";
 import Interface from "./Interface.js";
+import ResourceManager from "../../tools/ResourceManager.js";
 
 
 export default class InventoryCrafting extends Interface {
@@ -127,7 +128,7 @@ export default class InventoryCrafting extends Interface {
         canvas.setAttribute('class', 'gui-layer')
         canvas.id = "progressLayer"
 
-        const arrow = window.images.progressArrow
+        const arrow = ResourceManager.images.progressArrow
 
         canvas.width = arrow.width
         canvas.height = arrow.height

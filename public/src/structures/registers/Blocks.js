@@ -8,6 +8,7 @@ import AbstractRegister from "./AbstractRegister.js";
 import Liquid from "../blocks/liquids/Liquid.js";
 import PhysicalBlock from "../blocks/PhysicalBlock.js";
 import CraftingTableBlock from "../blocks/machines/CraftingTable.js";
+import ResourceManager from "../../tools/ResourceManager.js";
 
 export default class Blocks extends AbstractRegister {
 
@@ -53,14 +54,14 @@ export default class Blocks extends AbstractRegister {
     }
 
     static init() {
-        for(let name in window.blockData) {
-            let block = window.blockData[name]
+        for(let name in ResourceManager.data.blocks) {
+            let block = ResourceManager.data.blocks[name]
             while(block.geometry) {
-                let parentBlock = window.blockData[block.geometry]
+                let parentBlock = ResourceManager.data.blocks[block.geometry]
                 block.parent = block.geometry
                 delete block.geometry
                 block = Object.assign({}, parentBlock, block)
-                window.blockData[name] = JSON.parse(JSON.stringify(block))
+                ResourceManager.data.blocks[name] = JSON.parse(JSON.stringify(block))
             }
         }
 

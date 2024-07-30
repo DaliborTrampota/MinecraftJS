@@ -1,7 +1,6 @@
 import { Scene, Clock, PerspectiveCamera, WebGLRenderer } from 'three';
 import './tools/Extensions.js'
 import PhotoBooth from './tools/PhotoBooth.js';
-import { baseURL } from './tools/Constants.js';
 
 Array.prototype.view = function(start, end) {
     return new Proxy(this, {
@@ -65,40 +64,18 @@ async function main() {
     
     document.onresize = onWindowResize
     window.onbeforeunload = preventClose
-    await fetchData()
-    window.images = await loadImages()
     const Game = await import('./structures/Game.js').then(res => res.default)
     new Game(renderer, camera)
 } 
 main()
 
 
-async function fetchData() {
-    window.textures = await fetch(`${baseURL}/atlases`).then(res => res.json())
-    window.blockData = await fetch(`${baseURL}/data/blocks`).then(res => res.json())
-    window.itemData = await fetch(`${baseURL}/data/items`).then(res => res.json())
-    window.recipeData = await fetch(`${baseURL}/data/recipes`).then(res => res.json())
-    window.entityData = await fetch(`${baseURL}/data/entities`).then(res => res.json())
-    // let biomeData = await fetch('/biomes').then(res => res.json())
-    // let dimensionData = await fetch('/dimensions').then(res => res.json())
-    // let structureData = await fetch('/structures').then(res => res.json())
-    window.lootTableData = await fetch(`${baseURL}/data/lootTables`).then(res => res.json())
-}
 
-async function loadImages() {
-    const images = {
-        slot: await loadImage(`/resources/gui/slot.png`),
-        progressArrow: await loadImage(`/resources/gui/progressArrow.png`),
+
+
+function preventClose(e) {
+    if(window.game.player.controller.locked) {
+        e.preventDefault()
+        return e.returnValue = 'Are you sure you want to leave?'
     }
-
-    // await Promise.all(Object.values(images))
-    return images
-}
-
-async function loadImage(path) {
-    return new Promise((resolve, reject) => {
-        const image = new Image()
-        image.onload = () => resolve(image)
-        image.src = path
-    })
 }

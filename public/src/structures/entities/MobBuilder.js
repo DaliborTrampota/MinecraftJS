@@ -1,5 +1,6 @@
 import { BoxGeometry, BufferAttribute, Group, Mesh } from "three"
 import TextureManager from "../../tools/TextureManager"
+import ResourceManager from "../../tools/ResourceManager"
 
 
 export default class MobBuilder {
@@ -9,7 +10,7 @@ export default class MobBuilder {
         this.aiClass = false
 
         this.geometries = []
-        this.loadData(window.entityData[key])
+        this.loadData(ResourceManager.data.entities[key])
     }
 
     setAI(ai) {

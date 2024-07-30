@@ -1,6 +1,7 @@
 import AbstractRegister from "./AbstractRegister.js";
 import AbstractRecipe from "../recipes/AbstractRecipe.js";
 import Blocks from "./Blocks.js";
+import ResourceManager from "../../tools/ResourceManager.js";
 
 export default class Recipes extends AbstractRegister {
 
@@ -10,8 +11,8 @@ export default class Recipes extends AbstractRegister {
     }
 
     load() {
-        for(let recipeName in window.recipeData) {
-            let recipe = AbstractRecipe.fromJSON(recipeName, window.recipeData[recipeName])
+        for(let recipeName in ResourceManager.data.recipes) {
+            let recipe = AbstractRecipe.fromJSON(recipeName, ResourceManager.data.recipes[recipeName])
             // switch(window.recipeData[recipeName].machine) {
             //     case 'furnace':
             //         recipe.machine = Blocks.FURNACE
