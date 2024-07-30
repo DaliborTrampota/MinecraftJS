@@ -1,5 +1,5 @@
 import { Vector3, Vector2, Euler, Raycaster, MeshBasicMaterial, Mesh, BoxGeometry } from 'three';
-import { PI_2, GAMEMODE, BASE_PLAYER_SETTINGS, PLAYER_DIMENSIONS, CrossCheck, CornerCheck, MOUSE_BUTTON } from '../../tools/Constants.js'
+import { PI_2, GAMEMODE, BASE_PLAYER_SETTINGS, PLAYER_DIMENSIONS, CrossCheck, CornerCheck, MOUSE_BUTTON, WORLD_SETTINGS } from '../../tools/Constants.js'
 import { clamp, moveTowards } from '../../tools/Utils.js'
 
 import ItemEntity from '../entities/ItemEntity.js';
@@ -39,6 +39,9 @@ export default class Player extends LivingEntity {
         this.placeDelay = 0
         this.useDelay = 0
 
+        this.spawned = false
+        this.currentWorld = "earth"
+
         this.holding = {
             clickStack: [],
             RMB: false,
@@ -71,6 +74,18 @@ export default class Player extends LivingEntity {
         return this.gamemode == GAMEMODE.SURVIVAL
     }
 
+    get inGUI() {
+        return Controller.inGUI
+    }
+
+    set inGUI(value) {
+        Controller.inGUI = value
+    }
+
+    setWorld(world) {
+        this.currentWorld = world.key
+    }
+
     setPlaceDelay(){
         this.useDelay = BASE_PLAYER_SETTINGS.placeDelay
     }
@@ -79,7 +94,7 @@ export default class Player extends LivingEntity {
         this.useDelay = delay
     }
 
-    Update(delta){
+    Update(delta) {
         if(this.controller.jumpRequest && this.grounded) this.jump()
         super.Update(delta)
         this.pickupEntities()
@@ -93,7 +108,7 @@ export default class Player extends LivingEntity {
     }
 
     curChunkChanged() {
-        window.game.world.updateViewDistance()
+        this.world.updateViewDistance(this)
     }
     
     calculateVelocity(delta){
@@ -197,7 +212,7 @@ export default class Player extends LivingEntity {
         const { block, position, normal, found } = context.getAimedBlock(this.range)
         if(!found) return false
 
-        let chunk = window.game.world.getChunkFromPos(position)
+        let chunk = this.world.getChunkFromPos(position)
         let outcome = false
         if(this.inSurvival){
             //TODO check if can break
@@ -274,7 +289,7 @@ export default class Player extends LivingEntity {
     }
 
     onMouseClick(e){
-        if(this.controller.inGUI) return
+        if(this.inGUI) return
         switch(e.which){
             case MOUSE_BUTTON.LMB: 
                 this.holding.clickStack.push(MOUSE_BUTTON.LMB)

@@ -65,7 +65,7 @@ export default class InventoryInterface extends Interface {
             }
         }
         super.open()
-        this.player.controller.inGUI = this.isOpen
+        this.player.inGUI = this.isOpen
     }
 
     close() {
@@ -74,7 +74,7 @@ export default class InventoryInterface extends Interface {
             this.interfaces[iface].close()
         }
         this.interfaces = {}
-        this.player.controller.inGUI = this.isOpen
+        this.player.inGUI = this.isOpen
     }
 
     update() {

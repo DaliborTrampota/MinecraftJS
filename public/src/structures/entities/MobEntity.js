@@ -12,6 +12,8 @@ export default class MobEntity extends LivingEntity {
 
         this.maxUpStep = 1.1
         this.speed = 3
+        
+        window.game.addUpdateSub(this)
     }
 
     Update(delta) {

@@ -5,10 +5,11 @@ import { BoxHelper, AxesHelper } from 'three';
 
 export default class Controller {
 
+    static inGUI = false
+
     constructor(player){
         this.player = player
         this.locked = false
-        this.inGUI = false
 
         this.movement = {
             front: false,
@@ -115,9 +116,9 @@ export default class Controller {
             return
         }
 
-        this.horizontal = this.inGUI ? 0 : clamp(this.horizontal, -1, 1)
-        this.vertical = this.inGUI ? 0 : clamp(this.vertical, -1, 1)
-        this.upDown = this.inGUI ? 0 : clamp(this.upDown, -1, 1)
+        this.horizontal = Controller.inGUI ? 0 : clamp(this.horizontal, -1, 1)
+        this.vertical = Controller.inGUI ? 0 : clamp(this.vertical, -1, 1)
+        this.upDown = Controller.inGUI ? 0 : clamp(this.upDown, -1, 1)
     }
     
     keyUp(e){
@@ -156,9 +157,9 @@ export default class Controller {
                 break
         }
 
-        this.horizontal = this.inGUI ? 0 : clamp(this.horizontal, -1, 1)
-        this.vertical = this.inGUI ? 0 : clamp(this.vertical, -1, 1)
-        this.upDown = this.inGUI ? 0 : clamp(this.upDown, -1, 1)
+        this.horizontal = Controller.inGUI ? 0 : clamp(this.horizontal, -1, 1)
+        this.vertical = Controller.inGUI ? 0 : clamp(this.vertical, -1, 1)
+        this.upDown = Controller.inGUI ? 0 : clamp(this.upDown, -1, 1)
     }
 
     onMouseScroll(e){
@@ -170,7 +171,7 @@ export default class Controller {
         document.addEventListener('keydown', this.keyDown.bind(this))
         document.addEventListener('keyup', this.keyUp.bind(this))
         document.addEventListener('click', () => {
-            if(!this.locked && !this.inGUI) document.body.requestPointerLock()
+            if(!this.locked && !Controller.inGUI) document.body.requestPointerLock()
         })
 
         document.addEventListener('pointerlockchange', () => this.locked = !this.locked)

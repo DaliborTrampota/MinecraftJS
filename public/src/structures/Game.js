@@ -3,6 +3,7 @@ import Stats from 'three/examples/jsm/libs/stats.module.js'
 
 import RegisterManager from './registers/RegisterManager.js';
 import TextureManager from '../tools/TextureManager.js';
+import ResourceManager from '../tools/ResourceManager.js';
 import World from './level/World.js';
 
 import Player from './player/Player.js';
@@ -20,6 +21,7 @@ export default class Game extends EventTarget {
 
     constructor(renderer, camera){
         super()
+        this.updateSubs = [];
         window.game = this
 
         this.renderer = renderer;
@@ -30,15 +32,33 @@ export default class Game extends EventTarget {
         this.register
 
         this.player
-        this.world
+        this.worlds = {}
+
+
+        this.renderer.setAnimationLoop(this.Update.bind(this));
 
         this.stats = new Stats();
         document.getElementById('target').appendChild(this.stats.dom);
-
-        this.updateSubs = [];
-        this.renderer.setAnimationLoop(this.Update.bind(this));
-
         this.Init()
+    }
+
+    get world() {
+        this.worlds[this.player.currentWorld]
+    }
+
+    async spawn(worldType) {
+        if(!this.worlds[worldType]) {
+            this.worlds[worldType] = new World(worldType, this, new (Game.generators()[worldType])(this.register))
+            await this.worlds[worldType].Init()
+        }
+        // if(!this.worlds.earth) {
+        //     this.worlds.earth = new World('earth', this, new OverworldGenerator(this.register))
+
+        //     await this.worlds.earth.Init()
+        //     // this.worlds.earth = new World('earth', this, new SkyBlockGenerator(this.register))
+        //     // this.worlds.earth = new World('earth', this, new OneChunkGenerator(this.register))
+        // }
+        this.worlds[worldType].spawn(this.player)       
     }
 
     async Init(){
@@ -67,16 +87,12 @@ export default class Game extends EventTarget {
         console.debug('Loaded recipes:', this.register.recipes.map.size)
         console.debug('Loaded features:', this.register.features.map.size)
         
-        this.player = new Player(this.camera, this)
-        this.world = new World(new OverworldGenerator(this.register), this.register, this.player)
-        // this.world = new World(new SkyBlockGenerator(this.register), this.register, this.player)
-        // this.world = new World(new OneChunkGenerator(this.register), this.register, this.player)
 
         window.clock.start()
+
+        this.player = new Player(this.camera)
+        console.log(this.player)
         
-        for(let key of this.register.items.map.keys()) {
-            // this.player.inventory.addStack(Stack.create(key, 64))
-        }
         this.player.inventory.addStack(Stack.create('crafting_table', 1))
         this.player.inventory.addStack(Stack.create('furnace', 64))
         this.player.inventory.addStack(Stack.create('oak_log', 64))
@@ -88,15 +104,15 @@ export default class Game extends EventTarget {
         this.player.inventory.addStack(Stack.create('cow_spawn_egg', 64))
         this.player.inventory.addStack(Stack.create('water_still', 64))
         this.player.inventory.addStack(Stack.create('lava_still', 64))
-        // this.player.inventory.addStack(Stack.create('table', 64))
-        // this.player.inventory.addStack(Stack.create('chair', 64))
-        // this.player.inventory.addStack(Stack.create('furnace', 64))
-        // this.player.inventory.addStack(Stack.create('dispenser', 64))
-        // this.player.inventory.addStack(Stack.create('oak_log', 64))
-        // this.player.inventory.addStack(Stack.create('grass_block', 64))
-        // this.player.inventory.addStack(Stack.create('sand', 64))
-        // this.player.inventory.addStack(Stack.create('sand', 64))
-        // this.player.inventory.addStack(Stack.create('sand', 64))
+        this.player.inventory.addStack(Stack.create('table', 64))
+        this.player.inventory.addStack(Stack.create('chair', 64))
+        this.player.inventory.addStack(Stack.create('furnace', 64))
+        this.player.inventory.addStack(Stack.create('dispenser', 64))
+        this.player.inventory.addStack(Stack.create('oak_log', 64))
+        this.player.inventory.addStack(Stack.create('grass_block', 64))
+        this.player.inventory.addStack(Stack.create('sand', 64))
+        this.player.inventory.addStack(Stack.create('sand', 64))
+        this.player.inventory.addStack(Stack.create('sand', 64))
         // this.player.inventory.addStack(Stack.create('cobblestone', 64))
         // this.player.inventory.addStack(Stack.create('glass', 64))
         
@@ -106,6 +122,7 @@ export default class Game extends EventTarget {
     Update(){
         this.stats.update()
         for(let o of this.updateSubs){
+            // console.log(o)
             const delta = o.clock.getDelta();
             o.obj.Update(delta)
         }
@@ -116,7 +133,8 @@ export default class Game extends EventTarget {
             if (t.uniforms.time) {
                 t.uniforms.time.value += delta
             }
-            if (t.uniforms.cameraPos) {
+
+            if (t.uniforms.cameraPos && this.spawned) {
                 t.uniforms.cameraPos.value = this.player.eyePos
             }
             // if (t.uniforms.animFrame && TextureManager.animationMs > 100) {
@@ -125,11 +143,12 @@ export default class Game extends EventTarget {
             // }
 
         }
-
+        
         this.renderer.render(window.scene, this.camera);
     }
 
     addUpdateSub(obj){
+        console.log(this)
         if('Update' in obj) {
             if(!obj.id) {
                 console.warn("No ID for", obj, "which subscribed to Update, given", Game.#ID)
@@ -174,5 +193,13 @@ export default class Game extends EventTarget {
         ]);
         // window.scene.background = new Color(80.0/255.0, 207.0/255.0, 242.0/255.0)
         window.scene.background = texture;
+    }
+
+    static generators() {
+        return {
+            'earth': OverworldGenerator,
+            'skyblock': SkyBlockGenerator,
+            'onechunk': OneChunkGenerator
+        }
     }
 }

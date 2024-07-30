@@ -3,28 +3,41 @@ import Chunk from "./Chunk.js"
 
 export default class World {
     
-    constructor(generator, register, player){
+    constructor(key, game, generator) {
+        this.key = key
         this.generator = generator
-        this.register = register;
-        this.player = player;
+        this.game = game
 
         this.gravity = -9.81 * 2
         this.chunks = {}
 
         this.activeChunks = []
 
-        this.Init()
-        window.game.addUpdateSub(this)
+        // this.Init()
+    }
+
+    get register() {
+        return this.game.register
     }
 
     async Init(){
-        console.time('Loading')
-        console.info('Loading chunks...')
+        console.time('Generating world', this.key)
+        this.game.dispatchEvent(new CustomEvent('loading', { detail: 'Generating terrain...'}))
         await this.load()
         
-        console.info('Spawning player...')
-        this.spawnPlayer()
-        console.timeEnd('Loading')
+        console.timeEnd('Generating world', this.key)
+        this.game.addUpdateSub(this)
+    }
+
+    spawn(player) {
+        player.setWorld(this)
+
+        const centerOfChunk = WORLD_SETTINGS.chunkSize / 2
+        const height = this.getChunk(0, 0).heightAt(centerOfChunk, centerOfChunk) + 10
+        player.position.set(centerOfChunk, height, centerOfChunk)
+        player.camera.lookAt(centerOfChunk, 0, centerOfChunk) //+h-
+        player.spawned = true
+        window.game.addUpdateSub(player)
     }
 
     Update(delta){
@@ -39,8 +52,8 @@ export default class World {
     }
 
     async load(){
-        const start = -this.player.viewDistance
-        const end = this.player.viewDistance
+        const start = -3//player.viewDistance
+        const end = 3//player.viewDistance
 
         for(let i = start; i < end; ++i){
             for(let j = start; j < end; ++j){
@@ -50,6 +63,7 @@ export default class World {
                 this.activeChunks.push(chunk.id)
             }
         }
+        this.game.dispatchEvent(new CustomEvent('loading', { detail: 'Generating features...'}))
         for(let chID in this.chunks) {
             const chunk = this.chunks[chID]
             chunk.generateFeatures()
@@ -58,22 +72,15 @@ export default class World {
         }
     }
 
-    spawnPlayer(){
-        const centerOfChunk = WORLD_SETTINGS.chunkSize / 2
-        const height = this.getChunk(0, 0).heightAt(centerOfChunk, centerOfChunk) + 10
-        this.player.position.set(centerOfChunk, height, centerOfChunk)
-        this.player.camera.lookAt(centerOfChunk, 0, centerOfChunk) //+h-
-    }
-
-    updateViewDistance(){
+    updateViewDistance(player){
         console.debug('updating view distance')
         for(let chID of this.activeChunks){//todo unload only necessarry chunks
             this.chunks[chID].unload()
         }
         this.activeChunks = []
 
-        const start = this.player.chunkCoords.x - this.player.viewDistance
-        const end = this.player.chunkCoords.y + this.player.viewDistance + 1
+        const start = player.chunkCoords.x - player.viewDistance
+        const end = player.chunkCoords.y + player.viewDistance + 1
 
         let newChunks = []
         for(let i = start; i < end; ++i){
@@ -115,7 +122,7 @@ export default class World {
     }
 
     getVoxel(pos){ //Terain Generation here
-        return this.generator.getVoxel(pos)
+        return this.generator.getVoxel(pos, this)
     }
 
     getVoxelFromPos(pos){
@@ -163,7 +170,7 @@ export default class World {
 
     setVoxel(pos, blockID, blockData) {
         const chunk = this.getChunkFromPos(pos)
-        if(!chunk) return console.log(pos.x / WORLD_SETTINGS.chunkSize, pos.z / WORLD_SETTINGS.chunkSize, "Chunk not found")
+        if(!chunk) return //console.log(pos.x / WORLD_SETTINGS.chunkSize, pos.z / WORLD_SETTINGS.chunkSize, "Chunk not found")
         return chunk.setVoxel(pos, blockID, blockData)
     }
 

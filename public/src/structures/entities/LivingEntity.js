@@ -11,6 +11,7 @@ export default class LivingEntity {
     constructor(model){
         this.model = model
 
+        this.currentWorld = "earth"
 
         this.health = 100
         this.speed = 2
@@ -31,15 +32,14 @@ export default class LivingEntity {
         this.maxUpStep = 0.5
 
         window.scene.add(this.model)
-        window.game.addUpdateSub(this)
     }
 
     get world() {
-        return window.game.world //todo get the actual world
+        return window.game.worlds[this.currentWorld] //todo get the actual world
     }
 
     get chunk() {
-        return window.game.world.chunks[Chunk.id(this.chunkCoords.x, this.chunkCoords.y)]
+        return this.world.chunks[Chunk.id(this.chunkCoords.x, this.chunkCoords.y)]
     } 
 
     get position() {
@@ -48,7 +48,7 @@ export default class LivingEntity {
 
     set position(vector){
         this.model.position.copy(vector)
-        let chunk = window.game.world.getChunkFromPos(vector)
+        let chunk = this.world.getChunkFromPos(vector)
         if(chunk) this.chunkCoords = new Vector2(chunk.x, chunk.y)
     }
     
@@ -65,7 +65,7 @@ export default class LivingEntity {
         this.calculateVelocity(delta)
         this.model.translateOnAxis(this.velocity, delta)
         
-        let curChunk = window.game.world.getChunkFromPos(this.position)
+        let curChunk = this.world.getChunkFromPos(this.position)
         if(!curChunk) return
         let curChunkPos = new Vector2(curChunk.x, curChunk.y)
 
