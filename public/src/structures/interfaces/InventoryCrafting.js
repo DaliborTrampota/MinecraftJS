@@ -153,7 +153,7 @@ export default class InventoryCrafting extends Interface {
     }
 
     onRecipeFinish({ detail: recipe }) {
-        console.log('finish')
+        // console.log('finish')
         this.update()
     }
 }

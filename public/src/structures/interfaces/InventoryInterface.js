@@ -125,7 +125,7 @@ export default class InventoryInterface extends Interface {
         if(this != originInterface)
             originInterface.update()
         
-        originInterface.entity.onSlotChange(stack, data.originSection)
+        originInterface.entity?.onSlotChange(stack, data.originSection)
     }
 
     allowDrop(e) {

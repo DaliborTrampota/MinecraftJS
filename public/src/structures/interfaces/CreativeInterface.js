@@ -44,5 +44,8 @@ export default class CreativeSection extends Interface {
         this.update()
     }
 
+    slots(section) {
+        return this.items.filter(i => i.tab === this.activeTab).map(i => Stack.create(i.key, i.stack))
+    }
 
 }
