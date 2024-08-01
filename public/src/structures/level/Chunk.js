@@ -62,27 +62,39 @@ export default class Chunk {
     }
 
     generateFeatures() {
-        for(let i = 0; i < chunkSize; ++i){
-            for(let k = 0; k < chunkSize; ++k){
-                let biome = this.world.generator.getBiome(i + this.x * chunkSize, k + this.y * chunkSize)
-                let height = Math.floor(this.world.generator.getHeight(i + this.x * chunkSize, k + this.y * chunkSize))//this.heightAt(i, k)
-                let feature = biome.getFeature()
-                if(feature) {
-                    this.register.getFeature(feature).generate(
-                        this.world, 
-                        new Vector3(i + this.x * chunkSize, height, k + this.y * chunkSize), 
-                        false
-                    )
+        if('getBiome' in this.world.generator) {
+            for(let i = 0; i < chunkSize; ++i){
+                for(let k = 0; k < chunkSize; ++k){
+                    let biome = this.world.generator.getBiome(i + this.x * chunkSize, k + this.y * chunkSize)
+                    let height = Math.floor(this.world.generator.getHeight(i + this.x * chunkSize, k + this.y * chunkSize))//this.heightAt(i, k)
+                    let feature = biome.getFeature()
+                    if(feature) {
+                        this.register.getFeature(feature).generate(
+                            this.world, 
+                            new Vector3(i + this.x * chunkSize, height, k + this.y * chunkSize), 
+                            false
+                        )
+                    }
                 }
-                // console.log(biome)
-                // let rand = Math.random()
-                // if(rand < 0.015) {
-                //     this.register.getFeature("tree").generate(
-                //         this.world, 
-                //         new Vector3(i + this.x * chunkSize, height, k + this.y * chunkSize), 
-                //         false
-                //     )
-                // }
+            }
+        } else if('getFeature' in this.world.generator) {
+            for(let i = 0; i < chunkSize; ++i){
+                for(let j = 0; j < chunkSize; ++j) {
+                    const x = i + this.x * chunkSize
+                    const z = j + this.y * chunkSize
+                    const h = Math.floor(this.heightAt(i, j))
+                    if(h === -1) continue
+                    
+                    let feature = this.world.generator.getFeature(this, new Vector3(x, h, z))
+                    if(feature) {
+                        this.register.getFeature(feature).generate(
+                            this.world, 
+                            new Vector3(x, h, z), 
+                            false
+                        )
+                    }
+
+                }
             }
         }
     }

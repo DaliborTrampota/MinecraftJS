@@ -36,6 +36,13 @@ export default class Feature {
         return this
     }
 
+    createBox(start, end, palette, blockData = false) {
+        this.operations.push((world, pos) => {
+            Feature.box(world, pos.clone().add(start), pos.clone().add(end), palette, blockData)
+        })
+        return this
+    }
+
     generate(world, pos, updateChunk = true) {
         for(let operation of this.operations) {
             operation(world, pos)
@@ -110,6 +117,16 @@ export default class Feature {
                 }
             }
             radius -= slope
+        }
+    }
+
+    static box(world, start, end, palette, blockData = false) {
+        for(let x = start.x; x < end.x; x++) {
+            for(let y = start.y; y < end.y; y++) {
+                for(let z = start.z; z < end.z; z++) {
+                    world.setVoxel(new Vector3(x, y, z), palette.getBlock(), blockData)
+                }
+            }
         }
     }
 

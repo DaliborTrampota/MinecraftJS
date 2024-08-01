@@ -91,7 +91,7 @@ export default class Game extends EventTarget {
         window.clock.start()
 
         this.player = new Player(this.camera)
-        console.log(this.player)
+        // console.log(this.player)
         
         this.player.inventory.addStack(Stack.create('crafting_table', 1))
         this.player.inventory.addStack(Stack.create('furnace', 64))
@@ -148,7 +148,6 @@ export default class Game extends EventTarget {
     }
 
     addUpdateSub(obj){
-        console.log(this)
         if('Update' in obj) {
             if(!obj.id) {
                 console.warn("No ID for", obj, "which subscribed to Update, given", Game.#ID)
