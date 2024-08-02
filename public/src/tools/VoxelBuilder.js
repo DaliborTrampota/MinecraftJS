@@ -1,6 +1,6 @@
 import { BufferGeometry, BufferAttribute, Vector3, Matrix4, Matrix3, Vector2 } from 'three';
 import { triangles, vertices, UVs } from './Constants.js';
-import Side from '../structures/Side.js';
+import Side from '../Side.js';
 import TextureManager from './TextureManager.js';
 
 

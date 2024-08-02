@@ -1,7 +1,7 @@
 import { Scene, Clock, PerspectiveCamera, WebGLRenderer } from 'three';
 import './tools/Extensions.js'
 import PhotoBooth from './tools/PhotoBooth.js';
-import Menu from './structures/UI/Menu.js';
+import Menu from './UI/Menu.js';
 
 
 
@@ -38,7 +38,7 @@ async function main() {
     }
     
 
-    const Game = await import('./structures/Game.js').then(res => res.default)
+    const Game = await import('./Game.js').then(res => res.default)
     const game = new Game(renderer, camera)
     const menu = new Menu(menuTarget, game)
 } 

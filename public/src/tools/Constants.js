@@ -1,6 +1,6 @@
 import { Vector3 } from 'three';
 import { createEnum } from './Utils.js';
-import Side from '../structures/Side.js';
+import Side from '../Side.js';
 
 const baseURL = import.meta.env.VITE_BASE_URL
 
