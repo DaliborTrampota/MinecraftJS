@@ -240,6 +240,7 @@ body {
     border: solid 0 transparent;
     text-transform: uppercase;
     font-weight: bold; 
+    cursor: pointer;
 }
 
 .hide {

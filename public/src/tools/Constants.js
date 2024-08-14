@@ -135,6 +135,12 @@ const WORLD_SETTINGS = {
     ambientOcclusion: true,
 }
 
+const GENERATE_PHASES = {
+    Nothing: 0,
+    HeightMap: 1,
+    Features: 2,
+}
+
 const GAME_SETTINGS = {
     maxItems: 64,
 }
@@ -176,4 +182,5 @@ export {
     PLAYER_DIMENSIONS,
     WORLD_SETTINGS,
     GAME_SETTINGS,
+    GENERATE_PHASES,
 }

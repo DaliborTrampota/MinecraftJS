@@ -1,5 +1,5 @@
 import { Vector2, Vector3 } from 'three';
-import { WORLD_SETTINGS, CrossCheck, Material, UpDownCheck } from "../tools/Constants.js"
+import { WORLD_SETTINGS, CrossCheck, Material, UpDownCheck, GENERATE_PHASES } from "../tools/Constants.js"
 import { PosMap, create3DArray, map } from "../tools/Utils.js"
 import ItemEntity from "../entities/ItemEntity.js";
 import LootTable from "../LootTable.js";
@@ -31,6 +31,8 @@ export default class Chunk {
         this.mesh
 
         this.waterTimer = 1
+
+        this.generatePhase = GENERATE_PHASES.Nothing
     }
 
     /**
@@ -59,6 +61,7 @@ export default class Chunk {
                 }
             }
         }
+        this.generatePhase = GENERATE_PHASES.HeightMap
     }
 
     generateFeatures() {
@@ -97,6 +100,7 @@ export default class Chunk {
                 }
             }
         }
+        this.generatePhase = GENERATE_PHASES.Features
     }
 
     getBlockState(pos) {

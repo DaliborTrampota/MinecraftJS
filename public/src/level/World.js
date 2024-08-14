@@ -1,4 +1,5 @@
-import { WORLD_SETTINGS } from "../tools/Constants.js";
+import { Vector2, Vector3 } from "three";
+import { BASE_PLAYER_SETTINGS, CornerCheck, CrossCheck, GENERATE_PHASES, WORLD_SETTINGS } from "../tools/Constants.js";
 import Chunk from "./Chunk.js"
 
 export default class World {
@@ -23,7 +24,11 @@ export default class World {
     async Init(){
         console.time('Generating world', this.key)
         this.game.dispatchEvent(new CustomEvent('loading', { detail: 'Generating terrain...'}))
-        await this.load()
+        await this.generate(
+            new Vector2(-BASE_PLAYER_SETTINGS.viewDistance, -BASE_PLAYER_SETTINGS.viewDistance), 
+            new Vector2(BASE_PLAYER_SETTINGS.viewDistance, BASE_PLAYER_SETTINGS.viewDistance), 
+            true
+        )
         
         console.timeEnd('Generating world', this.key)
         this.game.addUpdateSub(this)
@@ -51,64 +56,71 @@ export default class World {
         }
     }
 
-    async load(){
-        const start = -3//player.viewDistance
-        const end = 3//player.viewDistance
 
-        for(let i = start; i < end; ++i){
-            for(let j = start; j < end; ++j){
-                let chunk = new Chunk(i, j, this)
-                this.chunks[chunk.id] = chunk
-
-                this.activeChunks.push(chunk.id)
+    async generate(from, to, load = false) {
+        const generated = []
+        for(let i = from.x - 1; i <= to.x + 1; ++i){
+            for(let j = from.y - 1; j <= to.y + 1; ++j){
+                let chunk = this.getChunk(i, j) ?? new Chunk(i, j, this)
+                this.chunks[chunk.id] ??= chunk
+                generated.push(chunk)
+                // if(chunk = this.getChunk(i, j)) {
+                //     if(chunk.generatePhase < GENERATE_PHASES.Features)
+                //         generated.push(chunk) 
+                //     else {
+                //         rest.push(chunk)
+                //     }
+                // } else {
+                //     chunk = new Chunk(i, j, this)
+                //     this.chunks[chunk.id] = chunk
+                //     generated.push(chunk)
+                // }
             }
         }
+
         this.game.dispatchEvent(new CustomEvent('loading', { detail: 'Generating features...'}))
-        for(let chID in this.chunks) {
-            const chunk = this.chunks[chID]
-            chunk.generateFeatures()
-            window.scene.add(chunk.generate())
-            chunk.load()
+        for(const ch of generated) {
+            if(ch.generatePhase < GENERATE_PHASES.Features) {
+                let allNeighbors = true
+                for(const dir of [...CornerCheck, ...CrossCheck]) {
+                    const neighbor = this.getChunk(ch.x + dir.x, ch.y + dir.z)
+                    if(!neighbor) {
+                        allNeighbors = false
+                        break
+                    }
+                }
+    
+                if(allNeighbors) {
+                    ch.generateFeatures()
+                }
+            }
+
+            const inCenter = ch.x >= from.x && ch.x <= to.x && ch.y >= from.y && ch.y <= to.y
+            if(load && inCenter  && !this.activeChunks.includes(ch.id)) {
+                this.activeChunks.push(ch.id)
+                if(!ch.mesh?.parent) window.scene.add(ch.generate())
+                ch.load()
+            }
+        }
+        if(load) {
+            for(let i = this.activeChunks.length - 1; i >= 0; --i) {
+                const chID = this.activeChunks[i]
+                const [x, y] = chID.split('_').map(Number)
+                if(x < from.x || x > to.x || y < from.y || y > to.y) {
+                    this.chunks[chID].unload()
+                    this.activeChunks.splice(this.activeChunks.indexOf(chID), 1)
+                }
+            }
         }
     }
 
     updateViewDistance(player){
         console.debug('updating view distance')
-        for(let chID of this.activeChunks){//todo unload only necessarry chunks
-            this.chunks[chID].unload()
-        }
-        this.activeChunks = []
-
-        const startX = player.chunkCoords.x - player.viewDistance
-        const startY = player.chunkCoords.y - player.viewDistance
-        const endX = player.chunkCoords.x + player.viewDistance + 1
-        const endY = player.chunkCoords.y + player.viewDistance + 1
-
-        let newChunks = []
-        for(let i = startX; i < endX; ++i){
-            for(let j = startY; j < endY; ++j){
-                const ID = Chunk.id(i, j)
-
-                if(!this.chunks[ID]) {
-                    this.chunks[ID] = new Chunk(i, j, this);
-                    newChunks.push(ID)
-                } else {
-                    this.chunks[ID].load()
-                }
-                if(!this.chunks[ID].mesh) window.scene.add(this.chunks[ID].generate())
-
-                this.activeChunks.push(ID)
-            }
-        }
-
-        for(let chID of newChunks) {
-            let chunk = this.chunks[chID]
-            // if(!chunk.mesh) {
-                chunk.generateFeatures()
-                window.scene.add(chunk.generate())
-                chunk.load()
-            // }
-        }
+        this.generate(
+            new Vector2(player.chunkCoords.x - player.viewDistance, player.chunkCoords.y - player.viewDistance),
+            new Vector2(player.chunkCoords.x + player.viewDistance, player.chunkCoords.y + player.viewDistance),
+            true
+        )
     }
 
     getChunk(x, y){
