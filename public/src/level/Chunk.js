@@ -1,9 +1,11 @@
-import { Vector2, Vector3 } from 'three';
+import { BufferAttribute, BufferGeometry, Mesh, Vector2, Vector3 } from 'three';
 import { WORLD_SETTINGS, CrossCheck, Material, UpDownCheck, GENERATE_PHASES } from "../tools/Constants.js"
 import { PosMap, create3DArray, map } from "../tools/Utils.js"
 import ItemEntity from "../entities/ItemEntity.js";
 import LootTable from "../LootTable.js";
 import TerrainBuilder from "./TerrainBuilder.js";
+import TextureManager from '../tools/TextureManager.js';
+import Blocks from '../registers/Blocks.js';
 
 const { chunkSize, chunkHeight } = WORLD_SETTINGS
 
@@ -27,6 +29,10 @@ export default class Chunk {
         this.breaking = []
 
         this.Init()
+        
+        this.worker = new Worker('src/level/worker.js', { type: 'module', name : `Chunk ${this.id}` })
+        this.worker.addEventListener('message', this.onWorkerMessage.bind(this))
+
         this.builder = new TerrainBuilder(this)
         this.mesh
 
@@ -48,12 +54,44 @@ export default class Chunk {
     }
 
     generate(){
-        this.mesh = this.builder.build(new Vector2(this.x, this.y), this.enabled)
-        return this.mesh
+        // this.worker.postMessage({
+        //     type: 'register',
+        //     data: JSON.stringify(Blocks.all())
+        // })
+        this.worker.postMessage({ 
+            type: 'build', 
+            data: { x: this.x, y: this.y, data: this.data, metadata: this.metadata, breaking: this.breaking }}
+        )
+        // console.time('mesh build')
+        // this.mesh = this.builder.build(new Vector2(this.x, this.y), this.enabled)
+        // // console.timeEnd('mesh build')
+        // return this.mesh
+    }
+
+    onWorkerMessage({ data: { type, data }}) {
+        console.log('msg from worker', type, data)
+        switch(type) {
+            case 'output':
+                const geometry = new BufferGeometry()
+                for(let key in data.attributes) {
+                    geometry.setAttribute(key, new BufferAttribute(new Float32Array(data[key].data), data[key].size))
+                }
+                for(let group of data.groups) {
+                    geometry.addGroup(group.start, group.count, group.materialIndex)
+                }
+                this.geometry.computeVertexNormals()
+                this.mesh = new Mesh(geometry, TextureManager.textures)
+                window.scene.add(this.mesh)
+                break
+
+            case 'getVoxel':
+                this.worker.postMessage({ type: 'getVoxel', data: this.world.getVoxelFromPos(new Vector3(data.x, data.y, data.z)).id })
+                break
+        }
     }
 
     populate(){
-        //let height = Math.floor(this.world.noise.Get(i + this.x * chunkSize, 0.0, k + this.y * chunkSize)) + 20            
+        //let height = Math.floor(this.world.noise.Get(i + this.x * chunkSize, 0.0, k + this.y * chunkSize)) + 20           
         for(let i = 0; i < chunkSize; ++i){
             for(let j = 0; j < chunkHeight; ++j){
                 for(let k = 0; k < chunkSize; ++k){
@@ -370,6 +408,10 @@ export default class Chunk {
 
     static id(x, y){
         return `${x}_${y}`
+    }
+
+    static modCoords(pos) {
+        return new Vector3(mod(pos.x, chunkSize), pos.y, mod(pos.z, chunkSize))
     }
 
 }

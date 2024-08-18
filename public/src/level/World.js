@@ -1,6 +1,7 @@
-import { Vector2, Vector3 } from "three";
+import { Vector2 } from "three";
 import { BASE_PLAYER_SETTINGS, CornerCheck, CrossCheck, GENERATE_PHASES, WORLD_SETTINGS } from "../tools/Constants.js";
 import Chunk from "./Chunk.js"
+import Minimap from "../UI/Minimap.js";
 
 export default class World {
     
@@ -43,6 +44,8 @@ export default class World {
         player.camera.lookAt(centerOfChunk, 0, centerOfChunk) //+h-
         player.spawned = true
         window.game.addUpdateSub(player)
+
+        // new Minimap(player, document.querySelector('#minimap>canvas'))
     }
 
     Update(delta){
@@ -98,8 +101,8 @@ export default class World {
             const inCenter = ch.x >= from.x && ch.x <= to.x && ch.y >= from.y && ch.y <= to.y
             if(load && inCenter  && !this.activeChunks.includes(ch.id)) {
                 this.activeChunks.push(ch.id)
-                if(!ch.mesh?.parent) window.scene.add(ch.generate())
-                ch.load()
+                if(!ch.mesh?.parent) ch.generate()//.then(mesh => window.scene.add(mesh))
+                // ch.load()
             }
         }
         if(load) {

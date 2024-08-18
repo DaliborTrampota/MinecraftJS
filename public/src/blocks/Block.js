@@ -24,7 +24,7 @@ export default class Block {
         this.animation = false
 
         this.entityClass = false
-
+        
         this.loadData(ResourceManager.data.blocks[key])
     }
 
@@ -87,7 +87,7 @@ export default class Block {
     generateModel(){
         if(!this.elements) return console.warn('Missing block model/parent for', this.key)
         const { geometry, culled, unculled, materials } = VoxelBuilder.build(this.elements, this.animation)
-
+    
         this.geometry = geometry
         this.culled = culled
         this.unculled = unculled,

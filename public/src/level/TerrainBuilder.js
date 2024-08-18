@@ -1,14 +1,15 @@
-import { Vector3, BufferGeometry, BufferAttribute, Mesh } from 'three';
+import { Vector3 } from 'three';
 import { WORLD_SETTINGS } from "../tools/Constants.js"
 import TextureManager from "../tools/TextureManager.js";
 import VoxelBuilder from '../tools/VoxelBuilder.js';
 import Side from '../Side.js';
+import Blocks from '../registers/Blocks.js';
 
 export default class TerrainBuilder {
 
     constructor(chunk) {
         /**The chunk object.
-         * @type {import('./Chunk.js').default}
+         * @type {import('./WorkerChunk.js').default}
          */
         this.chunk = chunk
         this.vertices = []
@@ -17,20 +18,7 @@ export default class TerrainBuilder {
         this.chunkPosAttr
 
         this.groupStart = 0
-        this.geometry = new BufferGeometry()
-        this.mesh
-    }
-
-    build(pos, visible){
-        this.createMeshData()
-        this.createMesh()
-
-        this.mesh.position.set(pos.x * WORLD_SETTINGS.chunkSize, 0, pos.y * WORLD_SETTINGS.chunkSize)
-        this.mesh.visible = visible
-        // this.mesh.receiveShadow = true
-        // this.mesh.castShadow = true
-
-        return this.mesh
+        this.groups = []
     }
 
     rebuild() {
@@ -38,31 +26,28 @@ export default class TerrainBuilder {
         this.UVs = []
         this.ao = []
 
-        this.geometry.clearGroups()
         this.groupStart = 0
+        this.groups = []
         
-        this.createMeshData(true)
-        this.createMesh(true)
-
-        return this.mesh
+        this.build(true)
     }
 
 
-    createMeshData(update = false){
+    async build(update = false){
         const materialGroups = {}
-        
-        for(let i = 0; i < WORLD_SETTINGS.chunkSize; ++i){
-            for(let j = 0; j < WORLD_SETTINGS.chunkHeight; ++j){
-                next:
-                for(let k = 0; k < WORLD_SETTINGS.chunkSize; ++k){
-                    const blockID = this.chunk.data[i][j][k]
-                    if(!blockID) continue next
 
-                    const blockData = this.chunk.register.getBlock(blockID)
-                    if(!blockData) console.warn('createMesh no blockData', blockID, i, j, k)
+        
+        for(let i = 0; i < WORLD_SETTINGS.chunkSize; ++i) {
+            for(let j = 0; j < WORLD_SETTINGS.chunkHeight; ++j) {
+                for(let k = 0; k < WORLD_SETTINGS.chunkSize; ++k) {
+                    const blockID = this.chunk.data[i][j][k]
+                    if(!blockID) continue
+
+                    const blockData = Blocks.get(blockID)
+                    if(!blockData) console.warn('TerrainBuilder#build: No blockData', blockID, i, j, k)
 
                     const pos = new Vector3(i, j, k)
-                    this.buildBlock(pos, blockData, materialGroups)
+                    await this.buildBlock(pos, blockData, materialGroups)
                     
                 }
             }
@@ -70,9 +55,11 @@ export default class TerrainBuilder {
         for (let materialID in materialGroups) {
             this.processDrawCall(materialGroups[materialID])
         }
+        console.log('done building', this)
+        this.chunkPosAttr = new Array(this.ao.length).fill([this.chunk.x, this.chunk.y]).flat()
     }
 
-    buildBlock(pos, blockData, materialGroups) {
+    async buildBlock(pos, blockData, materialGroups) {
         
         const breaking = this.chunk.breaking.find(o => o.pos.equals(pos))
         const blockState = this.chunk.getBlockState(pos)
@@ -83,7 +70,7 @@ export default class TerrainBuilder {
         for(let side of Side.All) {
             const rotatedSide = blockState ? blockState.rotated(side) : side
             
-            const shouldDrawFace = this.chunk.checkVoxel(faceChecks[side](pos.clone()), blockData, rotatedSide, false) // here probably want rotated side to get verts of the correct side
+            const shouldDrawFace = await this.chunk.checkVoxel(faceChecks[side](pos.clone()), blockData, rotatedSide, false) // here probably want rotated side to get verts of the correct side
             // if(blockState) console.log(side, rotatedSide, shouldDrawFace, blockState.block.key)
             if(!shouldDrawFace && !blockData.voxel) continue
             
@@ -124,28 +111,14 @@ export default class TerrainBuilder {
         //     console.log(textureIndex, offset, this.groupStart)
         //     this.geometry.addGroup(this.groupStart + offset, 6, textureIndex)
         // }
-        
+        console.log(drawCall)
         this.vertices = this.vertices.concat(drawCall.vertices)
         this.UVs = this.UVs.concat(drawCall.uvs)
         this.ao = this.ao.concat(drawCall.ao)
 
         const groupSize = drawCall.vertices.length / 3
-        this.geometry.addGroup(this.groupStart, groupSize, drawCall.textureIndex)
+        this.groups.push({ start: this.groupStart, count: groupSize, textureIndex: drawCall.textureIndex })
         this.groupStart += groupSize
-    }
-
-    
-    createMesh(update = false){
-        this.geometry.setAttribute('ao', new BufferAttribute(new Float32Array(this.ao), 1))
-        this.geometry.setAttribute('position', new BufferAttribute(new Float32Array(this.vertices), 3))
-        this.geometry.setAttribute('uv', new BufferAttribute(new Float32Array(this.UVs), 2))
-        if(!this.chunkPosAttr) this.chunkPosAttr = new BufferAttribute(new Float32Array(new Array(this.ao.length).fill([this.chunk.x, this.chunk.y]).flat()), 2)
-        this.geometry.setAttribute('chunkPos', this.chunkPosAttr)
-        this.geometry.computeVertexNormals()
-
-        if(update) return
-        
-        this.mesh = new Mesh(this.geometry, TextureManager.textures)
     }
 
     // first calc only for top faces, lookup values for other faces
@@ -232,12 +205,6 @@ export default class TerrainBuilder {
         if((side1 || side2) && corner) return 0.6
         if(side1 || side2 || corner) return 0.75
         return 1
-    }
-
-
-    dispose() {
-        window.scene.remove(this.mesh)
-        this.geometry.dispose()
     }
 }
 

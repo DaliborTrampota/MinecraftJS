@@ -28,6 +28,10 @@ export default class ResourceManager {
         }
     }
 
+    async fetchBlocks() {
+        ResourceManager.data.blocks = await this.#makeRequest(`data/blocks`)
+    }
+
 
     async fetchImages() {
         ResourceManager.images.slot = this.#loadImage(`/resources/gui/slot.png`)

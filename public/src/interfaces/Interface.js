@@ -1,7 +1,7 @@
 export default class Interface {
 
     static empty = '/resources/empty.png'
-    static GUI = document.getElementById('gui')
+    static GUI = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope ? null : document.getElementById('gui')
     
     constructor(){
         this.isOpen = false

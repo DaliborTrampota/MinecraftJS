@@ -1,7 +1,6 @@
 import { Material } from "../tools/Constants.js";
 import { Vector3 } from "three";
 import Block from "../blocks/Block.js";
-import Items from "./Items.js";
 import FurnaceBlock from "../blocks/machines/FurnaceBlock.js";
 import VoxelBlock from "../blocks/VoxelBlock.js";
 import AbstractRegister from "./AbstractRegister.js";

@@ -105,7 +105,7 @@ const MOUSE_BUTTON = {
 }
 
 const BASE_PLAYER_SETTINGS = {
-    viewDistance: 3,
+    viewDistance: 1,
     health: 100,
     acceleration: 60,
     airDrag: 10,
