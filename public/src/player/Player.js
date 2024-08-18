@@ -82,6 +82,13 @@ export default class Player extends LivingEntity {
         Controller.inGUI = value
     }
 
+    /**
+     * @returns {import('../level/World.js').default} 
+     */
+    get world() {
+        return window.game.worlds[this.currentWorld]
+    }
+
     setWorld(world) {
         this.currentWorld = world.key
     }

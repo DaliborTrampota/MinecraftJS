@@ -134,6 +134,3 @@ export default class Feature {
         this.chunk.needsUpdate = true
     }
 }
-
-window.Feature = Feature
-window.Vector3 = Vector3

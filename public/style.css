@@ -59,6 +59,22 @@ body {
     top: 50px;
 }
 
+#minimap {
+    z-index: 1000;
+    position: absolute;
+    right: 1em;
+    top: 1em;
+    width: 6em;
+    height: 6em;
+    background-color: darkgray;
+}
+
+#minimap > canvas {
+    width: calc(100% - 0.5em);
+    height: calc(100% - 0.5em);
+    margin: 0.25em;
+}
+
 #crosshair {
     position: absolute;
     top:50%;
