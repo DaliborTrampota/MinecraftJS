@@ -6,9 +6,7 @@ export default class ResourceManager {
     static data = {}
     static images = {}
 
-    constructor(baseURL) {
-        this.baseURL = baseURL
-
+    constructor() {
         this.data = {}
     }
 
@@ -48,6 +46,6 @@ export default class ResourceManager {
     }
 
     #makeRequest(path) {
-        return fetch(`${this.baseURL}/${path}`).then(r => r.json())
+        return fetch(`api/${path}`).then(r => r.json())
     }
 }

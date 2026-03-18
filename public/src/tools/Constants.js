@@ -2,8 +2,6 @@ import { Vector3 } from 'three';
 import { createEnum } from './Utils.js';
 import Side from '../Side.js';
 
-const baseURL = import.meta.env.VITE_BASE_URL
-
 const PI_2 = Math.PI / 2;
 
 const vertices = [
@@ -159,9 +157,7 @@ const Section = {
     LEFT: 4,
 }
 
-export {
-    baseURL,
-    
+export {    
     PI_2,
     vertices, 
     triangles,

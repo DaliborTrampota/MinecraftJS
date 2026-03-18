@@ -3,7 +3,6 @@ import { TextureLoader, NearestFilter, DoubleSide, FrontSide, DefaultLoadingMana
 // import lightFrag from '../shaders/light.frag?raw'
 // import lightVert from '../shaders/light.frag?raw'
 // import liquidVert from '../shaders/light.frag?raw'
-import { baseURL } from './Constants';
 
 export default class TextureManager {
 
@@ -32,14 +31,14 @@ export default class TextureManager {
     async load(textures){
         console.info('Loading textures...')
 
-        const lightFrag = await fetch(`${baseURL}/shaders/light.frag`).then(r => r.text())
-        const lightVert = await fetch(`${baseURL}/shaders/light.vert`).then(r => r.text())
-        const liquidVert = await fetch(`${baseURL}/shaders/liquid.vert`).then(r => r.text())
+        const lightFrag = await fetch(`api/shaders/light.frag`).then(r => r.text())
+        const lightVert = await fetch(`api/shaders/light.vert`).then(r => r.text())
+        const liquidVert = await fetch(`api/shaders/liquid.vert`).then(r => r.text())
         
-        const liquidAtlas = this.loader.load(baseURL +  textures.atlases.liquids)
-        const opaqueAtlas = this.loader.load(baseURL + textures.atlases.opaque)
-        const transparentAtlas = this.loader.load(baseURL + textures.atlases.transparent)
-        const entityAtlas = this.loader.load(baseURL + textures.atlases.entities)
+        const liquidAtlas = this.loader.load('api' +  textures.atlases.liquids)
+        const opaqueAtlas = this.loader.load('api' + textures.atlases.opaque)
+        const transparentAtlas = this.loader.load('api' + textures.atlases.transparent)
+        const entityAtlas = this.loader.load('api' + textures.atlases.entities)
         
         this.loadItems(textures.items)
         
@@ -74,7 +73,7 @@ export default class TextureManager {
         const promises = []
         
         for(let path of paths) {
-            promises.push(this.loader.load(`${baseURL}/${path}`))
+            promises.push(this.loader.load(`api/${path}`))
         }
 
         return Promise.all(promises).then((icons) => {

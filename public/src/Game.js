@@ -13,7 +13,6 @@ import BiomeGenerator from './level/generators/BiomeGenerator.js';
 import OverworldGenerator from './level/generators/OverworldGenerator.js';
 import SkyBlockGenerator from './level/generators/SkyBlockGenerator.js';
 import OneChunkGenerator from './level/generators/OneChunkGenerator.js';
-import { baseURL } from './tools/Constants.js';
 
 export default class Game extends EventTarget {
 
@@ -27,7 +26,7 @@ export default class Game extends EventTarget {
         this.renderer = renderer;
         this.camera = camera;
 
-        this.resourceManager = new ResourceManager(baseURL)
+        this.resourceManager = new ResourceManager()
         this.textureManager = new TextureManager()
         this.register
 
