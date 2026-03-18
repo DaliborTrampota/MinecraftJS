@@ -8,7 +8,7 @@
   },
   "type": "module",
   "scripts": {
-    "server": "cd server & node --env-file=.env index.js",
+    "server": "cd server && node --env-file=.env index.js",
     "dev": "vite",
     "build": "vite build"
   },
