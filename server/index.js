@@ -6,8 +6,8 @@ const { parseDataFiles, createTextureAtlas } = require('./utils');
 
 
 const app = express()
-const PORT = 8000
-const local = true
+const PORT = Number(process.env.PORT)
+const local = process.env.LOCAL == '1'
 
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
@@ -55,8 +55,8 @@ if(local) {
     app.listen(PORT, null, null, () => console.log("The local server is up and running!", `http://localhost:${PORT}`));
 } else {
     const server = https.createServer({
-        key: fs.readFileSync('/etc/sslcert/privkey.key'),
-        cert: fs.readFileSync('/etc/sslcert/origin.pem'),
+        key: fs.readFileSync(process.env.PRIVATE_KEY_PATH),
+        cert: fs.readFileSync(process.env.CERTIFICATE_PATH),
     }, app)
     
     server.listen(PORT, () => {
